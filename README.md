@@ -24,6 +24,7 @@ Install
 
 Client SDKs
 ===========
+> you can use any redis client from `redis-cli` or [from here](https://redis.io/clients)
 
 Why
 ===
@@ -31,4 +32,4 @@ Why
 
 WHO AM I
 ========
-> I'm Mohamed Al Ashaal, a software engineer, team leader
+> I'm Mohamed Al Ashaal, a software engineer, team leader and now I'm the CTO of [uflare](https://uflare.io)
