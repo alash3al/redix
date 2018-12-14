@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -89,7 +90,7 @@ func (db *DB) Scan(offset string, keyOnly bool, size int) (result []string, err 
 					result = append(result, string(v))
 				}
 			}
-		} else if !strings.HasSuffix(offset, "%") {
+		} else if !strings.Contains(offset, "*") && !strings.HasSuffix(offset, "%") {
 			for it.Seek([]byte(offset)); it.Valid() && (size < 1 || len(result) <= size); it.Next() {
 				item := it.Item()
 				k := item.KeyCopy(nil)
@@ -106,6 +107,26 @@ func (db *DB) Scan(offset string, keyOnly bool, size int) (result []string, err 
 			for it.Seek([]byte(offset)); it.ValidForPrefix([]byte(offset)) && (size < 1 || len(result) <= size); it.Next() {
 				item := it.Item()
 				k := item.KeyCopy(nil)
+
+				result = append(result, string(k))
+
+				if !keyOnly {
+					v, _ := item.ValueCopy(nil)
+					result = append(result, string(v))
+				}
+			}
+		} else if strings.Contains(offset, "*") {
+			re, err := regexp.Compile(offset)
+			if err != nil {
+				return err
+			}
+			for it.Rewind(); it.Valid() && (size < 1 || len(result) <= size); it.Next() {
+				item := it.Item()
+				k := item.KeyCopy(nil)
+
+				if !re.Match(k) {
+					continue
+				}
 
 				result = append(result, string(k))
 

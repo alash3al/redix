@@ -9,13 +9,15 @@ Supported Commands
 - `GET <key> [<default value>]`
 - `MGET <key1> [<key2> ...]`
 - `DEL <key1> [<key2> ...]`
-- `SCAN [cursor|offset|prefix|key] [keys "keys only?"] [limit "size of result"]`
+- `SCAN [cursor|offset|prefix "suffixed by '%'"|key|pattern "regex"] [keys "keys only?"] [limit "size of result"]`
 - `MSET <key1> <value1> [<key2> <value2> ...]`
-- `APPEND <key> <value> [<TTL>]`, like `SADD`
+- `APPEND <key> <value> [<TTL>]`, like single `SADD`
+- `MAPPEND <key> <value> [<val> ...]`, like `SADD`
 - `HSET <HASHMAP> <KEY> <VALUE> <TTL>`
 - `HGET <HASHMAP> <KEY>`
 - `HDEL <HASHMAP> <key1> [<key2> ...]`
 - `HGETALL <HASHMAP>`
+- `HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]`
 
 Install
 =======

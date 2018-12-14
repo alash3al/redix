@@ -22,14 +22,19 @@ var (
 )
 
 var commands = map[string]CommandHandler{
-	"ping":   pingCommand,
-	"set":    setCommand,
-	"mset":   msetCommand,
-	"get":    getCommand,
-	"mget":   mgetCommand,
-	"del":    delCommand,
-	"scan":   scanCommand,
-	"append": appendCommand,
+	"ping":    pingCommand,
+	"set":     setCommand,
+	"mset":    msetCommand,
+	"get":     getCommand,
+	"mget":    mgetCommand,
+	"del":     delCommand,
+	"scan":    scanCommand,
+	"append":  appendCommand,
+	"mappend": mappendCommand,
+	"hset":    hsetCommand,
+	"hdel":    hdelCommand,
+	"hgetall": hgetallCommand,
+	"hmset":   hmsetCommand,
 }
 
 func init() {

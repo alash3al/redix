@@ -175,7 +175,31 @@ func appendCommand(c Context) {
 		return
 	}
 
-	c.WriteString(offset)
+	c.WriteInt(1)
+}
+
+// mappendCommand - MAPPEND <key> <val1> [<val2> ...]
+func mappendCommand(c Context) {
+	var k string
+	var vals []string
+	var done int
+
+	if len(c.args) < 2 {
+		c.WriteError("MAPPEND command requires at least two arguments SET <key> <value> <TTL Millisecond>")
+		return
+	}
+
+	k, vals, done = c.args[0], c.args[1:], 0
+
+	for _, v := range vals {
+		offset := xid.New().String()
+		if err := c.db.Set(k+"/{ARRAY}/"+offset, v, -1); err != nil {
+			continue
+		}
+		done++
+	}
+
+	c.WriteInt(done)
 }
 
 // hsetCommand - HSET <HASHMAP> <KEY> <VALUE> <TTL>
@@ -245,7 +269,60 @@ func hgetallCommand(c Context) {
 		c.WriteError("HGETALL command requires at least one argument HGETALL <HASHMAP>")
 	}
 
-	c.args = []string{c.args[0] + "/{HASH}/%", "", "-1"}
+	offset := c.args[0] + "/{HASH}/%"
+	data, err := c.db.Scan(offset, false, -1)
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
 
-	scanCommand(c)
+	c.WriteArray(len(data))
+	i := -1
+	for _, v := range data {
+		i++
+		if i%2 == 0 {
+			p := strings.SplitN(v, "/{HASH}/", 2)
+			if len(p) < 2 {
+				p = append(p, "")
+			}
+			v = p[1]
+		}
+		c.WriteBulkString(v)
+	}
+}
+
+// hmsetCommand - HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]
+func hmsetCommand(c Context) {
+	var ns string
+
+	if len(c.args) < 3 {
+		c.WriteError("HMSET command requires at least three arguments HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]")
+		return
+	}
+
+	ns = c.args[0]
+	args := c.args[1:]
+
+	currentCount := len(args)
+	if len(args)%2 != 0 {
+		c.WriteError(fmt.Sprintf("HMSET {key => value} pairs must be even you specified %d, it should be %d or %d", currentCount, currentCount+1, currentCount-1))
+		return
+	}
+
+	data := map[string]string{}
+	for i, v := range args {
+		index := i + 1
+		if index%2 == 0 {
+			data[ns+"/{HASH}/"+args[i-1]] = v
+		} else {
+			data[ns+"/{HASH}/"+args[i]] = ""
+		}
+	}
+
+	if err := c.db.MSet(data); err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	c.WriteInt(len(data))
 }
