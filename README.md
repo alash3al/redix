@@ -1,6 +1,7 @@
 Redix
 ======
-> a very fast persistent pure key - value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol
+> a very fast persistent pure key - value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data.
+> Internally, I'm using [badgerdb](https://github.com/dgraph-io/badger) as storage 
 
 Supported Commands
 ===================
