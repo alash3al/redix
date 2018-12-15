@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	log.Printf("⇨ redix is listining on %s \n", color.GreenString(*flagListenAddr))
+	fmt.Printf("⇨ redix is listining on %s \n", color.GreenString(*flagListenAddr))
 	err := redcon.ListenAndServe(
 		*flagListenAddr,
 		func(conn redcon.Conn, cmd redcon.Command) {
@@ -37,6 +37,19 @@ func main() {
 				log.Println(color.YellowString(todo), color.CyanString(strings.Join(args, " ")))
 			}
 
+			// internal ping-pong
+			if todo == "ping" {
+				conn.WriteString("PONG")
+				return
+			}
+
+			// close the connection
+			if todo == "quit" {
+				conn.WriteString("OK")
+				conn.Close()
+				return
+			}
+
 			// internal command to pick a database
 			if todo == "select" {
 				if len(args) < 1 {
@@ -44,6 +57,8 @@ func main() {
 				}
 				ctx["db"] = args[0]
 				conn.SetContext(ctx)
+				conn.WriteString("OK")
+				return
 			}
 
 			// set the default db if there is no db selected

@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/dgraph-io/badger"
+
 	"github.com/alash3al/color"
 )
 
@@ -22,23 +26,38 @@ var (
 )
 
 var commands = map[string]CommandHandler{
-	"ping":    pingCommand,
-	"set":     setCommand,
-	"mset":    msetCommand,
-	"get":     getCommand,
-	"mget":    mgetCommand,
-	"del":     delCommand,
-	"scan":    scanCommand,
-	"append":  appendCommand,
-	"mappend": mappendCommand,
+	// strings
+	"set":    setCommand,
+	"mset":   msetCommand,
+	"get":    getCommand,
+	"mget":   mgetCommand,
+	"del":    delCommand,
+	"exists": existsCommands,
+
+	// lists
+	"lpush":  lpushCommand,
+	"lpushu": lpushuCommand,
+	"lrange": lrangeCommand,
+	"lrem":   lremCommand,
+	"lcount": lcountCommand,
+
+	// hashes
 	"hset":    hsetCommand,
+	"hget":    hgetCommand,
 	"hdel":    hdelCommand,
 	"hgetall": hgetallCommand,
 	"hmset":   hmsetCommand,
+	"hexists": hexistsCommand,
 }
 
 func init() {
 	flag.Parse()
+
+	if !*flagVerbose {
+		logger := logrus.New()
+		logger.SetOutput(ioutil.Discard)
+		badger.SetLogger(logger)
+	}
 
 	databases = new(sync.Map)
 

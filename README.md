@@ -5,20 +5,35 @@ Redix
 
 Supported Commands
 ===================
+
+##### Basic
 - `PING`
+- `QUIT`
+- `SELECT`
+
+##### Strings
 - `SET <key> <value> [<TTL "millisecond">]`
+- `MSET <key1> <value1> [<key2> <value2> ...]`
 - `GET <key> [<default value>]`
 - `MGET <key1> [<key2> ...]`
 - `DEL <key1> [<key2> ...]`
-- `SCAN [cursor|offset|prefix "suffixed by '%'"|key|pattern "regex"] [keys "keys only?"] [limit "size of result"]`
-- `MSET <key1> <value1> [<key2> <value2> ...]`
-- `APPEND <key> <value> [<TTL>]`, like single `SADD`
-- `MAPPEND <key> <value> [<val> ...]`, like `SADD`
+- `EXISTS <key>`
+
+##### HASHES
 - `HSET <HASHMAP> <KEY> <VALUE> <TTL>`
+- `HMSET <HASHMAP> <key1> <value1> [<key2> <value2> ...]`
 - `HGET <HASHMAP> <KEY>`
 - `HDEL <HASHMAP> <key1> [<key2> ...]`
 - `HGETALL <HASHMAP>`
 - `HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]`
+- `HEXISTS <HASHMAP> [<key>]`, you can just check if the map is exists or not, or a key in the map exists or not.
+
+##### LIST
+- `LPUSH <LIST> <val1> [<val2> ...]`
+- `LPUSHU <LIST> <val1> [<val2> ...]` push unique
+- `LGETALL <key> [<offset> <size>]`
+- `LREM <key> <val> [<val> <val> ...]`
+- `LCOUNT <LIST>`
 
 Install
 =======

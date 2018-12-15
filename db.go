@@ -1,8 +1,6 @@
 package main
 
 import (
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/dgraph-io/badger"
@@ -59,90 +57,6 @@ func (db *DB) Get(k string) (string, error) {
 	return data, err
 }
 
-// Del - removes key(s) from the store
-func (db *DB) Del(keys []string) error {
-	return db.badger.Update(func(txn *badger.Txn) error {
-		for _, key := range keys {
-			txn.Delete([]byte(key))
-		}
-
-		return nil
-	})
-}
-
-// Scan - iterate over the whole store
-func (db *DB) Scan(offset string, keyOnly bool, size int) (result []string, err error) {
-	err = db.badger.View(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.PrefetchValues = !keyOnly
-		it := txn.NewIterator(opts)
-		defer it.Close()
-
-		if offset == "" {
-			for it.Rewind(); it.Valid() && (size < 1 || len(result) <= size); it.Next() {
-				item := it.Item()
-				k := item.KeyCopy(nil)
-
-				result = append(result, string(k))
-
-				if !keyOnly {
-					v, _ := item.ValueCopy(nil)
-					result = append(result, string(v))
-				}
-			}
-		} else if !strings.Contains(offset, "*") && !strings.HasSuffix(offset, "%") {
-			for it.Seek([]byte(offset)); it.Valid() && (size < 1 || len(result) <= size); it.Next() {
-				item := it.Item()
-				k := item.KeyCopy(nil)
-
-				result = append(result, string(k))
-
-				if !keyOnly {
-					v, _ := item.ValueCopy(nil)
-					result = append(result, string(v))
-				}
-			}
-		} else if strings.HasSuffix(offset, "%") {
-			offset = strings.TrimSuffix(offset, "%")
-			for it.Seek([]byte(offset)); it.ValidForPrefix([]byte(offset)) && (size < 1 || len(result) <= size); it.Next() {
-				item := it.Item()
-				k := item.KeyCopy(nil)
-
-				result = append(result, string(k))
-
-				if !keyOnly {
-					v, _ := item.ValueCopy(nil)
-					result = append(result, string(v))
-				}
-			}
-		} else if strings.Contains(offset, "*") {
-			re, err := regexp.Compile(offset)
-			if err != nil {
-				return err
-			}
-			for it.Rewind(); it.Valid() && (size < 1 || len(result) <= size); it.Next() {
-				item := it.Item()
-				k := item.KeyCopy(nil)
-
-				if !re.Match(k) {
-					continue
-				}
-
-				result = append(result, string(k))
-
-				if !keyOnly {
-					v, _ := item.ValueCopy(nil)
-					result = append(result, string(v))
-				}
-			}
-		}
-
-		return nil
-	})
-
-	return result, err
-}
-
 // MGet - fetch multiple values of the specified keys
 func (db *DB) MGet(keys []string) (data []string) {
 	db.badger.View(func(txn *badger.Txn) error {
@@ -163,4 +77,66 @@ func (db *DB) MGet(keys []string) (data []string) {
 	})
 
 	return data
+}
+
+// Del - removes key(s) from the store
+func (db *DB) Del(keys []string) error {
+	return db.badger.Update(func(txn *badger.Txn) error {
+		for _, key := range keys {
+			txn.Delete([]byte(key))
+		}
+
+		return nil
+	})
+}
+
+// Scan - iterate over the whole store using the handler function
+func (db *DB) Scan(scannerOpt ScannerOptions) error {
+	return db.badger.View(func(txn *badger.Txn) error {
+		iteratorOpts := badger.DefaultIteratorOptions
+		iteratorOpts.PrefetchValues = scannerOpt.FetchValues
+
+		it := txn.NewIterator(iteratorOpts)
+		defer it.Close()
+
+		start := func(it *badger.Iterator) {
+			if scannerOpt.Offset == "" {
+				it.Rewind()
+			} else {
+				it.Seek([]byte(scannerOpt.Offset))
+				if !scannerOpt.IncludeOffset && it.Valid() {
+					it.Next()
+				}
+			}
+		}
+
+		valid := func(it *badger.Iterator) bool {
+			if !it.Valid() {
+				return false
+			}
+
+			if scannerOpt.Prefix != "" && !it.ValidForPrefix([]byte(scannerOpt.Prefix)) {
+				return false
+			}
+
+			return true
+		}
+
+		for start(it); valid(it); it.Next() {
+			var k, v []byte
+
+			item := it.Item()
+			k = item.KeyCopy(nil)
+
+			if scannerOpt.FetchValues {
+				v, _ = item.ValueCopy(nil)
+			}
+
+			if !scannerOpt.Handler(string(k), string(v)) {
+				break
+			}
+		}
+
+		return nil
+	})
 }
