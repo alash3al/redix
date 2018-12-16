@@ -30,12 +30,12 @@ Supported Commands
 ===================
 > `Redix` doesn't implement all redis commands, but instead it supports the core concepts that will help you to build any type of data models on top of it, there are more commands and features in all next releases.
 
-### Basic
+## # Basic
 - `PING`
 - `QUIT`
 - `SELECT`
 
-### Strings
+## # Strings
 - `SET <key> <value> [<TTL "millisecond">]`
 - `MSET <key1> <value1> [<key2> <value2> ...]`
 - `GET <key> [<default value>]`
@@ -44,7 +44,7 @@ Supported Commands
 - `EXISTS <key>`
 - `INCR <key> [<by>]`
 
-### HASHES
+## # HASHES
 > I enhanced the HASH MAP implementation and added some features like TTL per nested key,
 > also you can check whether the hash map itself exists or not using `HEXISTS <hashmapname>` or a nested key 
 > exists using `HEXISTS <hashmapname> <keyname>`.  
@@ -59,7 +59,7 @@ Supported Commands
 - `HEXISTS <HASHMAP> [<key>]`.
 - `HINCR <HASHMAP> <key> [<by>]`
 
-### LIST
+## # LIST
 > I applied a new concept, you can push or push-unique values into the list,
 >  based on that I don't need to implement two different data structures, 
 > as well as, you can quickly iterate over a list in a high performance way,
