@@ -48,5 +48,5 @@ Client SDKs
 
 Why
 ===
-> I built this software to lear more about data modeling, data structrues and how to map any data to pure key value.
+> I built this software to lear more about data modeling, data structures and how to map any data to pure key value.
 
