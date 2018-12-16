@@ -6,8 +6,7 @@ import (
 
 // DB Interface
 type DB interface {
-	// Open(path string) (*DB, error)
-	// Incr(k string, incrby int64) (int64, error)
+	Incr(k string, by int64) (int64, error)
 	Set(k, v string, ttl int) error
 	MSet(data map[string]string) error
 	Get(k string) (string, error)

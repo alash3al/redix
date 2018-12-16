@@ -139,6 +139,7 @@ func hmsetCommand(c Context) {
 	c.WriteInt(len(data))
 }
 
+// hexistsCommand - HEXISTS <HASHMAP> [<key>]
 func hexistsCommand(c Context) {
 	if len(c.args) < 1 {
 		c.WriteError("HEXISTS command requires at least 1 argument HEXISTS <HASHMAP> [<key>]")
@@ -166,4 +167,21 @@ func hexistsCommand(c Context) {
 	})
 
 	c.WriteInt(found)
+}
+
+func hincrCommand(c Context) {
+	if len(c.args) < 2 {
+		c.WriteError("HINCR command must has at least 2 arguments HINCR <HASH> <key> [number]")
+		return
+	}
+
+	ns, key, by := c.args[0], c.args[1], ""
+
+	if len(c.args) > 2 {
+		by = c.args[2]
+	}
+
+	c.args = []string{ns + "/{HASH}/" + key, by}
+
+	incrCommand(c)
 }

@@ -133,5 +133,29 @@ func existsCommands(c Context) {
 }
 
 func incrCommand(c Context) {
+	var key string
+	var by int64
 
+	if len(c.args) < 1 {
+		c.WriteError("INCR command must has at least one argument INCR <key> [number]")
+		return
+	}
+
+	key = c.args[0]
+
+	if len(c.args) > 1 {
+		by, _ = strconv.ParseInt(c.args[1], 10, 64)
+	}
+
+	if by == 0 {
+		by = 1
+	}
+
+	val, err := c.db.Incr(key, by)
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	c.WriteInt64(int64(val))
 }

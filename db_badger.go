@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
@@ -28,6 +30,27 @@ func OpenBadger(path string) (*BadgerDB, error) {
 	db.countersLocks = sync.RWMutex{}
 
 	return db, nil
+}
+
+// Incr - increment the key by the specified value
+func (db *BadgerDB) Incr(k string, by int64) (int64, error) {
+	db.countersLocks.Lock()
+	defer db.countersLocks.Unlock()
+
+	val, err := db.Get(k)
+	if err != nil {
+		val = ""
+	}
+
+	valFloat, _ := strconv.ParseInt(val, 10, 64)
+	valFloat += by
+
+	err = db.Set(k, fmt.Sprintf("%d", valFloat), -1)
+	if err != nil {
+		return 0, err
+	}
+
+	return valFloat, nil
 }
 
 // Set - sets a key with the specified value and optional ttl

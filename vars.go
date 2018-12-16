@@ -34,7 +34,7 @@ var commands = map[string]CommandHandler{
 	"mget":   mgetCommand,
 	"del":    delCommand,
 	"exists": existsCommands,
-	// "incr":   incrCommand,
+	"incr":   incrCommand,
 
 	// lists
 	"lpush":  lpushCommand,
@@ -50,6 +50,7 @@ var commands = map[string]CommandHandler{
 	"hgetall": hgetallCommand,
 	"hmset":   hmsetCommand,
 	"hexists": hexistsCommand,
+	"hincr":   hincrCommand,
 }
 
 func init() {

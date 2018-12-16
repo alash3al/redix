@@ -18,6 +18,7 @@ Supported Commands
 - `MGET <key1> [<key2> ...]`
 - `DEL <key1> [<key2> ...]`
 - `EXISTS <key>`
+- `INCR <key> [<by>]`
 
 ##### HASHES
 - `HSET <HASHMAP> <KEY> <VALUE> <TTL>`
@@ -27,6 +28,7 @@ Supported Commands
 - `HGETALL <HASHMAP>`
 - `HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]`
 - `HEXISTS <HASHMAP> [<key>]`, you can just check if the map is exists or not, or a key in the map exists or not.
+- `HINCR <HASHMAP> <key> [<by>]`
 
 ##### LIST
 - `LPUSH <LIST> <val1> [<val2> ...]`
