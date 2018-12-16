@@ -150,7 +150,7 @@ func hexistsCommand(c Context) {
 
 	if len(c.args) > 1 {
 		c.args = []string{ns + "/{HASH}/" + c.args[1]}
-		existsCommands(c)
+		existsCommand(c)
 		return
 	}
 

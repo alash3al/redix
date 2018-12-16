@@ -8,11 +8,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/sirupsen/logrus"
-
-	"github.com/dgraph-io/badger"
-
 	"github.com/alash3al/color"
+	"github.com/dgraph-io/badger"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -33,7 +31,7 @@ var commands = map[string]CommandHandler{
 	"get":    getCommand,
 	"mget":   mgetCommand,
 	"del":    delCommand,
-	"exists": existsCommands,
+	"exists": existsCommand,
 	"incr":   incrCommand,
 
 	// lists

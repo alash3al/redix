@@ -116,8 +116,8 @@ func msetCommand(c Context) {
 	c.WriteInt(len(data))
 }
 
-// existsCommands - Exists <key>
-func existsCommands(c Context) {
+// existsCommand - Exists <key>
+func existsCommand(c Context) {
 	if len(c.args) < 1 {
 		c.WriteError("EXISTS command must has at least 1 argument EXISTS <key>")
 		return
@@ -132,6 +132,7 @@ func existsCommands(c Context) {
 	c.WriteInt(1)
 }
 
+// incrCommand -
 func incrCommand(c Context) {
 	var key string
 	var by int64
