@@ -76,6 +76,6 @@ Supported Commands
 
 TODO Commands
 =============
-- `HDELALL <HASHMAP`
+- `HDELALL <HASHMAP>`
 - `LDELLALL <LIST>`
 
