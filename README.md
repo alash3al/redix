@@ -50,6 +50,3 @@ Why
 ===
 > I built this software to lear more about data modeling, data structrues and how to map any data to pure key value.
 
-WHO AM I
-========
-> I'm Mohamed Al Ashaal, a software engineer, team leader and now I'm the CTO of [uflare](https://uflare.io)
