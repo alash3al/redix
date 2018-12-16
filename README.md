@@ -21,7 +21,7 @@ Supported Commands
 - `INCR <key> [<by>]`
 
 ##### HASHES
-- `HSET <HASHMAP> <KEY> <VALUE> <TTL>`
+- `HSET <HASHMAP> <KEY> <VALUE> [<TTL "millesecond">]`
 - `HMSET <HASHMAP> <key1> <value1> [<key2> <value2> ...]`
 - `HGET <HASHMAP> <KEY>`
 - `HDEL <HASHMAP> <key1> [<key2> ...]`
