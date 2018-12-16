@@ -31,8 +31,8 @@ Supported Commands
 ##### LIST
 - `LPUSH <LIST> <val1> [<val2> ...]`
 - `LPUSHU <LIST> <val1> [<val2> ...]` push unique
-- `LGETALL <key> [<offset> <size>]`
-- `LREM <key> <val> [<val> <val> ...]`
+- `LGETALL <LIST> [<offset> <size>]`
+- `LREM <LIST> <val> [<val> <val> ...]`
 - `LCOUNT <LIST>`
 
 Install

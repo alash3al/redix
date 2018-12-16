@@ -131,3 +131,7 @@ func existsCommands(c Context) {
 
 	c.WriteInt(1)
 }
+
+func incrCommand(c Context) {
+
+}

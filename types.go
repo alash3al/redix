@@ -4,6 +4,18 @@ import (
 	"github.com/tidwall/redcon"
 )
 
+// DB Interface
+type DB interface {
+	// Open(path string) (*DB, error)
+	// Incr(k string, incrby int64) (int64, error)
+	Set(k, v string, ttl int) error
+	MSet(data map[string]string) error
+	Get(k string) (string, error)
+	MGet(keys []string) []string
+	Del(keys []string) error
+	Scan(ScannerOpt ScannerOptions) error
+}
+
 // ScannerOptions - represents the options for a scanner
 type ScannerOptions struct {
 	// from where to start
@@ -22,13 +34,15 @@ type ScannerOptions struct {
 	Handler func(k, v string) bool
 }
 
+// type DB
+
 // CommandHandler - represents a handler for a command
 type CommandHandler func(c Context)
 
 // Context - represents a handler context
 type Context struct {
 	redcon.Conn
-	db     *DB
+	db     DB
 	action string
 	args   []string
 }

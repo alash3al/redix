@@ -1,36 +1,35 @@
 package main
 
 import (
+	"errors"
 	"path/filepath"
-
-	"github.com/dgraph-io/badger"
+	"strings"
 )
 
-func selectDB(n string) (*DB, error) {
+// selectDB - load/fetches the requested db
+func selectDB(n string) (db DB, err error) {
 	dbpath := filepath.Join(*flagStorageDir, n)
 	dbi, found := databases.Load(n)
 	if !found {
-		bdb, err := openDB(dbpath)
+		db, err = openDB(*flagEngine, dbpath)
 		if err != nil {
 			return nil, err
 		}
-
-		databases.Store(n, bdb)
-		dbi, _ = databases.Load(n)
+		databases.Store(n, db)
+	} else {
+		db, _ = dbi.(DB)
 	}
 
-	db, _ := dbi.(*badger.DB)
-
-	return &DB{badger: db}, nil
+	return db, nil
 }
 
-func openDB(path string) (*badger.DB, error) {
-	opts := badger.DefaultOptions
-	opts.Dir = path
-	opts.ValueDir = path
-	db, err := badger.Open(opts)
-	if err != nil {
-		return nil, err
+// openDB - initialize a db in the specified path and engine
+func openDB(engine, dbpath string) (DB, error) {
+	dbpath = dbpath + "-" + engine
+	switch strings.ToLower(engine) {
+	default:
+		return nil, errors.New("unsupported engine: " + engine)
+	case "badger":
+		return OpenBadger(dbpath)
 	}
-	return db, nil
 }

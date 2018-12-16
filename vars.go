@@ -18,6 +18,7 @@ import (
 var (
 	flagListenAddr = flag.String("l", "localhost:6380", "the address to listen on")
 	flagStorageDir = flag.String("s", "./redix-data", "the storage directory")
+	flagEngine     = flag.String("e", "badger", "the storage engine to be used, available (badger)")
 	flagVerbose    = flag.Bool("v", false, "verbose or not")
 )
 
@@ -33,6 +34,7 @@ var commands = map[string]CommandHandler{
 	"mget":   mgetCommand,
 	"del":    delCommand,
 	"exists": existsCommands,
+	// "incr":   incrCommand,
 
 	// lists
 	"lpush":  lpushCommand,

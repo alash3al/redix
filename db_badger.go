@@ -1,18 +1,37 @@
 package main
 
 import (
+	"sync"
 	"time"
 
 	"github.com/dgraph-io/badger"
 )
 
-// DB - represents a DB structure
-type DB struct {
-	badger *badger.DB
+// BadgerDB - represents a badger db implementation
+type BadgerDB struct {
+	badger        *badger.DB
+	countersLocks sync.RWMutex
+}
+
+// OpenBadger - Opens the specified path
+func OpenBadger(path string) (*BadgerDB, error) {
+	opts := badger.DefaultOptions
+	opts.Dir = path
+	opts.ValueDir = path
+	bdb, err := badger.Open(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	db := new(BadgerDB)
+	db.badger = bdb
+	db.countersLocks = sync.RWMutex{}
+
+	return db, nil
 }
 
 // Set - sets a key with the specified value and optional ttl
-func (db *DB) Set(k, v string, ttl int) error {
+func (db *BadgerDB) Set(k, v string, ttl int) error {
 	return db.badger.Update(func(txn *badger.Txn) (err error) {
 		if ttl < 1 {
 			err = txn.Set([]byte(k), []byte(v))
@@ -25,7 +44,7 @@ func (db *DB) Set(k, v string, ttl int) error {
 }
 
 // MSet - sets multiple key-value pairs
-func (db *DB) MSet(data map[string]string) error {
+func (db *BadgerDB) MSet(data map[string]string) error {
 	return db.badger.Update(func(txn *badger.Txn) (err error) {
 		for k, v := range data {
 			txn.Set([]byte(k), []byte(v))
@@ -35,7 +54,7 @@ func (db *DB) MSet(data map[string]string) error {
 }
 
 // Get - fetches the value of the specified k
-func (db *DB) Get(k string) (string, error) {
+func (db *BadgerDB) Get(k string) (string, error) {
 	var data string
 
 	err := db.badger.View(func(txn *badger.Txn) error {
@@ -58,7 +77,7 @@ func (db *DB) Get(k string) (string, error) {
 }
 
 // MGet - fetch multiple values of the specified keys
-func (db *DB) MGet(keys []string) (data []string) {
+func (db *BadgerDB) MGet(keys []string) (data []string) {
 	db.badger.View(func(txn *badger.Txn) error {
 		for _, key := range keys {
 			item, err := txn.Get([]byte(key))
@@ -80,7 +99,7 @@ func (db *DB) MGet(keys []string) (data []string) {
 }
 
 // Del - removes key(s) from the store
-func (db *DB) Del(keys []string) error {
+func (db *BadgerDB) Del(keys []string) error {
 	return db.badger.Update(func(txn *badger.Txn) error {
 		for _, key := range keys {
 			txn.Delete([]byte(key))
@@ -91,7 +110,7 @@ func (db *DB) Del(keys []string) error {
 }
 
 // Scan - iterate over the whole store using the handler function
-func (db *DB) Scan(scannerOpt ScannerOptions) error {
+func (db *BadgerDB) Scan(scannerOpt ScannerOptions) error {
 	return db.badger.View(func(txn *badger.Txn) error {
 		iteratorOpts := badger.DefaultIteratorOptions
 		iteratorOpts.PrefetchValues = scannerOpt.FetchValues
