@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"strconv"
 
+	"github.com/alash3al/redix/kvstore"
 	"github.com/rs/xid"
 )
 
@@ -96,7 +97,7 @@ func lrangeCommand(c Context) {
 	}
 
 	data := []string{}
-	err := c.db.Scan(ScannerOptions{
+	err := c.db.Scan(kvstore.ScannerOptions{
 		Offset:      offset,
 		Prefix:      prefix,
 		FetchValues: true,
@@ -159,7 +160,7 @@ func lremCommand(c Context) {
 		valsMap[v] = true
 	}
 
-	err := c.db.Scan(ScannerOptions{
+	err := c.db.Scan(kvstore.ScannerOptions{
 		Offset:      prefix,
 		Prefix:      prefix,
 		FetchValues: true,
@@ -193,7 +194,7 @@ func lcountCommand(c Context) {
 
 	size := int64(0)
 	prefix := c.args[0] + "/{LIST}/"
-	c.db.Scan(ScannerOptions{
+	c.db.Scan(kvstore.ScannerOptions{
 		Offset:      prefix,
 		Prefix:      prefix,
 		FetchValues: false,

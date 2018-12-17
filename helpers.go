@@ -4,10 +4,14 @@ import (
 	"errors"
 	"path/filepath"
 	"strings"
+
+	"github.com/alash3al/redix/kvstore/badger"
+
+	"github.com/alash3al/redix/kvstore"
 )
 
 // selectDB - load/fetches the requested db
-func selectDB(n string) (db DB, err error) {
+func selectDB(n string) (db kvstore.DB, err error) {
 	dbpath := filepath.Join(*flagStorageDir, n)
 	dbi, found := databases.Load(n)
 	if !found {
@@ -17,19 +21,19 @@ func selectDB(n string) (db DB, err error) {
 		}
 		databases.Store(n, db)
 	} else {
-		db, _ = dbi.(DB)
+		db, _ = dbi.(kvstore.DB)
 	}
 
 	return db, nil
 }
 
 // openDB - initialize a db in the specified path and engine
-func openDB(engine, dbpath string) (DB, error) {
+func openDB(engine, dbpath string) (kvstore.DB, error) {
 	dbpath = dbpath + "-" + engine
 	switch strings.ToLower(engine) {
 	default:
 		return nil, errors.New("unsupported engine: " + engine)
 	case "badger":
-		return OpenBadger(dbpath)
+		return badger.OpenBadger(dbpath)
 	}
 }

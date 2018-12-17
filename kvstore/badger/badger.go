@@ -1,4 +1,4 @@
-package main
+package badger
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/alash3al/redix/kvstore"
 	"github.com/dgraph-io/badger"
 )
 
@@ -133,7 +134,7 @@ func (db *BadgerDB) Del(keys []string) error {
 }
 
 // Scan - iterate over the whole store using the handler function
-func (db *BadgerDB) Scan(scannerOpt ScannerOptions) error {
+func (db *BadgerDB) Scan(scannerOpt kvstore.ScannerOptions) error {
 	return db.badger.View(func(txn *badger.Txn) error {
 		iteratorOpts := badger.DefaultIteratorOptions
 		iteratorOpts.PrefetchValues = scannerOpt.FetchValues

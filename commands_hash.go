@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/alash3al/redix/kvstore"
 )
 
 // hsetCommand - HSET <HASHMAP> <KEY> <VALUE> <TTL>
@@ -75,7 +77,7 @@ func hgetallCommand(c Context) {
 
 	prefix := c.args[0] + "/{HASH}/"
 	data := map[string]string{}
-	err := c.db.Scan(ScannerOptions{
+	err := c.db.Scan(kvstore.ScannerOptions{
 		FetchValues:   true,
 		IncludeOffset: true,
 		Prefix:        prefix,
@@ -157,7 +159,7 @@ func hexistsCommand(c Context) {
 	found := 0
 	prefix := ns + "/{HASH}/"
 
-	c.db.Scan(ScannerOptions{
+	c.db.Scan(kvstore.ScannerOptions{
 		Prefix: prefix,
 		Offset: prefix,
 		Handler: func(_, _ string) bool {
