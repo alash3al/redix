@@ -48,20 +48,34 @@ func hgetCommand(c Context) {
 	getCommand(c)
 }
 
-// hdelCommand - HDEL <HASHMAP> <key1> [<key2> ...]
+// hdelCommand - HDEL <HASHMAP> [<key1> <key2> ...]
 func hdelCommand(c Context) {
 	var ns string
 
-	if len(c.args) < 2 {
-		c.WriteError("HGET command requires at least two arguments HGET <hashmap> <key>")
+	if len(c.args) < 1 {
+		c.WriteError("HDEL command requires at least two arguments HDEL <HASHMAP> [<key1> <key2> ...]")
 		return
 	}
 
 	ns = c.args[0]
 	keys := c.args[1:]
 
-	for i, k := range keys {
-		keys[i] = ns + "/{HASH}/" + k
+	if len(keys) > 0 {
+		for i, k := range keys {
+			keys[i] = ns + "/{HASH}/" + k
+		}
+	} else {
+		prefix := ns + "/{HASH}/"
+		c.db.Scan(kvstore.ScannerOptions{
+			Prefix:        prefix,
+			Offset:        prefix,
+			IncludeOffset: true,
+			FetchValues:   false,
+			Handler: func(k, _ string) bool {
+				keys = append(keys, k)
+				return true
+			},
+		})
 	}
 
 	c.args = keys
