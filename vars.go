@@ -62,6 +62,7 @@ func init() {
 	}
 
 	databases = new(sync.Map)
+	*flagStorageDir = filepath.Join(*flagStorageDir, *flagEngine)
 
 	os.MkdirAll(*flagStorageDir, 0744)
 
