@@ -64,7 +64,6 @@ Supported Commands
 > as well as, you can quickly iterate over a list in a high performance way,
 > every push will return the internal offset of the value, also, the iterator `lrange`
 > will tell you the next offset you can start from.  
-> I'm also planning to remove a list using `LDELALL` (**todo**).
 
 - `LPUSH <LIST> <val1> [<val2> ...]` (push the item into the list "it doesn't check for uniqueness, it will append anyway (duplicate)")
 - `LPUSHU <LIST> <val1> [<val2> ...]` (push the item into the list only if it isn't exists)
@@ -73,8 +72,13 @@ Supported Commands
 - `LCOUNT <LIST>`
 
 
-TODO Commands
-=============
-- `HDELALL <HASHMAP>`
-- `LDELLALL <LIST>`
-
+TODO
+=====
+- [x] Basic Commands
+- [x] Strings Commands
+- [x] Hashmap Commands
+- [x] List Commands
+- [ ] GIS Commands
+- [ ] PubSub Commands
+- [ ] Aggregations ?
+- [ ] Document/JSON Commands ?
