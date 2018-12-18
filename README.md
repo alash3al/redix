@@ -48,12 +48,11 @@ Supported Commands
 > I enhanced the HASH MAP implementation and added some features like TTL per nested key,
 > also you can check whether the hash map itself exists or not using `HEXISTS <hashmapname>` or a nested key 
 > exists using `HEXISTS <hashmapname> <keyname>`.  
-> I'm planning to support removing the map itself using `HDELALL` (**todo**).
 
 - `HSET <HASHMAP> <KEY> <VALUE> [<TTL "millesecond">]`
 - `HMSET <HASHMAP> <key1> <value1> [<key2> <value2> ...]`
 - `HGET <HASHMAP> <KEY>`
-- `HDEL <HASHMAP> <key1> [<key2> ...]`
+- `HDEL <HASHMAP> [<key1> <key2> ...]` (deletes the map itself or keys in the map)
 - `HGETALL <HASHMAP>`
 - `HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]`
 - `HEXISTS <HASHMAP> [<key>]`.
@@ -67,10 +66,10 @@ Supported Commands
 > will tell you the next offset you can start from.  
 > I'm also planning to remove a list using `LDELALL` (**todo**).
 
-- `LPUSH <LIST> <val1> [<val2> ...]`
-- `LPUSHU <LIST> <val1> [<val2> ...]` push unique
+- `LPUSH <LIST> <val1> [<val2> ...]` (push the item into the list "it doesn't check for uniqueness, it will append anyway (duplicate)")
+- `LPUSHU <LIST> <val1> [<val2> ...]` (push the item into the list only if it isn't exists)
 - `LGETALL <LIST> [<offset> <size>]`
-- `LREM <LIST> <val> [<val> <val> ...]`
+- `LREM <LIST> [<val1> <val2> <val3> ...]` (deletes the list itself or values in the list)
 - `LCOUNT <LIST>`
 
 
