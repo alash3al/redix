@@ -40,6 +40,7 @@ var commands = map[string]CommandHandler{
 	"lrange": lrangeCommand,
 	"lrem":   lremCommand,
 	"lcount": lcountCommand,
+	// "ldelall": ldelallCommand,
 
 	// hashes
 	"hset":    hsetCommand,

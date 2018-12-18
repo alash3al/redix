@@ -98,9 +98,10 @@ func lrangeCommand(c Context) {
 
 	data := []string{}
 	err := c.db.Scan(kvstore.ScannerOptions{
-		Offset:      offset,
-		Prefix:      prefix,
-		FetchValues: true,
+		IncludeOffset: true,
+		Offset:        offset,
+		Prefix:        prefix,
+		FetchValues:   true,
 		Handler: func(k, v string) bool {
 			if limit > 0 && (len(data) == limit) {
 				return false
@@ -146,8 +147,8 @@ func lrangeCommand(c Context) {
 
 // lremCommand - LREM <LIST> <val> [<val> <val> ...]
 func lremCommand(c Context) {
-	if len(c.args) < 2 {
-		c.WriteError("LREM command requires at least 1 arguments LREM <key> <val> [<val> <val> ...]")
+	if len(c.args) < 1 {
+		c.WriteError("LREM command requires at least 1 arguments LREM <key> [<val1> <val2> <val3> ...]")
 		return
 	}
 
@@ -165,7 +166,7 @@ func lremCommand(c Context) {
 		Prefix:      prefix,
 		FetchValues: true,
 		Handler: func(k, v string) bool {
-			if valsMap[v] {
+			if len(valsMap) < 1 || valsMap[v] {
 				keys = append(keys, k)
 			}
 			return true
