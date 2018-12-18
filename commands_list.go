@@ -162,9 +162,10 @@ func lremCommand(c Context) {
 	}
 
 	err := c.db.Scan(kvstore.ScannerOptions{
-		Offset:      prefix,
-		Prefix:      prefix,
-		FetchValues: true,
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   true,
 		Handler: func(k, v string) bool {
 			if len(valsMap) < 1 || valsMap[v] {
 				keys = append(keys, k)
@@ -196,9 +197,10 @@ func lcountCommand(c Context) {
 	size := int64(0)
 	prefix := c.args[0] + "/{LIST}/"
 	c.db.Scan(kvstore.ScannerOptions{
-		Offset:      prefix,
-		Prefix:      prefix,
-		FetchValues: false,
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   false,
 		Handler: func(k, v string) bool {
 			size++
 			return true
