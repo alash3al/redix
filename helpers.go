@@ -29,7 +29,6 @@ func selectDB(n string) (db kvstore.DB, err error) {
 
 // openDB - initialize a db in the specified path and engine
 func openDB(engine, dbpath string) (kvstore.DB, error) {
-	dbpath = dbpath + "-" + engine
 	switch strings.ToLower(engine) {
 	default:
 		return nil, errors.New("unsupported engine: " + engine)
