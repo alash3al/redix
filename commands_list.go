@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/hex"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/alash3al/redix/kvstore"
 	"github.com/rs/xid"
@@ -208,4 +210,183 @@ func lcountCommand(c Context) {
 	})
 
 	c.WriteInt64(size)
+}
+
+// lsumCommand - LSUM <list>
+func lsumCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("LSUM command must has at least 1 argument LSUM <LIST>")
+		return
+	}
+
+	sum := int64(0)
+	prefix := c.args[0] + "/{LIST}/"
+	c.db.Scan(kvstore.ScannerOptions{
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   true,
+		Handler: func(_, v string) bool {
+			i, _ := strconv.ParseInt(v, 10, 64)
+			sum += i
+			return true
+		},
+	})
+
+	c.WriteInt64(sum)
+}
+
+// lavgCommand - LSUM <list>
+func lavgCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("LSUM command must has at least 1 argument LSUM <LIST>")
+		return
+	}
+
+	sum := int64(0)
+	size := int64(0)
+	prefix := c.args[0] + "/{LIST}/"
+	c.db.Scan(kvstore.ScannerOptions{
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   true,
+		Handler: func(_, v string) bool {
+			i, _ := strconv.ParseInt(v, 10, 64)
+			sum += i
+			size++
+			return true
+		},
+	})
+
+	c.WriteInt64(sum / size)
+}
+
+// lminCommand - LMIN <list>
+func lminCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("LMIN command must has at least 1 argument LMIN <LIST>")
+		return
+	}
+
+	min := int64(0)
+	started := false
+	prefix := c.args[0] + "/{LIST}/"
+	c.db.Scan(kvstore.ScannerOptions{
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   true,
+		Handler: func(_, v string) bool {
+			i, _ := strconv.ParseInt(v, 10, 64)
+			if !started {
+				min = i
+				started = true
+			} else if i < min {
+				min = i
+			}
+			return true
+		},
+	})
+
+	c.WriteInt64(min)
+}
+
+// lmaxCommand - LMAX <list>
+func lmaxCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("LMAX command must has at least 1 argument LMAX <LIST>")
+		return
+	}
+
+	max := int64(0)
+	started := false
+	prefix := c.args[0] + "/{LIST}/"
+	c.db.Scan(kvstore.ScannerOptions{
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   true,
+		Handler: func(_, v string) bool {
+			i, _ := strconv.ParseInt(v, 10, 64)
+			if !started {
+				max = i
+				started = true
+			} else if i > max {
+				max = i
+			}
+			return true
+		},
+	})
+
+	c.WriteInt64(max)
+}
+
+// lsearchCommand - LSRCH <list> <pattern>
+func lsearchCommand(c Context) {
+	if len(c.args) < 2 {
+		c.WriteError("LSRCH command must has at least 2 argument LSRCH <LIST> <regexp>")
+		return
+	}
+
+	re, err := regexp.CompilePOSIX(c.args[1])
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	result := []string{}
+
+	prefix := c.args[0] + "/{LIST}/"
+	c.db.Scan(kvstore.ScannerOptions{
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   true,
+		Handler: func(_, v string) bool {
+			v = strings.ToLower(v)
+			if re.MatchString(v) || strings.Contains(v, strings.ToLower(c.args[1])) {
+				result = append(result, v)
+			}
+			return true
+		},
+	})
+
+	c.WriteArray(len(result))
+	for _, v := range result {
+		c.WriteBulkString(v)
+	}
+}
+
+// lsearchcountCommand - LSRCHCOUNT <list> <pattern>
+func lsearchcountCommand(c Context) {
+	if len(c.args) < 2 {
+		c.WriteError("LSRCHCOUNT command must has at least 2 argument LSRCHCOUNT <LIST> <regexp>")
+		return
+	}
+
+	re, err := regexp.CompilePOSIX(c.args[1])
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	result := int64(0)
+
+	prefix := c.args[0] + "/{LIST}/"
+	c.db.Scan(kvstore.ScannerOptions{
+		Offset:        prefix,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		FetchValues:   true,
+		Handler: func(_, v string) bool {
+			v = strings.ToLower(v)
+			if re.MatchString(v) || strings.Contains(v, strings.ToLower(c.args[1])) {
+				result++
+			}
+			return true
+		},
+	})
+
+	c.WriteInt64(result)
 }

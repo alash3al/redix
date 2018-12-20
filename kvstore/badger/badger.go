@@ -22,8 +22,8 @@ func OpenBadger(path string) (*BadgerDB, error) {
 	opts := badger.DefaultOptions
 	opts.Dir = path
 	opts.ValueDir = path
-	opts.TableLoadingMode = options.MemoryMap
-	opts.ValueLogLoadingMode = options.FileIO
+	opts.TableLoadingMode = options.LoadToRAM
+	opts.ValueLogLoadingMode = options.MemoryMap
 	bdb, err := badger.Open(opts)
 	if err != nil {
 		return nil, err

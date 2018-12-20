@@ -14,7 +14,9 @@ func publishCommand(c Context) {
 		return
 	}
 
-	changelog.Broadcast(c.args[1], c.args[0])
+	if changelog.Subscribers(c.args[0]) > 0 {
+		changelog.Broadcast(c.args[1], c.args[0])
+	}
 
 	c.WriteInt(1)
 }

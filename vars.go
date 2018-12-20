@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"github.com/alash3al/color"
@@ -19,6 +20,7 @@ var (
 	flagListenAddr = flag.String("l", "localhost:6380", "the address to listen on")
 	flagStorageDir = flag.String("s", "./redix-data", "the storage directory")
 	flagEngine     = flag.String("e", "badger", "the storage engine to be used, available (badger)")
+	flagWorkers    = flag.Int("w", runtime.NumCPU()*4, "the default workers number")
 	flagVerbose    = flag.Bool("v", false, "verbose or not")
 )
 
@@ -39,11 +41,17 @@ var (
 		"incr":   incrCommand,
 
 		// lists
-		"lpush":  lpushCommand,
-		"lpushu": lpushuCommand,
-		"lrange": lrangeCommand,
-		"lrem":   lremCommand,
-		"lcount": lcountCommand,
+		"lpush":      lpushCommand,
+		"lpushu":     lpushuCommand,
+		"lrange":     lrangeCommand,
+		"lrem":       lremCommand,
+		"lcount":     lcountCommand,
+		"lsum":       lsumCommand,
+		"lavg":       lavgCommand,
+		"lmin":       lminCommand,
+		"lmax":       lmaxCommand,
+		"lsrch":      lsearchCommand,
+		"lsrchcount": lsearchcountCommand,
 
 		// hashes
 		"hset":    hsetCommand,
@@ -57,6 +65,14 @@ var (
 		// pubsub
 		"publish":   publishCommand,
 		"subscribe": subscribeCommand,
+
+		// utils
+		"encode":  encodeCommand,
+		"uuidv4":  uuid4Command,
+		"uniqid":  uniqidCommand,
+		"randstr": randstrCommand,
+		"randint": randintCommand,
+		"time":    timeCommand,
 	}
 
 	defaultPubSubAllTopic = "*"
@@ -64,6 +80,8 @@ var (
 
 func init() {
 	flag.Parse()
+
+	runtime.GOMAXPROCS(*flagWorkers)
 
 	if !*flagVerbose {
 		logger := logrus.New()

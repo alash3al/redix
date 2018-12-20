@@ -132,7 +132,7 @@ func existsCommand(c Context) {
 	c.WriteInt(1)
 }
 
-// incrCommand -
+// incrCommand - INCR <key> [number]
 func incrCommand(c Context) {
 	var key string
 	var by int64

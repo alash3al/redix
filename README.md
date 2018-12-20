@@ -35,7 +35,7 @@ Supported Commands
 - `QUIT`
 - `SELECT`
 
-## # Strings
+## # Flat
 - `SET <key> <value> [<TTL "millisecond">]`
 - `MSET <key1> <value1> [<key2> <value2> ...]`
 - `GET <key> [<default value>]`
@@ -69,8 +69,29 @@ Supported Commands
 - `LPUSHU <LIST> <val1> [<val2> ...]` (push the item into the list only if it isn't exists)
 - `LGETALL <LIST> [<offset> <size>]`
 - `LREM <LIST> [<val1> <val2> <val3> ...]` (deletes the list itself or values in the list)
-- `LCOUNT <LIST>`
+- `LCOUNT <LIST>` (get the list members count)
+- `LSUM <LIST>` (sum the members of the list "in case they were numbers")
+- `LAVG <LIST>` (get the avg of the members of the list "in case they were numbers")
+- `LMIN <LIST>` (get the minimum of the members of the list "in case they were numbers")
+- `LMAX <LIST>` (get the maximum of the members of the list "in case they were numbers")
+- `LSRCH <LIST> <NEEDLE>` (text-search using (string search or regex) in the list)
+- `LSRCHCOUNT <LIST> <NEEDLE>` (size of text-search result using (string search or regex) in the list)
 
+## # Pub/Sub
+> `Redix` has very simple pub/sub functionality, you can subscribe to internal logs on the `*` channel or any custom defined channel, and publish to any custom channel.
+
+- `SUBSCRIBE [<channel1> <channel2>]`, if there is no channel specified, it will be set to `*`
+- `PUBLISH <channel> <payload>`
+
+## # Utils
+> a helpers commands
+
+- `ENCODE <method> <payload>`, encode the specified `<payload>` using the specified `<method>` (`md5`, `sha1`, `sha256`, `sha512`, `hex`)
+- `UUIDV4`, generates a uuid-v4 string, i.e `0b98aa17-eb06-42b8-b39f-fd7ba6aba7cd`.
+- `UNIQID`, generates a unique string.
+- `RANDS [<size>, default size is 10]`, generates a random string using the specified length. 
+- `RANDI <min> <max>`, generates a random string between the specified `<min>` and `<max>`.
+- `TIME`, returns the current time in `utc`, `seconds` and `nanoseconds`
 
 TODO
 =====
@@ -79,6 +100,6 @@ TODO
 - [x] Hashmap Commands
 - [x] List Commands
 - [x] PubSub Commands
+- [x] Utils Commands
+- [ ] Document/JSON Commands
 - [ ] GIS Commands
-- [ ] Aggregations ?
-- [ ] Document/JSON Commands ?
