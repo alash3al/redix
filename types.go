@@ -15,3 +15,10 @@ type Context struct {
 	action string
 	args   []string
 }
+
+// Change - a change feed
+type Change struct {
+	Namespace string   `json:"namespace"`
+	Command   string   `json:"command"`
+	Arguments []string `json:"arguments"`
+}

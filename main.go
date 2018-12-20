@@ -37,19 +37,6 @@ func main() {
 				log.Println(color.YellowString(todo), color.CyanString(strings.Join(args, " ")))
 			}
 
-			// internal ping-pong
-			if todo == "ping" {
-				conn.WriteString("PONG")
-				return
-			}
-
-			// close the connection
-			if todo == "quit" {
-				conn.WriteString("OK")
-				conn.Close()
-				return
-			}
-
 			// internal command to pick a database
 			if todo == "select" {
 				if len(args) < 1 {
@@ -70,6 +57,26 @@ func main() {
 			db, err := selectDB(ctx["db"].(string))
 			if err != nil {
 				conn.WriteError(fmt.Sprintf("db error: %s", err.Error()))
+				return
+			}
+
+			// our internal change log
+			changelog.Broadcast(Change{
+				Namespace: ctx["db"].(string),
+				Command:   todo,
+				Arguments: args,
+			}, defaultPubSubAllTopic)
+
+			// internal ping-pong
+			if todo == "ping" {
+				conn.WriteString("PONG")
+				return
+			}
+
+			// close the connection
+			if todo == "quit" {
+				conn.WriteString("OK")
+				conn.Close()
 				return
 			}
 

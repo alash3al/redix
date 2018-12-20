@@ -9,6 +9,8 @@ import (
 	"sync"
 
 	"github.com/alash3al/color"
+	"github.com/alash3al/go-pubsub"
+
 	"github.com/dgraph-io/badger"
 	"github.com/sirupsen/logrus"
 )
@@ -22,35 +24,43 @@ var (
 
 var (
 	databases *sync.Map
+	changelog *pubsub.Broker
 )
 
-var commands = map[string]CommandHandler{
-	// strings
-	"set":    setCommand,
-	"mset":   msetCommand,
-	"get":    getCommand,
-	"mget":   mgetCommand,
-	"del":    delCommand,
-	"exists": existsCommand,
-	"incr":   incrCommand,
+var (
+	commands = map[string]CommandHandler{
+		// strings
+		"set":    setCommand,
+		"mset":   msetCommand,
+		"get":    getCommand,
+		"mget":   mgetCommand,
+		"del":    delCommand,
+		"exists": existsCommand,
+		"incr":   incrCommand,
 
-	// lists
-	"lpush":  lpushCommand,
-	"lpushu": lpushuCommand,
-	"lrange": lrangeCommand,
-	"lrem":   lremCommand,
-	"lcount": lcountCommand,
-	// "ldelall": ldelallCommand,
+		// lists
+		"lpush":  lpushCommand,
+		"lpushu": lpushuCommand,
+		"lrange": lrangeCommand,
+		"lrem":   lremCommand,
+		"lcount": lcountCommand,
 
-	// hashes
-	"hset":    hsetCommand,
-	"hget":    hgetCommand,
-	"hdel":    hdelCommand,
-	"hgetall": hgetallCommand,
-	"hmset":   hmsetCommand,
-	"hexists": hexistsCommand,
-	"hincr":   hincrCommand,
-}
+		// hashes
+		"hset":    hsetCommand,
+		"hget":    hgetCommand,
+		"hdel":    hdelCommand,
+		"hgetall": hgetallCommand,
+		"hmset":   hmsetCommand,
+		"hexists": hexistsCommand,
+		"hincr":   hincrCommand,
+
+		// pubsub
+		"publish":   publishCommand,
+		"subscribe": subscribeCommand,
+	}
+
+	defaultPubSubAllTopic = "*"
+)
 
 func init() {
 	flag.Parse()
@@ -62,6 +72,7 @@ func init() {
 	}
 
 	databases = new(sync.Map)
+	changelog = pubsub.NewBroker()
 	*flagStorageDir = filepath.Join(*flagStorageDir, *flagEngine)
 
 	os.MkdirAll(*flagStorageDir, 0744)

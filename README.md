@@ -78,7 +78,7 @@ TODO
 - [x] Strings Commands
 - [x] Hashmap Commands
 - [x] List Commands
+- [x] PubSub Commands
 - [ ] GIS Commands
-- [ ] PubSub Commands
 - [ ] Aggregations ?
 - [ ] Document/JSON Commands ?
