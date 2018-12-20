@@ -89,8 +89,8 @@ Supported Commands
 - `ENCODE <method> <payload>`, encode the specified `<payload>` using the specified `<method>` (`md5`, `sha1`, `sha256`, `sha512`, `hex`)
 - `UUIDV4`, generates a uuid-v4 string, i.e `0b98aa17-eb06-42b8-b39f-fd7ba6aba7cd`.
 - `UNIQID`, generates a unique string.
-- `RANDS [<size>, default size is 10]`, generates a random string using the specified length. 
-- `RANDI <min> <max>`, generates a random string between the specified `<min>` and `<max>`.
+- `RANDSTR [<size>, default size is 10]`, generates a random string using the specified length. 
+- `RANDINT <min> <max>`, generates a random string between the specified `<min>` and `<max>`.
 - `TIME`, returns the current time in `utc`, `seconds` and `nanoseconds`
 
 TODO
