@@ -61,11 +61,13 @@ func main() {
 			}
 
 			// our internal change log
-			changelog.Broadcast(Change{
-				Namespace: ctx["db"].(string),
-				Command:   todo,
-				Arguments: args,
-			}, defaultPubSubAllTopic)
+			if changelog.Subscribers(defaultPubSubAllTopic) > 0 {
+				changelog.Broadcast(Change{
+					Namespace: ctx["db"].(string),
+					Command:   todo,
+					Arguments: args,
+				}, defaultPubSubAllTopic)
+			}
 
 			// internal ping-pong
 			if todo == "ping" {
