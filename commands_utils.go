@@ -124,3 +124,8 @@ func encodeCommand(c Context) {
 
 	c.WriteString((methods[method])(payload))
 }
+
+// dbsizeCommand - DBSIZE
+func dbsizeCommand(c Context) {
+	c.WriteInt64(c.db.Size())
+}

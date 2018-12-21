@@ -25,6 +25,9 @@ var (
 
 var (
 	commands = map[string]CommandHandler{
+		// internals
+		"dbsize": dbsizeCommand,
+
 		// strings
 		"set":    setCommand,
 		"mset":   msetCommand,
