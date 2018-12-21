@@ -82,6 +82,10 @@ Supported Commands
 
 - `SUBSCRIBE [<channel1> <channel2>]`, if there is no channel specified, it will be set to `*`
 - `PUBLISH <channel> <payload>`
+- `WEBHOOKSET <channel> <httpurl>`, register a http endpoint so it can be notified through `JSON POST` request with the channel updates, this command will return a reference ID so you can manage it later.
+- `WEBHOOKDEL <ID>`, stops listening on a channel using the above reference ID.
+- `WEBSOCKETOPEN <channel>`, opens a websocket endpoint and returns its id, so you can receive updates through `ws://server.address:port/stream/ws/{generated_id_here}`
+- `WEBSOCKETCLOSE <ID>`, closes the specified websocket endpoint using the above generated id. 
 
 ## # Utils
 > a helpers commands
