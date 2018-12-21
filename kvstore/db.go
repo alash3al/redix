@@ -9,6 +9,7 @@ type DB interface {
 	MGet(keys []string) []string
 	Del(keys []string) error
 	Scan(ScannerOpt ScannerOptions) error
+	Size() int64
 }
 
 // ScannerOptions - represents the options for a scanner
