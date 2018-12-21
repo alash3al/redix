@@ -29,6 +29,7 @@ func init() {
 	databases = new(sync.Map)
 	changelog = pubsub.NewBroker()
 	webhooks = new(sync.Map)
+	websockets = new(sync.Map)
 
 	*flagStorageDir = filepath.Join(*flagStorageDir, *flagEngine)
 

@@ -92,6 +92,8 @@ Supported Commands
 - `RANDSTR [<size>, default size is 10]`, generates a random string using the specified length. 
 - `RANDINT <min> <max>`, generates a random string between the specified `<min>` and `<max>`.
 - `TIME`, returns the current time in `utc`, `seconds` and `nanoseconds`
+- `DBSIZE`, returns the database size in bytes.
+- `GC`, runs the Garbage Collector.
 
 TODO
 =====

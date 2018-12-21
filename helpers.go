@@ -4,7 +4,6 @@ import (
 	"errors"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/alash3al/redix/kvstore/badger"
 
@@ -34,6 +33,6 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 	default:
 		return nil, errors.New("unsupported engine: " + engine)
 	case "badger":
-		return badger.OpenBadger(dbpath, time.Duration(*flagGCInterval)*time.Second)
+		return badger.OpenBadger(dbpath)
 	}
 }

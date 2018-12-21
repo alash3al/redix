@@ -18,7 +18,7 @@ type BadgerDB struct {
 }
 
 // OpenBadger - Opens the specified path
-func OpenBadger(path string, gcInterval time.Duration) (*BadgerDB, error) {
+func OpenBadger(path string) (*BadgerDB, error) {
 	opts := badger.DefaultOptions
 	opts.Dir = path
 	opts.ValueDir = path
@@ -34,13 +34,6 @@ func OpenBadger(path string, gcInterval time.Duration) (*BadgerDB, error) {
 	db.badger = bdb
 	db.countersLocks = sync.RWMutex{}
 
-	gc := time.NewTicker(gcInterval)
-	go (func() {
-		for range gc.C {
-			bdb.RunValueLogGC(0.5)
-		}
-	})()
-
 	return db, nil
 }
 
@@ -48,6 +41,11 @@ func OpenBadger(path string, gcInterval time.Duration) (*BadgerDB, error) {
 func (db *BadgerDB) Size() int64 {
 	lsm, vlog := db.badger.Size()
 	return lsm + vlog
+}
+
+// GC - runs the garbage collector
+func (db *BadgerDB) GC() error {
+	return db.badger.RunValueLogGC(0.5)
 }
 
 // Incr - increment the key by the specified value

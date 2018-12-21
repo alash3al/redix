@@ -8,6 +8,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	mathRand "math/rand"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -128,4 +129,14 @@ func encodeCommand(c Context) {
 // dbsizeCommand - DBSIZE
 func dbsizeCommand(c Context) {
 	c.WriteInt64(c.db.Size())
+}
+
+// gcCommand - GC
+func gcCommand(c Context) {
+	runtime.GC()
+	if err := c.db.GC(); err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+	c.WriteInt(1)
 }

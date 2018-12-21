@@ -9,25 +9,23 @@ import (
 )
 
 var (
-	flagListenAddr = flag.String("l", "localhost:6380", "the address to listen on")
-	flagStorageDir = flag.String("s", "./redix-data", "the storage directory")
-	flagEngine     = flag.String("e", "badger", "the storage engine to be used, available (badger)")
-	flagGCInterval = flag.Int("gc", 30, "databse GC interval in seconds")
-	flagWorkers    = flag.Int("w", runtime.NumCPU()*4, "the default workers number")
-	flagVerbose    = flag.Bool("v", false, "verbose or not")
+	flagRESPListenAddr = flag.String("resp-addr", "localhost:6380", "the address of resp server")
+	flagHTTPListenAddr = flag.String("http-addr", "localhost:7090", "the address of the http server")
+	flagStorageDir     = flag.String("storage", "./redix-data", "the storage directory")
+	flagEngine         = flag.String("engine", "badger", "the storage engine to be used, available (badger)")
+	flagWorkers        = flag.Int("workers", runtime.NumCPU()*4, "the default workers number")
+	flagVerbose        = flag.Bool("verbose", false, "verbose or not")
 )
 
 var (
-	databases *sync.Map
-	changelog *pubsub.Broker
-	webhooks  *sync.Map
+	databases  *sync.Map
+	changelog  *pubsub.Broker
+	webhooks   *sync.Map
+	websockets *sync.Map
 )
 
 var (
 	commands = map[string]CommandHandler{
-		// internals
-		"dbsize": dbsizeCommand,
-
 		// strings
 		"set":    setCommand,
 		"mset":   msetCommand,
@@ -60,10 +58,12 @@ var (
 		"hincr":   hincrCommand,
 
 		// pubsub
-		"publish":    publishCommand,
-		"subscribe":  subscribeCommand,
-		"webhookset": webhooksetCommand,
-		"webhookdel": webhookdelCommand,
+		"publish":        publishCommand,
+		"subscribe":      subscribeCommand,
+		"webhookset":     webhooksetCommand,
+		"webhookdel":     webhookdelCommand,
+		"websocketopen":  websocketopenCommand,
+		"websocketclose": websocketcloseCommand,
 
 		// utils
 		"encode":  encodeCommand,
@@ -72,6 +72,8 @@ var (
 		"randstr": randstrCommand,
 		"randint": randintCommand,
 		"time":    timeCommand,
+		"dbsize":  dbsizeCommand,
+		"gc":      gcCommand,
 	}
 
 	defaultPubSubAllTopic = "*"

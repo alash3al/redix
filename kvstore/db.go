@@ -10,6 +10,7 @@ type DB interface {
 	Del(keys []string) error
 	Scan(ScannerOpt ScannerOptions) error
 	Size() int64
+	GC() error
 }
 
 // ScannerOptions - represents the options for a scanner

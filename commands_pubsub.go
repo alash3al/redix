@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/alash3al/go-pubsub"
+
 	"github.com/go-resty/resty"
 
 	"github.com/tidwall/redcon"
@@ -126,7 +128,7 @@ func webhooksetCommand(c Context) {
 
 // webhookdel - WEBHOOKDEL <channel> <http://url.here/>
 func webhookdelCommand(c Context) {
-	if len(c.args) < 2 {
+	if len(c.args) < 1 {
 		c.WriteError("WEBHOOKDEL command requires at least 1 arguments, WEBHOOKDEL <WebHookID>")
 		return
 	}
@@ -137,8 +139,49 @@ func webhookdelCommand(c Context) {
 		return
 	}
 
+	webhooks.Delete(c.args[0])
 	webhookChan := webhook.(chan bool)
 	webhookChan <- true
+
+	c.WriteInt(1)
+}
+
+// websocketopenCommand - WEBSOCKETOPEN <channel>
+func websocketopenCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("WEBSOCKETOPEN command requires at least 1 arguments, WEBSOCKETOPEN <channel>")
+		return
+	}
+
+	channel := c.args[0]
+
+	user, err := changelog.Attach()
+	if err != nil {
+		c.WriteError(":: " + err.Error())
+		return
+	}
+
+	changelog.Subscribe(user, channel)
+	websockets.Store(user.GetID(), user)
+
+	c.WriteString(user.GetID())
+}
+
+// websocketcloseCommand - WEBSOCKETCLOSE <ID>
+func websocketcloseCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("WEBSOCKETCLOSE command requires at least 1 arguments, WEBSOCKETCLOSE <ID>")
+		return
+	}
+
+	user, found := websockets.Load(c.args[0])
+	if !found {
+		c.WriteInt(1)
+		return
+	}
+
+	websockets.Delete(c.args[0])
+	changelog.Detach(user.(*pubsub.Subscriber))
 
 	c.WriteInt(1)
 }
