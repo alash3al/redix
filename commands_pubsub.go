@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/go-resty/resty"
+
 	"github.com/tidwall/redcon"
 )
 
@@ -76,4 +78,67 @@ func subscribeCommand(c Context) {
 			break
 		}
 	}
+}
+
+// webhooksetCommand - WEBHOOKSET <channel> <http://url.here/>
+func webhooksetCommand(c Context) {
+	if len(c.args) < 2 {
+		c.WriteError("WEBHOOKSET command requires at least 2 arguments, WEBHOOKSET <channel> <http://url.here/>")
+		return
+	}
+
+	channel, url := c.args[0], c.args[1]
+
+	user, err := changelog.Attach()
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	changelog.Subscribe(user, channel)
+	webhooks.Store(user.GetID(), make(chan bool))
+
+	go (func() {
+		done := (func() chan bool {
+			ch, _ := webhooks.Load(user.GetID())
+			return ch.(chan bool)
+		})()
+
+	eventloop:
+		for {
+			select {
+			case msg := <-user.GetMessages():
+				resty.R().SetHeader("Content-Type", "application/json").SetBody(map[string]interface{}{
+					"topic":   msg.GetTopic(),
+					"payload": msg.GetPayload(),
+					"time":    msg.GetCreatedAt(),
+				}).Post(url)
+			case <-done:
+				changelog.Detach(user)
+				close(done)
+				break eventloop
+			}
+		}
+	})()
+
+	c.WriteString(user.GetID())
+}
+
+// webhookdel - WEBHOOKDEL <channel> <http://url.here/>
+func webhookdelCommand(c Context) {
+	if len(c.args) < 2 {
+		c.WriteError("WEBHOOKDEL command requires at least 1 arguments, WEBHOOKDEL <WebHookID>")
+		return
+	}
+
+	webhook, found := webhooks.Load(c.args[0])
+	if !found {
+		c.WriteInt(1)
+		return
+	}
+
+	webhookChan := webhook.(chan bool)
+	webhookChan <- true
+
+	c.WriteInt(1)
 }

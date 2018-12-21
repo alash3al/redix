@@ -27,6 +27,7 @@ var (
 var (
 	databases *sync.Map
 	changelog *pubsub.Broker
+	webhooks  *sync.Map
 )
 
 var (
@@ -63,8 +64,10 @@ var (
 		"hincr":   hincrCommand,
 
 		// pubsub
-		"publish":   publishCommand,
-		"subscribe": subscribeCommand,
+		"publish":    publishCommand,
+		"subscribe":  subscribeCommand,
+		"webhookset": webhooksetCommand,
+		"webhookdel": webhookdelCommand,
 
 		// utils
 		"encode":  encodeCommand,
@@ -91,6 +94,8 @@ func init() {
 
 	databases = new(sync.Map)
 	changelog = pubsub.NewBroker()
+	webhooks = new(sync.Map)
+
 	*flagStorageDir = filepath.Join(*flagStorageDir, *flagEngine)
 
 	os.MkdirAll(*flagStorageDir, 0744)
