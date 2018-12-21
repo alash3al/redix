@@ -34,10 +34,10 @@ func subscribeCommand(c Context) {
 		c.WriteError(err.Error())
 		return
 	}
-	defer changelog.Detach(subscriber)
 
 	conn := c.Detach()
 	defer conn.Close()
+	defer changelog.Detach(subscriber)
 
 	go (func() {
 		for {
