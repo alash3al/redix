@@ -1,6 +1,6 @@
 Redix
 =======
-> a very fast persistent pure key - value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data.
+> a very fast persistent real-time key-value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data.
 > Internally, I'm using [badgerdb](https://github.com/dgraph-io/badger) as storage engine 
 
 Features
@@ -12,19 +12,66 @@ Features
 - No blocking commands
 - Very easy and simple
 - Very compatible with any `redis-client`
+- Not only basic redis channels subscriptions, but also there is `webhook` and `websocket`, so you can easily use integrate it directly to any web/mobile app.
 
 Why
 ===
-> I built this software to learn more about data modeling, data structures and how to map any data to pure key value, I don't need to build a redis clone, but I need to build something with my own concepts in my own style.
+> I started this software to learn more about data modeling, data structures and how to map any data to pure key value, I don't need to build a redis clone, but I need to build something with my own concepts in my own style. I decided to use RESP (redis protocol) so you can use `Redix` with any redis client out there.
+
+Production
+==========
+> Yep, This software is ready for use in production, and I'm already using it in production as a drop-in-replacement for redis in some softwares in [uFlare](https://uflare.io) for our solutions.
 
 Install
 =======
 - from source: `go get github.com/alash3al/redix`.
 - from binaries: go [there](https://github.com/alash3al/redix/releases) and choose your platform based binary, then download and execute from the command line with `-h` flag to see the help text.
 
-Client SDKs
-===========
-> you can use any redis client from `redis-cli` or [from here](https://redis.io/clients)
+
+Configurations
+============
+> It is so easy to configure `Redix`, there is no configuration files, it is all about running `./redix` after you download it from the [releases](https://github.com/alash3al/redix/releases), if you downloaded i.e 'redix_linux_amd64' and unziped it,
+```
+$ ./redix_linux_amd64 -h
+
+  -engine string
+        the storage engine to be used, available (badger) (default "badger")
+  -http-addr string
+        the address of the http server (default "localhost:7090")
+  -resp-addr string
+        the address of resp server (default "localhost:6380")
+  -storage string
+        the storage directory (default "./redix-data")
+  -verbose
+        verbose or not
+  -workers int
+        the default workers number (default ...)
+```
+
+Examples
+=========
+
+```bash
+
+# i.e: $mykey1 = "this is my value"
+$ redis-cli -p 6380 set mykey1 "this is my value"
+
+# i.e: $mykey1 = "this is my value" and expire it after 10 seconds
+$ redis-cli -p 6380 set mykey1 "this is my value" 10000
+
+# i.e: echo $mykey1
+$ redis-cli -p 6380 get mykey1
+
+# i.e: $mymap1[x] = y
+$ redis-cli -p 6380 hset mymap1 x y
+
+# i.e: $mymap1[x] = y and expires it after 10 seconds
+$ redis-cli -p 6380 hset mymap1 x y 10000
+
+# i.e: sha512 of "test"
+$ redis-cli -p 6380 encode sha512 test
+
+```
 
 Supported Commands
 ===================
