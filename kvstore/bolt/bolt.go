@@ -23,12 +23,10 @@ type BoltDB struct {
 func OpenBolt(path string) (*BoltDB, error) {
 	bdb, err := bbolt.Open(path, 0600, nil)
 
-	err = bdb.Update(func(txn *bbolt.Tx) error {
+	if err := bdb.Update(func(txn *bbolt.Tx) error {
 		_, err := txn.CreateBucketIfNotExists([]byte("default"))
 		return err
-	})
-
-	if nil != err {
+	}); err != nil {
 		return nil, err
 	}
 
