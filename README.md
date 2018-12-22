@@ -1,7 +1,7 @@
 Redix
 =======
-> a very fast persistent real-time key-value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data.
-> Internally, I'm using [badgerdb](https://github.com/dgraph-io/badger) as storage engine 
+> a very fast persistent real-time key-value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data, also it integrates with your mobile/web apps to add real-time features, soon you can use it as a document store cause it should become a multi-model db. `Redix` is used in production, you can use it in your apps with no worries.
+
 
 Features
 =========
