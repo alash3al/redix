@@ -31,7 +31,7 @@ Install
 Configurations
 ============
 > It is so easy to configure `Redix`, there is no configuration files, it is all about running `./redix` after you download it from the [releases](https://github.com/alash3al/redix/releases), if you downloaded i.e 'redix_linux_amd64' and unziped it,
-```
+```bash
 $ ./redix_linux_amd64 -h
 
   -engine string
