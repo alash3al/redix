@@ -79,4 +79,9 @@ var (
 	}
 
 	defaultPubSubAllTopic = "*"
+
+	supportedEngines = map[string]bool{
+		"badger": true,
+		"bolt":   true,
+	}
 )

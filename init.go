@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,6 +25,12 @@ func init() {
 		logger := logrus.New()
 		logger.SetOutput(ioutil.Discard)
 		badger.SetLogger(logger)
+	}
+
+	if !supportedEngines[*flagEngine] {
+		fmt.Println(color.RedString("Invalid strorage engine specified"))
+		os.Exit(0)
+		return
 	}
 
 	databases = new(sync.Map)

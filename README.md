@@ -1,15 +1,13 @@
 Redix
 =======
-> a very fast persistent real-time key-value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data, also it integrates with your mobile/web apps to add real-time features, soon you can use it as a document store cause it should become a multi-model db. `Redix` is used in production, you can use it in your apps with no worries.
+> a fast persistent real-time key-value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data, also it integrates with your mobile/web apps to add real-time features, soon you can use it as a document store cause it should become a multi-model db. `Redix` is used in production, you can use it in your apps with no worries.
 
 
 Features
 =========
-- Fast on-disk store.
-- [ACID Transactions](https://blog.dgraph.io/post/badger-txn/)
-- [Crash Resilient](https://blog.dgraph.io/post/alice/)
-- Multi Core
-- No blocking commands
+- Fast on-disk store
+- Pluggable Storage Engine (`badger`, `bolt`)
+- Multi Core via `-workers=<num workers here>`
 - Very easy and simple
 - Very compatible with any `redis-client`
 - Not only basic redis channels subscriptions, but also there is `webhook` and `websocket`, so you can easily use integrate it directly to any web/mobile app.
@@ -27,17 +25,15 @@ Install
 - from source: `go get github.com/alash3al/redix`.
 - from binaries: go [there](https://github.com/alash3al/redix/releases) and choose your platform based binary, then download and execute from the command line with `-h` flag to see the help text.
 
-
 Configurations
 ============
 > It is so easy to configure `Redix`, there is no configuration files, it is all about running `./redix` after you download it from the [releases](https://github.com/alash3al/redix/releases), if you downloaded i.e 'redix_linux_amd64' and unziped it.
-
 
 ```bash
 $ ./redix_linux_amd64 -h
 
   -engine string
-        the storage engine to be used, available (badger) (default "badger")
+        the storage engine to be used, available (default "badger")
   -http-addr string
         the address of the http server (default "localhost:7090")
   -resp-addr string
@@ -84,6 +80,11 @@ $ redis-cli -p 6380 lpush mylist1 "I'm Mohammed" "I like to Go using Go" "I love
 $ redis-cli -p 6380 lsrch mylist1 "mo(.*)"
 
 ```
+
+Which Engine
+=============
+> `Redix` supports `bolt` & `badger` engines, bolt uses very very small amount of memory than badger, but it is slower than badger. 
+> If you want to order the redis and redix engines based on memory usage then it will be as the following: redis > badger > bolt.  
 
 Supported Commands
 ===================

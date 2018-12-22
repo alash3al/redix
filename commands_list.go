@@ -99,16 +99,18 @@ func lrangeCommand(c Context) {
 	}
 
 	data := []string{}
+	loaded := 0
 	err := c.db.Scan(kvstore.ScannerOptions{
 		IncludeOffset: true,
 		Offset:        offset,
 		Prefix:        prefix,
 		FetchValues:   true,
 		Handler: func(k, v string) bool {
-			if limit > 0 && (len(data) == limit) {
+			if limit > 0 && (loaded >= limit) {
 				return false
 			}
 			data = append(data, k, v)
+			loaded++
 			return true
 		},
 	})

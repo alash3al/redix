@@ -24,8 +24,11 @@ func OpenBadger(path string) (*BadgerDB, error) {
 	opts.Dir = path
 	opts.ValueDir = path
 	opts.Truncate = true
-	opts.TableLoadingMode = options.MemoryMap
+	opts.TableLoadingMode = options.FileIO
 	opts.ValueLogLoadingMode = options.FileIO
+	opts.NumMemtables = 1
+	opts.MaxTableSize = 5 << 20
+	opts.NumCompactors = 1
 
 	bdb, err := badger.Open(opts)
 	if err != nil {

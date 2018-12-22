@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/alash3al/redix/kvstore/bolt"
+
 	"github.com/alash3al/redix/kvstore/badger"
 
 	"github.com/alash3al/redix/kvstore"
@@ -34,5 +36,7 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 		return nil, errors.New("unsupported engine: " + engine)
 	case "badger":
 		return badger.OpenBadger(dbpath)
+	case "bolt":
+		return bolt.OpenBolt(dbpath)
 	}
 }
