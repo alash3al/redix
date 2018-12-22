@@ -5,6 +5,7 @@ require (
 	github.com/alash3al/color v1.7.0
 	github.com/alash3al/go-color v1.7.0
 	github.com/alash3al/go-pubsub v0.0.0-20181220233502-636a19c01258
+	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/dgraph-io/badger v1.5.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dgryski/go-farm v0.0.0-20180109070241-2de33835d102 // indirect
@@ -22,6 +23,7 @@ require (
 	github.com/tidwall/redcon v0.9.0
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4 // indirect
+	go.etcd.io/bbolt v1.3.0
 	golang.org/x/net v0.0.0-20181213202711-891ebc4b82d6 // indirect
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
 	golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06 // indirect
