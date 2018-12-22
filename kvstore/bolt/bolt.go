@@ -22,6 +22,9 @@ type BoltDB struct {
 // OpenBolt - Opens the specified path
 func OpenBolt(path string) (*BoltDB, error) {
 	bdb, err := bbolt.Open(path, 0600, nil)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := bdb.Update(func(txn *bbolt.Tx) error {
 		_, err := txn.CreateBucketIfNotExists([]byte("default"))
