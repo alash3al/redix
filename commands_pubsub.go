@@ -5,10 +5,8 @@ import (
 	"strings"
 
 	"github.com/alash3al/go-pubsub"
-
-	"github.com/go-resty/resty"
-
 	"github.com/tidwall/redcon"
+	"gopkg.in/resty.v1"
 )
 
 // publishCommand - PUBLISH <channel> <paylaod>
@@ -111,7 +109,7 @@ func webhooksetCommand(c Context) {
 			select {
 			case msg := <-user.GetMessages():
 				resty.R().SetHeader("Content-Type", "application/json").SetBody(map[string]interface{}{
-					"topic":   msg.GetTopic(),
+					"channel": msg.GetTopic(),
 					"payload": msg.GetPayload(),
 					"time":    msg.GetCreatedAt(),
 				}).Post(url)
