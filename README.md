@@ -71,6 +71,16 @@ $ redis-cli -p 6380 hset mymap1 x y 10000
 # i.e: sha512 of "test"
 $ redis-cli -p 6380 encode sha512 test
 
+# you want to notify an endpoint i.e: "http://localhost:800/new-data" that there is new data available, in other words, you want to subscribe a webhook to channel updates.
+$ redis-cli -p 6380 webhookset testchan http://localhost:800/new-data
+
+# add data to a list
+# i.e: [].push(....)
+$ redis-cli -p 6380 lpush mylist1 "I'm Mohammed" "I like to Go using Go" "I love coding"
+
+# search in the list
+$ redis-cli -p 6380 lsrch mylist1 "mo(.*)"
+
 ```
 
 Supported Commands
