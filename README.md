@@ -81,10 +81,11 @@ $ redis-cli -p 6380 lsrch mylist1 "mo(.*)"
 
 ```
 
-Which Engine
-=============
-> `Redix` supports `bolt` & `badger` engines, bolt uses very very small amount of memory than badger, but it is slower than badger. 
-> If you want to order the redis and redix engines based on memory usage then it will be as the following: redis > badger > bolt.  
+DB Engines
+===========
+- `Redix` supports two engines called `badger` and `bolt`
+- `badger` is the default, it is inspired by Facebook [`RocksDB`](https://rocksdb.org/), it meant to be fast on-disk engine, [read more](https://github.com/dgraph-io/badger)
+- `bolt` is our alternate engine, it is inspired by [`LMDB`](http://symas.com/mdb/), [read more](https://github.com/etcd-io/bbolt)
 
 Supported Commands
 ===================

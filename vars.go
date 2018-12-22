@@ -13,7 +13,7 @@ var (
 	flagHTTPListenAddr = flag.String("http-addr", "localhost:7090", "the address of the http server")
 	flagStorageDir     = flag.String("storage", "./redix-data", "the storage directory")
 	flagEngine         = flag.String("engine", "badger", "the storage engine to be used, available (badger)")
-	flagWorkers        = flag.Int("workers", runtime.NumCPU()*4, "the default workers number")
+	flagWorkers        = flag.Int("workers", runtime.NumCPU(), "the default workers number")
 	flagVerbose        = flag.Bool("verbose", false, "verbose or not")
 )
 
