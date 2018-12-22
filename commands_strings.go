@@ -160,3 +160,11 @@ func incrCommand(c Context) {
 
 	c.WriteInt64(int64(val))
 }
+
+func ttlCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("TTL command requires at least 1 argument, TTL <key>")
+		return
+	}
+	c.WriteInt64(int64(c.db.TTL(c.args[0])))
+}

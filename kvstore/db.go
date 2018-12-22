@@ -7,6 +7,7 @@ type DB interface {
 	MSet(data map[string]string) error
 	Get(k string) (string, error)
 	MGet(keys []string) []string
+	TTL(key string) int64
 	Del(keys []string) error
 	Scan(ScannerOpt ScannerOptions) error
 	Size() int64

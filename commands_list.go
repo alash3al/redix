@@ -66,13 +66,13 @@ func lpushuCommand(c Context) {
 	}
 }
 
-// lrange - LGETALL <LIST> [<offset> <size>]
+// lrange - LRANGE <LIST> [<offset> <size>]
 func lrangeCommand(c Context) {
 	var key, offset string
 	var limit int
 
 	if len(c.args) < 1 {
-		c.WriteError("LGETALL must has at least 1 argument")
+		c.WriteError("LRANGE must has at least 1 argument, LRANGE <LIST> [<offset> <size>]")
 		return
 	}
 

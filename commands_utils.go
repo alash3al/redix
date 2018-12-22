@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	mathRand "math/rand"
 	"runtime"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -134,6 +135,7 @@ func dbsizeCommand(c Context) {
 // gcCommand - GC
 func gcCommand(c Context) {
 	runtime.GC()
+	debug.FreeOSMemory()
 	if err := c.db.GC(); err != nil {
 		c.WriteError(err.Error())
 		return

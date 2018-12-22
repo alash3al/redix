@@ -94,7 +94,7 @@ Supported Commands
 - `QUIT`
 - `SELECT`
 
-## # Flat
+## # Strings
 - `SET <key> <value> [<TTL "millisecond">]`
 - `MSET <key1> <value1> [<key2> <value2> ...]`
 - `GET <key> [<default value>]`
@@ -102,6 +102,7 @@ Supported Commands
 - `DEL <key1> [<key2> ...]`
 - `EXISTS <key>`
 - `INCR <key> [<by>]`
+- `TTL <key>` returns `-1` if key will never expire, `-2` if it doesn't exists (expired), other wise will returns the `seconds` remain before the key will expire.
 
 ## # HASHES
 > I enhanced the HASH MAP implementation and added some features like TTL per nested key,
@@ -116,6 +117,7 @@ Supported Commands
 - `HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]`
 - `HEXISTS <HASHMAP> [<key>]`.
 - `HINCR <HASHMAP> <key> [<by>]`
+- `HTTL <HASHMAP> <key>`, the same as `TTL` but for `HASHMAP`
 
 ## # LIST
 > I applied a new concept, you can push or push-unique values into the list,

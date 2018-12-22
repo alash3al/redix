@@ -201,3 +201,13 @@ func hincrCommand(c Context) {
 
 	incrCommand(c)
 }
+
+// httlCommand - HTTL <HASH> <KEY>
+func httlCommand(c Context) {
+	if len(c.args) < 2 {
+		c.WriteError("HTTL command requires at least 2 arguments HTTL <HASHMAP> <key>")
+		return
+	}
+
+	c.WriteInt64(c.db.TTL(c.args[0] + "/{HASH}/" + c.args[1]))
+}

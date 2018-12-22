@@ -20,10 +20,12 @@ type BadgerDB struct {
 // OpenBadger - Opens the specified path
 func OpenBadger(path string) (*BadgerDB, error) {
 	opts := badger.DefaultOptions
+
 	opts.Dir = path
 	opts.ValueDir = path
-	opts.TableLoadingMode = options.LoadToRAM
-	opts.ValueLogLoadingMode = options.MemoryMap
+	opts.Truncate = true
+	opts.TableLoadingMode = options.MemoryMap
+	opts.ValueLogLoadingMode = options.FileIO
 
 	bdb, err := badger.Open(opts)
 	if err != nil {
@@ -33,6 +35,12 @@ func OpenBadger(path string) (*BadgerDB, error) {
 	db := new(BadgerDB)
 	db.badger = bdb
 	db.countersLocks = sync.RWMutex{}
+
+	go (func() {
+		for db.badger.RunValueLogGC(0.5) == nil {
+			// cleaning ...
+		}
+	})()
 
 	return db, nil
 }
@@ -45,7 +53,14 @@ func (db *BadgerDB) Size() int64 {
 
 // GC - runs the garbage collector
 func (db *BadgerDB) GC() error {
-	return db.badger.RunValueLogGC(0.5)
+	var err error
+	for {
+		err = db.badger.RunValueLogGC(0.5)
+		if err != nil {
+			break
+		}
+	}
+	return err
 }
 
 // Incr - increment the key by the specified value
@@ -135,6 +150,45 @@ func (db *BadgerDB) MGet(keys []string) (data []string) {
 	})
 
 	return data
+}
+
+// TTL - returns the time to live of the specified key's value
+func (db *BadgerDB) TTL(key string) int64 {
+	var expires int64
+
+	db.badger.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(key))
+		if err != nil {
+			expires = -2
+			return nil
+		}
+
+		exp := item.ExpiresAt()
+		if exp == 0 {
+			expires = -1
+			return nil
+		}
+
+		expires = int64(exp)
+
+		return nil
+	})
+
+	if expires == -2 {
+		return -2
+	}
+
+	if expires == -1 {
+		return -1
+	}
+
+	now := time.Now().Unix()
+
+	if now >= expires {
+		return -2
+	}
+
+	return (expires - now)
 }
 
 // Del - removes key(s) from the store

@@ -34,6 +34,7 @@ var (
 		"del":    delCommand,
 		"exists": existsCommand,
 		"incr":   incrCommand,
+		"ttl":    ttlCommand,
 
 		// lists
 		"lpush":      lpushCommand,
@@ -56,6 +57,7 @@ var (
 		"hmset":   hmsetCommand,
 		"hexists": hexistsCommand,
 		"hincr":   hincrCommand,
+		"httl":    httlCommand,
 
 		// pubsub
 		"publish":        publishCommand,
