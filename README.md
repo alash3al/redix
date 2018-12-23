@@ -31,9 +31,9 @@ $ ./redix_linux_amd64 -h
   -engine string
         the storage engine to be used, available (default "badger")
   -http-addr string
-        the address of the http server (default "localhost:7090")
+        the address of the http server (default ":7090")
   -resp-addr string
-        the address of resp server (default "localhost:6380")
+        the address of resp server (default ":6380")
   -storage string
         the storage directory (default "./redix-data")
   -verbose
