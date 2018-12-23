@@ -14,7 +14,7 @@ func hsetCommand(c Context) {
 	var ttl int
 
 	if len(c.args) < 3 {
-		c.WriteError("HSET command requires at least three arguments HSET <hashmap> <key> <value> [<TTL>]")
+		c.WriteError("HSET command requires at least three arguments: HSET <hashmap> <key> <value> [<TTL>]")
 		return
 	}
 
@@ -37,7 +37,7 @@ func hgetCommand(c Context) {
 	var ns, k string
 
 	if len(c.args) < 2 {
-		c.WriteError("HGET command requires at least two arguments HGET <hashmap> <key>")
+		c.WriteError("HGET command requires at least two arguments: HGET <hashmap> <key>")
 		return
 	}
 
@@ -53,7 +53,7 @@ func hdelCommand(c Context) {
 	var ns string
 
 	if len(c.args) < 1 {
-		c.WriteError("HDEL command requires at least two arguments HDEL <HASHMAP> [<key1> <key2> ...]")
+		c.WriteError("HDEL command requires at least two arguments: HDEL <hashmap> [<key1> <key2> ...]")
 		return
 	}
 
@@ -86,7 +86,7 @@ func hdelCommand(c Context) {
 // hgetallCommand - HGETALL <HASHMAP>
 func hgetallCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("HGETALL command requires at least one argument HGETALL <HASHMAP>")
+		c.WriteError("HGETALL command requires at least one argument: HGETALL <hashmap>")
 	}
 
 	prefix := c.args[0] + "/{HASH}/"
@@ -124,7 +124,7 @@ func hmsetCommand(c Context) {
 	var ns string
 
 	if len(c.args) < 3 {
-		c.WriteError("HMSET command requires at least three arguments HMSET <HASHMAP> <key1> <val1> [<key2> <val2> ...]")
+		c.WriteError("HMSET command requires at least three arguments: HMSET <hashmap> <key1> <val1> [<key2> <val2> ...]")
 		return
 	}
 
@@ -133,7 +133,7 @@ func hmsetCommand(c Context) {
 
 	currentCount := len(args)
 	if len(args)%2 != 0 {
-		c.WriteError(fmt.Sprintf("HMSET {key => value} pairs must be even you specified %d, it should be %d or %d", currentCount, currentCount+1, currentCount-1))
+		c.WriteError(fmt.Sprintf("HMSET {key => value} pairs must be even. You specified %d, it should be %d or %d", currentCount, currentCount+1, currentCount-1))
 		return
 	}
 
@@ -158,7 +158,7 @@ func hmsetCommand(c Context) {
 // hexistsCommand - HEXISTS <HASHMAP> [<key>]
 func hexistsCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("HEXISTS command requires at least 1 argument HEXISTS <HASHMAP> [<key>]")
+		c.WriteError("HEXISTS command requires at least one argument: HEXISTS <hashmap> [<key>]")
 		return
 	}
 
@@ -187,7 +187,7 @@ func hexistsCommand(c Context) {
 
 func hincrCommand(c Context) {
 	if len(c.args) < 2 {
-		c.WriteError("HINCR command must has at least 2 arguments HINCR <HASH> <key> [number]")
+		c.WriteError("HINCR command must has at least two arguments: HINCR <hash> <key> [number]")
 		return
 	}
 

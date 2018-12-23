@@ -61,7 +61,7 @@ func randstrCommand(c Context) {
 // randintCommand - RANDINT [<max>, default max is 10]
 func randintCommand(c Context) {
 	if len(c.args) < 2 {
-		c.WriteError("RANDINT command must have at least 2 arguments, IRAND <min> <max>")
+		c.WriteError("RANDINT command must have at least 2 arguments: IRAND <min> <max>")
 		return
 	}
 
@@ -114,7 +114,7 @@ func encodeCommand(c Context) {
 	}
 
 	if len(c.args) < 2 {
-		c.WriteError("ENCODE command requires at lease 2 arguments, ENCODE <method> <payload>")
+		c.WriteError("ENCODE command requires at least 2 arguments: ENCODE <method> <payload>")
 		return
 	}
 

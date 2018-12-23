@@ -12,7 +12,7 @@ import (
 // publishCommand - PUBLISH <channel> <paylaod>
 func publishCommand(c Context) {
 	if len(c.args) < 2 {
-		c.WriteError("PUBLISH command must have at least 1 argument, PUBLISH <channel> <message>")
+		c.WriteError("PUBLISH command must have at least one argument: PUBLISH <channel> <message>")
 		return
 	}
 
@@ -83,7 +83,7 @@ func subscribeCommand(c Context) {
 // webhooksetCommand - WEBHOOKSET <channel> <http://url.here/>
 func webhooksetCommand(c Context) {
 	if len(c.args) < 2 {
-		c.WriteError("WEBHOOKSET command requires at least 2 arguments, WEBHOOKSET <channel> <http://url.here/>")
+		c.WriteError("WEBHOOKSET command requires at least two arguments: WEBHOOKSET <channel> <http://url.here/>")
 		return
 	}
 
@@ -127,7 +127,7 @@ func webhooksetCommand(c Context) {
 // webhookdel - WEBHOOKDEL <channel> <http://url.here/>
 func webhookdelCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("WEBHOOKDEL command requires at least 1 arguments, WEBHOOKDEL <WebHookID>")
+		c.WriteError("WEBHOOKDEL command requires at least one argument: WEBHOOKDEL <webhook-id>")
 		return
 	}
 
@@ -147,7 +147,7 @@ func webhookdelCommand(c Context) {
 // websocketopenCommand - WEBSOCKETOPEN <channel>
 func websocketopenCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("WEBSOCKETOPEN command requires at least 1 arguments, WEBSOCKETOPEN <channel>")
+		c.WriteError("WEBSOCKETOPEN command requires at least one argument: WEBSOCKETOPEN <channel>")
 		return
 	}
 
@@ -168,7 +168,7 @@ func websocketopenCommand(c Context) {
 // websocketcloseCommand - WEBSOCKETCLOSE <ID>
 func websocketcloseCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("WEBSOCKETCLOSE command requires at least 1 arguments, WEBSOCKETCLOSE <ID>")
+		c.WriteError("WEBSOCKETCLOSE command requires at least one argument: WEBSOCKETCLOSE <id>")
 		return
 	}
 

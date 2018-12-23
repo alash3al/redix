@@ -10,7 +10,7 @@ Features
 - Multi Core via `-workers=<num workers here>`
 - Very easy and simple
 - Very compatible with any `redis-client`
-- Not only basic redis channels subscriptions, but also there is `webhook` and `websocket`, so you can easily use integrate it directly to any web/mobile app.
+- Not only basic redis channels subscriptions, but also there is `webhook` and `websocket`, so you can easily integrate it directly to any web/mobile app.
 
 Why
 ===

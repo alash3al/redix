@@ -9,7 +9,7 @@ import (
 func setCommand(c Context) {
 	var k, v, ttl string
 	if len(c.args) < 2 {
-		c.WriteError("SET command requires at least two arguments SET <key> <value> [TTL Millisecond]")
+		c.WriteError("SET command requires at least two arguments: SET <key> <value> [TTL Millisecond]")
 		return
 	}
 
@@ -32,7 +32,7 @@ func setCommand(c Context) {
 // getCommand - GET <key> [<default value>]
 func getCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("GET command must has at least 1 arguments")
+		c.WriteError("GET command must have at least 1 argument: GET <key> [default value]")
 		return
 	}
 
@@ -58,7 +58,7 @@ func getCommand(c Context) {
 // mgetCommand - MGET <key1> [<key2> ...]
 func mgetCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("MGET command must has at least 1 argumentss")
+		c.WriteError("MGET command must have at least 1 argument: MGET <key1> [<key2> ...]")
 		return
 	}
 
@@ -77,7 +77,7 @@ func mgetCommand(c Context) {
 // delCommand - DEL <key1> [<key2> ...]
 func delCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("DEL command must has at least 1 arguments")
+		c.WriteError("DEL command must have at least 1 argument: DEL <key1> [<key2> ...]")
 		return
 	}
 
@@ -93,7 +93,7 @@ func delCommand(c Context) {
 func msetCommand(c Context) {
 	currentCount := len(c.args)
 	if len(c.args)%2 != 0 {
-		c.WriteError(fmt.Sprintf("MSET command arguments must be even you specified %d, it should be %d or %d", currentCount, currentCount+1, currentCount-1))
+		c.WriteError(fmt.Sprintf("MSET command arguments must be even. You specified %d, it should be %d or %d", currentCount, currentCount+1, currentCount-1))
 		return
 	}
 
@@ -119,7 +119,7 @@ func msetCommand(c Context) {
 // existsCommand - Exists <key>
 func existsCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("EXISTS command must has at least 1 argument EXISTS <key>")
+		c.WriteError("EXISTS command must have at least 1 argument: EXISTS <key>")
 		return
 	}
 
@@ -138,7 +138,7 @@ func incrCommand(c Context) {
 	var by int64
 
 	if len(c.args) < 1 {
-		c.WriteError("INCR command must has at least one argument INCR <key> [number]")
+		c.WriteError("INCR command must have at least one argument: INCR <key> [number]")
 		return
 	}
 
