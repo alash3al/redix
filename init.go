@@ -33,6 +33,8 @@ func init() {
 		return
 	}
 
+	color.Cyan(redixBrand)
+
 	databases = new(sync.Map)
 	changelog = pubsub.NewBroker()
 	webhooks = new(sync.Map)

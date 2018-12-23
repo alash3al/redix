@@ -4,13 +4,12 @@ Redix
 
 Features
 =========
-- Rich data structure: `KV`, `List`, `Hashmap`
+- Core data structure: `KV`, `List`, `Hashmap` with advanced implementations.
 - Advanced Publish/Subscribe using webhook and websocket!
 - Pluggable Storage Engine (`badger`, `bolt`)
 - Very compatible with any `redis client` including `redis-cli`
 - Standalone with no external dependencies
 - Helpers commands for `Time`, `Encode <hex|md5|sha1|sha256|sha512> <payload>`, `RANDINT`, `RANDSTR`
-- 
 
 Why
 ===

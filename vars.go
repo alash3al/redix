@@ -12,7 +12,7 @@ var (
 	flagRESPListenAddr = flag.String("resp-addr", "localhost:6380", "the address of resp server")
 	flagHTTPListenAddr = flag.String("http-addr", "localhost:7090", "the address of the http server")
 	flagStorageDir     = flag.String("storage", "./redix-data", "the storage directory")
-	flagEngine         = flag.String("engine", "badger", "the storage engine to be used, available (badger)")
+	flagEngine         = flag.String("engine", "badger", "the storage engine to be used")
 	flagWorkers        = flag.Int("workers", runtime.NumCPU(), "the default workers number")
 	flagVerbose        = flag.Bool("verbose", false, "verbose or not")
 )
@@ -84,4 +84,22 @@ var (
 		"badger": true,
 		"bolt":   true,
 	}
+
+	redixBrand = `
+
+	_______  _______  ______  _________         
+	(  ____ )(  ____ \(  __  \ \__   __/|\     /|
+	| (    )|| (    \/| (  \  )   ) (   ( \   / )
+	| (____)|| (__    | |   ) |   | |    \ (_) / 
+	|     __)|  __)   | |   | |   | |     ) _ (  
+	| (\ (   | (      | |   ) |   | |    / ( ) \ 
+	| ) \ \__| (____/\| (__/  )___) (___( /   \ )
+	|/   \__/(_______/(______/ \_______/|/     \|
+												 
+
+A high-concurrency standalone NoSQL datastore with the support for redis protocol 
+and multiple backends/engines, also there is a native support for
+real-time apps via webhook & websockets besides the basic redis channels.
+
+	`
 )
