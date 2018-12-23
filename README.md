@@ -172,3 +172,7 @@ TODO
 - [x] Utils Commands
 - [ ] Document/JSON Commands
 - [ ] GIS Commands
+
+License
+=======
+This project licensed under MIT License
