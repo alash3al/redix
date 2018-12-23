@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	flagRESPListenAddr = flag.String("resp-addr", "localhost:6380", "the address of resp server")
-	flagHTTPListenAddr = flag.String("http-addr", "localhost:7090", "the address of the http server")
+	flagRESPListenAddr = flag.String("resp-addr", ":6380", "the address of resp server")
+	flagHTTPListenAddr = flag.String("http-addr", ":7090", "the address of the http server")
 	flagStorageDir     = flag.String("storage", "./redix-data", "the storage directory")
 	flagEngine         = flag.String("engine", "badger", "the storage engine to be used")
 	flagWorkers        = flag.Int("workers", runtime.NumCPU(), "the default workers number")
