@@ -17,7 +17,7 @@ func lpushCommand(c Context) {
 	var done []string
 
 	if len(c.args) < 2 {
-		c.WriteError("LPUSH command requires at least two arguments LPUSH <LIST> <value> [<value> ...]")
+		c.WriteError("LPUSH command requires at least two arguments: LPUSH <list> <value> [<value> ...]")
 		return
 	}
 
@@ -45,7 +45,7 @@ func lpushuCommand(c Context) {
 	var done []string
 
 	if len(c.args) < 2 {
-		c.WriteError("LPUSHU command requires at least two arguments command requires at least two arguments LPUSHU <LIST> <value> [<value> ...]")
+		c.WriteError("LPUSHU command requires at least two arguments: LPUSHU <list> <value> [<value> ...]")
 		return
 	}
 
@@ -72,7 +72,7 @@ func lrangeCommand(c Context) {
 	var limit int
 
 	if len(c.args) < 1 {
-		c.WriteError("LGETALL must has at least 1 argument")
+		c.WriteError("LGETALL must have at least one argument: LGETALL <list> [<offset> <size>]")
 		return
 	}
 
@@ -150,7 +150,7 @@ func lrangeCommand(c Context) {
 // lremCommand - LREM <LIST> <val> [<val> <val> ...]
 func lremCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("LREM command requires at least 1 arguments LREM <key> [<val1> <val2> <val3> ...]")
+		c.WriteError("LREM command requires at least one argument: LREM <key> [<val1> <val2> ...]")
 		return
 	}
 
@@ -192,7 +192,7 @@ func lremCommand(c Context) {
 // lcountCommand - LCOUNT <LIST>
 func lcountCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("LCOUNT command must has at least 1 argument LCOUNT <LIST>")
+		c.WriteError("LCOUNT command must have at least one argument: LCOUNT <list>")
 		return
 	}
 
@@ -215,7 +215,7 @@ func lcountCommand(c Context) {
 // lsumCommand - LSUM <list>
 func lsumCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("LSUM command must has at least 1 argument LSUM <LIST>")
+		c.WriteError("LSUM command must have at least one argument: LSUM <list>")
 		return
 	}
 
@@ -239,7 +239,7 @@ func lsumCommand(c Context) {
 // lavgCommand - LSUM <list>
 func lavgCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("LSUM command must has at least 1 argument LSUM <LIST>")
+		c.WriteError("LSUM command must have at least one argument: LSUM <list>")
 		return
 	}
 
@@ -265,7 +265,7 @@ func lavgCommand(c Context) {
 // lminCommand - LMIN <list>
 func lminCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("LMIN command must has at least 1 argument LMIN <LIST>")
+		c.WriteError("LMIN command must have at least one argument: LMIN <list>")
 		return
 	}
 
@@ -295,7 +295,7 @@ func lminCommand(c Context) {
 // lmaxCommand - LMAX <list>
 func lmaxCommand(c Context) {
 	if len(c.args) < 1 {
-		c.WriteError("LMAX command must has at least 1 argument LMAX <LIST>")
+		c.WriteError("LMAX command must have at least one argument: LMAX <list>")
 		return
 	}
 
@@ -325,7 +325,7 @@ func lmaxCommand(c Context) {
 // lsearchCommand - LSRCH <list> <pattern>
 func lsearchCommand(c Context) {
 	if len(c.args) < 2 {
-		c.WriteError("LSRCH command must has at least 2 argument LSRCH <LIST> <regexp>")
+		c.WriteError("LSRCH command must have at least two arguments: LSRCH <list> <regexp>")
 		return
 	}
 
@@ -361,7 +361,7 @@ func lsearchCommand(c Context) {
 // lsearchcountCommand - LSRCHCOUNT <list> <pattern>
 func lsearchcountCommand(c Context) {
 	if len(c.args) < 2 {
-		c.WriteError("LSRCHCOUNT command must has at least 2 argument LSRCHCOUNT <LIST> <regexp>")
+		c.WriteError("LSRCHCOUNT command must have at least two arguments: LSRCHCOUNT <list> <regexp>")
 		return
 	}
 
