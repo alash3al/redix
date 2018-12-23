@@ -1,29 +1,26 @@
 Redix
 =======
-> a fast persistent real-time key-value store, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data, also it integrates with your mobile/web apps to add real-time features, soon you can use it as a document store cause it should become a multi-model db. `Redix` is used in production, you can use it in your apps with no worries.
-
+> a fast NoSQL DB, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data, also it integrates with your mobile/web apps to add real-time features, soon you can use it as a document store cause it should become a multi-model db. `Redix` is used in production, you can use it in your apps with no worries.
 
 Features
 =========
-- Fast on-disk store
+- Rich data structure: `KV`, `List`, `Hashmap`
+- Advanced Publish/Subscribe using webhook and websocket!
 - Pluggable Storage Engine (`badger`, `bolt`)
-- Multi Core via `-workers=<num workers here>`
-- Very easy and simple
-- Very compatible with any `redis-client`
-- Not only basic redis channels subscriptions, but also there is `webhook` and `websocket`, so you can easily integrate it directly to any web/mobile app.
+- Very compatible with any `redis client` including `redis-cli`
+- Standalone with no external dependencies
+- Helpers commands for `Time`, `Encode <hex|md5|sha1|sha256|sha512> <payload>`, `RANDINT`, `RANDSTR`
+- 
 
 Why
 ===
 > I started this software to learn more about data modeling, data structures and how to map any data to pure key value, I don't need to build a redis clone, but I need to build something with my own concepts in my own style. I decided to use RESP (redis protocol) so you can use `Redix` with any redis client out there.
 
-Production
-==========
-> Yep, This software is ready for use in production, and I'm already using it in production as a drop-in-replacement for redis in some softwares in [uFlare](https://uflare.io) for our solutions.
-
 Install
 =======
 - from source: `go get github.com/alash3al/redix`.
 - from binaries: go [there](https://github.com/alash3al/redix/releases) and choose your platform based binary, then download and execute from the command line with `-h` flag to see the help text.
+- using docker: `docker run -P -v /path/to/redix-data:/root/redix-data alash3al/redix`
 
 Configurations
 ============
@@ -170,6 +167,10 @@ TODO
 - [x] List Commands
 - [x] PubSub Commands
 - [x] Utils Commands
+- [x] Adding BoltDB engine
+- [ ] Adding RAM engine
+- [ ] Writing MyOwn DB Engine 
+- [ ] Writing Test Cases
 - [ ] Document/JSON Commands
 - [ ] GIS Commands
 
