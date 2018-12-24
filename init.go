@@ -12,7 +12,6 @@ import (
 
 	"github.com/alash3al/color"
 	pubsub "github.com/alash3al/go-pubsub"
-	"github.com/dgraph-io/badger"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,7 +23,7 @@ func init() {
 	if !*flagVerbose {
 		logger := logrus.New()
 		logger.SetOutput(ioutil.Discard)
-		badger.SetLogger(logger)
+		// badger.SetLogger(logger)
 	}
 
 	if !supportedEngines[*flagEngine] {

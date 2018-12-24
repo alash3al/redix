@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/alash3al/redix/kvstore"
-	"go.etcd.io/bbolt"
+	bbolt "go.etcd.io/bbolt"
 )
 
 // BoltDB - represents a badger db implementation
