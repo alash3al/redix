@@ -6,9 +6,10 @@ require (
 	github.com/alash3al/go-color v1.7.0
 	github.com/alash3al/go-pubsub v0.0.0-20181220233502-636a19c01258
 	github.com/boltdb/bolt v1.3.1 // indirect
-	github.com/dgraph-io/badger v1.5.4
+	github.com/dgraph-io/badger v1.5.5-0.20181221193704-accd59b14998
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dgryski/go-farm v0.0.0-20180109070241-2de33835d102 // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/gorilla/websocket v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
@@ -18,12 +19,12 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/rs/xid v1.2.1
-	github.com/satori/go.uuid v1.2.0
+	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/sirupsen/logrus v1.2.0
 	github.com/tidwall/redcon v0.9.0
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4 // indirect
-	go.etcd.io/bbolt v1.3.0
+	go.etcd.io/bbolt v1.3.1-etcd.8.0.20181208010242-22d122a8b910
 	golang.org/x/net v0.0.0-20181213202711-891ebc4b82d6 // indirect
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
 	golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06 // indirect

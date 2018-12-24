@@ -20,7 +20,12 @@ import (
 
 // uuid4Command - UUID4
 func uuid4Command(c Context) {
-	c.WriteString(uuid.NewV4().String())
+	id, err := uuid.NewV4()
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+	c.WriteString(id.String())
 }
 
 // uniqidCommand - UNIQID
