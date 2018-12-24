@@ -17,7 +17,7 @@ Why
 
 Install
 =======
-- from source: `GO111MODULE=on go get github.com/alash3al/redix`.
+- from source: `go get github.com/alash3al/redix`.
 - from binaries: go [there](https://github.com/alash3al/redix/releases) and choose your platform based binary, then download and execute from the command line with `-h` flag to see the help text.
 - using docker: `docker run -P -v /path/to/redix-data:/root/redix-data alash3al/redix`
 
