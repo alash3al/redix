@@ -34,9 +34,9 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 	switch strings.ToLower(engine) {
 	default:
 		return nil, errors.New("unsupported engine: " + engine)
-	case "badger":
+	case "badger", "badgerdb":
 		return badger.OpenBadger(dbpath)
-	case "bolt":
+	case "bolt", "boltdb":
 		return bolt.OpenBolt(dbpath)
 	}
 }

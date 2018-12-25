@@ -10,6 +10,7 @@ Features
 - Very compatible with any `redis client` including `redis-cli`
 - Standalone with no external dependencies
 - Helpers commands for `Time`, `Encode <hex|md5|sha1|sha256|sha512> <payload>`, `RANDINT`, `RANDSTR`
+- Implements `RATELIMIT` helpers natively.
 
 Why
 ===
@@ -100,7 +101,9 @@ Supported Commands
 - `DEL <key1> [<key2> ...]`
 - `EXISTS <key>`
 - `INCR <key> [<by>]`
-- `TTL <key>` returns `-1` if key will never expire, `-2` if it doesn't exists (expired), other wise will returns the `seconds` remain before the key will expire.
+- `TTL <key>` returns `-1` if key will never expire, `-2` if it doesn't exists (expired), otherwise will returns the `seconds` remain before the key will expire.
+- `KEYS [<regexp-pattern>]`
+
 
 ## # HASHES
 > I enhanced the HASH MAP implementation and added some features like TTL per nested key,
@@ -116,6 +119,7 @@ Supported Commands
 - `HEXISTS <HASHMAP> [<key>]`.
 - `HINCR <HASHMAP> <key> [<by>]`
 - `HTTL <HASHMAP> <key>`, the same as `TTL` but for `HASHMAP`
+- `HKEYS <HASHMAP>`
 
 ## # LIST
 > I applied a new concept, you can push or push-unique values into the list,
@@ -146,6 +150,11 @@ Supported Commands
 - `WEBSOCKETOPEN <channel>`, opens a websocket endpoint and returns its id, so you can receive updates through `ws://server.address:port/stream/ws/{generated_id_here}`
 - `WEBSOCKETCLOSE <ID>`, closes the specified websocket endpoint using the above generated id. 
 
+## # Ratelimit
+- `RATELIMITSET <bucket> <limit> <seconds>`, create a new `$bucket` that accepts num of `$limit` of actions per the specified num of `$seconds`, it will returns `1` for success.
+- `RATELIMITTAKE <bucket>`, do an action in the specified `bucket` and take an item from it, it will return `-1` if the bucket not exists or it has unlimited actions `$limit < 1`, `0` if there are no more actions to be done right now, `reminder` of actions on success.
+- `RATELIMITGET <bucket>`, returns array [`$limit`, `$seconds`, `$remaining_time`, `$counter`] information for the specified bucket
+
 ## # Utils
 > a helpers commands
 
@@ -157,6 +166,8 @@ Supported Commands
 - `TIME`, returns the current time in `utc`, `seconds` and `nanoseconds`
 - `DBSIZE`, returns the database size in bytes.
 - `GC`, runs the Garbage Collector.
+- `ECHO [<arg1> <arg2> ...]`
+- `INFO`
 
 TODO
 =====

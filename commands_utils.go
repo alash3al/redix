@@ -141,3 +141,25 @@ func gcCommand(c Context) {
 	}
 	c.WriteInt(1)
 }
+
+// infoCommand - INFO
+func infoCommand(c Context) {
+	info := map[string]string{
+		"database":           *flagEngine,
+		"database_size":      strconv.Itoa(int(c.db.Size())),
+		"database_directory": *flagStorageDir,
+		"redis_port":         *flagRESPListenAddr,
+		"http_port":          *flagHTTPListenAddr,
+		"workers":            strconv.Itoa(*flagWorkers),
+	}
+
+	c.WriteArray(len(info))
+	for k, v := range info {
+		c.WriteBulkString(k + " : " + v)
+	}
+}
+
+// echoCommand - ECHO [<arg1> <arg2>]
+func echoCommand(c Context) {
+	c.WriteString(strings.Join(c.args, " "))
+}

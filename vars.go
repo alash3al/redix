@@ -35,6 +35,7 @@ var (
 		"exists": existsCommand,
 		"incr":   incrCommand,
 		"ttl":    ttlCommand,
+		"keys":   keysCommand,
 
 		// lists
 		"lpush":      lpushCommand,
@@ -54,6 +55,7 @@ var (
 		"hget":    hgetCommand,
 		"hdel":    hdelCommand,
 		"hgetall": hgetallCommand,
+		"hkeys":   hkeysCommand,
 		"hmset":   hmsetCommand,
 		"hexists": hexistsCommand,
 		"hincr":   hincrCommand,
@@ -76,13 +78,22 @@ var (
 		"time":    timeCommand,
 		"dbsize":  dbsizeCommand,
 		"gc":      gcCommand,
+		"info":    infoCommand,
+		"echo":    echoCommand,
+
+		// ratelimit
+		"ratelimitset":  ratelimitsetCommand,
+		"ratelimittake": ratelimittakeCommand,
+		"ratelimitget":  ratelimitgetCommand,
 	}
 
 	defaultPubSubAllTopic = "*"
 
 	supportedEngines = map[string]bool{
-		"badger": true,
-		"bolt":   true,
+		"badger":   true,
+		"badgerdb": true,
+		"bolt":     true,
+		"boltdb":   true,
 	}
 
 	redixBrand = `

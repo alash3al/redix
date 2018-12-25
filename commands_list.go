@@ -87,7 +87,10 @@ func lrangeCommand(c Context) {
 		limit, _ = strconv.Atoi(c.args[2])
 	}
 
+	includeOffsetVals := false
+
 	if offset == "" {
+		includeOffsetVals = true
 		offset = prefix
 	} else {
 		of, err := hex.DecodeString(offset)
@@ -101,7 +104,7 @@ func lrangeCommand(c Context) {
 	data := []string{}
 	loaded := 0
 	err := c.db.Scan(kvstore.ScannerOptions{
-		IncludeOffset: true,
+		IncludeOffset: includeOffsetVals,
 		Offset:        offset,
 		Prefix:        prefix,
 		FetchValues:   true,

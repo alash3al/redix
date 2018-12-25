@@ -8,7 +8,7 @@ import (
 
 func main() {
 	fmt.Printf("⇨ redix resp server available at: %s \n", color.GreenString(*flagRESPListenAddr))
-	fmt.Printf("⇨ redix http server available at: %s\n", color.GreenString(*flagHTTPListenAddr))
+	fmt.Printf("⇨ redix http server available at: %s \n", color.GreenString(*flagHTTPListenAddr))
 
 	err := make(chan error)
 

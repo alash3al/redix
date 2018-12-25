@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
+
+	"github.com/alash3al/redix/kvstore"
 )
 
 // setCommand - SET <key> <value> [<TTL "millisecond">]
@@ -161,10 +164,50 @@ func incrCommand(c Context) {
 	c.WriteInt64(int64(val))
 }
 
+// ttlCommand - TTL <key>
 func ttlCommand(c Context) {
 	if len(c.args) < 1 {
 		c.WriteError("TTL command requires at least 1 argument, TTL <key>")
 		return
 	}
 	c.WriteInt64(int64(c.db.TTL(c.args[0])))
+}
+
+// keysCommand - KEYS [<regexp-pattern>]
+func keysCommand(c Context) {
+	var data []string
+	var pattern *regexp.Regexp
+	var err error
+
+	if len(c.args) > 0 {
+		pattern, err = regexp.CompilePOSIX(c.args[0])
+	}
+
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	err = c.db.Scan(kvstore.ScannerOptions{
+		FetchValues:   false,
+		IncludeOffset: true,
+		Handler: func(k, _ string) bool {
+			if pattern != nil && pattern.MatchString(k) {
+				data = append(data, k)
+			} else if nil == pattern {
+				data = append(data, k)
+			}
+			return true
+		},
+	})
+
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	c.WriteArray(len(data))
+	for _, k := range data {
+		c.WriteBulkString(k)
+	}
 }

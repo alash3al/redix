@@ -87,6 +87,7 @@ func hdelCommand(c Context) {
 func hgetallCommand(c Context) {
 	if len(c.args) < 1 {
 		c.WriteError("HGETALL command requires at least one argument: HGETALL <hashmap>")
+		return
 	}
 
 	prefix := c.args[0] + "/{HASH}/"
@@ -116,6 +117,42 @@ func hgetallCommand(c Context) {
 	for k, v := range data {
 		c.WriteBulkString(k)
 		c.WriteBulkString(v)
+	}
+}
+
+// hkeysCommand - HKEYS <hashmap>
+func hkeysCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("HKEYS command requires at least one argument: HKEYS <hashmap>")
+		return
+	}
+
+	prefix := c.args[0] + "/{HASH}/"
+	data := []string{}
+	err := c.db.Scan(kvstore.ScannerOptions{
+		FetchValues:   false,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		Offset:        prefix,
+		Handler: func(k, _ string) bool {
+			p := strings.SplitN(k, "/{HASH}/", 2)
+			if len(p) < 2 {
+				return true
+			}
+			data = append(data, p[1])
+			return true
+		},
+	})
+
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	c.WriteArray(len(data))
+
+	for _, k := range data {
+		c.WriteBulkString(k)
 	}
 }
 
@@ -185,6 +222,7 @@ func hexistsCommand(c Context) {
 	c.WriteInt(found)
 }
 
+// hincrCommand - HINCR <hash> <key> [<number>]
 func hincrCommand(c Context) {
 	if len(c.args) < 2 {
 		c.WriteError("HINCR command must has at least two arguments: HINCR <hash> <key> [number]")
