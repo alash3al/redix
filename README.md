@@ -17,9 +17,12 @@ Why
 
 Install
 =======
-- from source: `go get github.com/alash3al/redix`.
-- from binaries: go [there](https://github.com/alash3al/redix/releases) and choose your platform based binary, then download and execute from the command line with `-h` flag to see the help text.
-- using docker: `docker run -P -v /path/to/redix-data:/root/redix-data alash3al/redix`
+- Using Homebrew:
+  - Add Homebrew Tap `brew tap alash3al/redix https://github.com/alash3al/redix`
+  - Install Redix `brew install alash3al/redix/redix`
+- From Binaries: go [there](https://github.com/alash3al/redix/releases) and choose your platform based binary, then download and execute from the command line with `-h` flag to see the help text.
+- Using Docker: `docker run -P -v /path/to/redix-data:/root/redix-data alash3al/redix`
+- Build From Source: `go get github.com/alash3al/redix`.
 
 Configurations
 ============
