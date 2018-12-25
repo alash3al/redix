@@ -3,7 +3,6 @@ class Redix < Formula
   homepage "https://alash3al.github.io/redix/"
   url "https://github.com/alash3al/redix/releases/download/v1.6/redix_darwin_amd64.zip"
   sha256 "2ee32559f97f57e3274d7fcbdf2a580925b5c6e826d241f545c1799ba88d31fc"
-  # depends_on "cmake" => :build
 
   def install
     # Rename redix_darwin_amd64 To Redix
