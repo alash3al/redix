@@ -1,5 +1,8 @@
-<center> Redix </center>
+<center> 
+Redix 
 =======
+</center>
+
 <center>
 
 [![Build Status](https://travis-ci.com/alash3al/redix.svg?branch=master)](https://travis-ci.com/alash3al/redix)
