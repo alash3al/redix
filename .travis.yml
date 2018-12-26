@@ -1,0 +1,11 @@
+language: go
+install: true
+
+go:
+  - master
+
+# go_import_path: github.com/alash3al/redix
+notifications:
+  email:
+    on_success: change
+    on_failure: always
