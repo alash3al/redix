@@ -1,13 +1,16 @@
-Redix
+<center> ![](https://via.placeholder.com/800x400/fff/000/?text=RedixDB) </center>
 =======
+<center>
+
 [![Build Status](https://travis-ci.com/alash3al/redix.svg?branch=master)](https://travis-ci.com/alash3al/redix)
 [![](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/alash3al/redix/blob/master/LICENSE)
 [![](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://cloud.docker.com/u/alash3al/repository/docker/alash3al/redix)
 [![](https://img.shields.io/github/contributors/alash3al/redix.svg)](https://github.com/alash3al/redix/graphs/contributors)
 
 
-
 > a fast NoSQL DB, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data, also it integrates with your mobile/web apps to add real-time features, soon you can use it as a document store cause it should become a multi-model db. `Redix` is used in production, you can use it in your apps with no worries.
+
+</center>
 
 Features
 =========
