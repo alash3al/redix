@@ -5,7 +5,7 @@
 <p align="center">
       <a style="display: inline-block" align="center" href="https://travis-ci.com/alash3al/redix"><img alt="Build Status" src="https://travis-ci.com/alash3al/redix.svg?branch=master" /></a>
       <a style="display: inline-block" align="center" href="https://github.com/alash3al/redix/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/hexpm/l/plug.svg" /></a>
-      <a style="display: inline-block" align="center" href="https://cloud.docker.com/u/alash3al/repository/docker/alash3al/redix"><img alt="Docker" src="https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg" /></a>
+      <a style="display: inline-block" align="center" href="https://cloud.docker.com/u/alash3al/repository/docker/alash3al/redix"><img alt="Docker" src="https://img.shields.io/docker/pulls/alash3al/redix.svg" /></a>
       <a style="display: inline-block" align="center" href="https://github.com/alash3al/redix/graphs/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/alash3al/redix.svg" /></a>
 </p>
 
