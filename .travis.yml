@@ -5,9 +5,13 @@ go:
 
 go_import_path: github.com/alash3al/redix
 
-script:
-  - GO111MODULE=on go get -u -v github.com/alash3al/redix
-  - go test -v github.com/alash3al/redix
+# script:
+#   - GO111MODULE=on go get -u -v github.com/alash3al/redix
+#   - go test -v github.com/alash3al/redix
+
+env:
+  global:
+    - GO111MODULE=on
 
 notifications:
   email:
