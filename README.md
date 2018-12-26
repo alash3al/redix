@@ -1,4 +1,4 @@
-<center> ![](https://via.placeholder.com/800x400/fff/000/?text=RedixDB) </center>
+<center> Redix </center>
 =======
 <center>
 
