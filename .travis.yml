@@ -4,6 +4,9 @@ install: true
 go:
   - "1.11.x"
 
+script:
+  - go get -u -v github.com/alash3al/redix
+
 # go_import_path: github.com/alash3al/redix
 notifications:
   email:
