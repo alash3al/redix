@@ -1,3 +1,8 @@
+// Copyright 2018 The Redix Authors. All rights reserved.
+// Use of this source code is governed by a Apache 2.0
+// license that can be found in the LICENSE file.
+//
+// kvstore is the main interface that any of db engine MUST implement
 package kvstore
 
 // DB Interface

@@ -1,5 +1,7 @@
 Redix
 =======
+[![Build Status](https://travis-ci.com/alash3al/redix.svg?branch=master)](https://travis-ci.com/alash3al/redix)  
+
 > a fast NoSQL DB, that uses the same [RESP](https://redis.io/topics/protocol) protocol and capable to store terabytes of data, also it integrates with your mobile/web apps to add real-time features, soon you can use it as a document store cause it should become a multi-model db. `Redix` is used in production, you can use it in your apps with no worries.
 
 Features
