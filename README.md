@@ -172,7 +172,7 @@ Supported Commands
 - `RATELIMITGET <bucket>`, returns array [`$limit`, `$seconds`, `$remaining_time`, `$counter`] information for the specified bucket
 
 ## # Utils
-> a helpers commands
+> some useful utils that you can use within your app to remove some hassle from it.
 
 - `ENCODE <method> <payload>`, encode the specified `<payload>` using the specified `<method>` (`md5`, `sha1`, `sha256`, `sha512`, `hex`)
 - `UUIDV4`, generates a uuid-v4 string, i.e `0b98aa17-eb06-42b8-b39f-fd7ba6aba7cd`.
