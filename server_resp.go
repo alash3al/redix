@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/alash3al/color"
+	"github.com/alash3al/go-color"
 	"github.com/tidwall/redcon"
 )
 

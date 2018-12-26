@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/alash3al/color"
+	"github.com/alash3al/go-color"
 	pubsub "github.com/alash3al/go-pubsub"
 	"github.com/dgraph-io/badger"
 	"github.com/sirupsen/logrus"

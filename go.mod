@@ -2,10 +2,8 @@ module github.com/alash3al/redix
 
 require (
 	github.com/AndreasBriese/bbloom v0.0.0-20180913140656-343706a395b7 // indirect
-	github.com/alash3al/color v1.7.0
 	github.com/alash3al/go-color v1.7.0
 	github.com/alash3al/go-pubsub v0.0.0-20181220233502-636a19c01258
-	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/dgraph-io/badger v1.5.5-0.20181221193704-accd59b14998
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dgryski/go-farm v0.0.0-20180109070241-2de33835d102 // indirect
