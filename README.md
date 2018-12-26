@@ -1,6 +1,5 @@
 <center> 
-Redix 
-=======
+<h1>Redix</h1> 
 </center>
 
 <center>
