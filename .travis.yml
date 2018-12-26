@@ -6,7 +6,7 @@ go:
 go_import_path: github.com/alash3al/redix
 
 script:
-  - go get -u -v github.com/alash3al/redix
+  - GO111MODULE=on go get -u -v github.com/alash3al/redix
   - go test -v github.com/alash3al/redix
 
 notifications:
