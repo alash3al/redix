@@ -97,6 +97,8 @@ var (
 		"badgerdb": true,
 		"bolt":     true,
 		"boltdb":   true,
+		"level":    true,
+		"leveldb":  true,
 	}
 
 	redixBrand = `
