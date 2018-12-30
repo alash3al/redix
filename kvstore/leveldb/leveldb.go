@@ -64,8 +64,8 @@ func (ldb *LevelDB) GC() error {
 
 // Incr - increment the key by the specified value
 func (ldb *LevelDB) Incr(k string, by int64) (int64, error) {
-	ldb.RLock()
-	defer ldb.RUnlock()
+	ldb.Lock()
+	defer ldb.Unlock()
 
 	val, err := ldb.get(k)
 	if err != nil {
@@ -94,16 +94,16 @@ func (ldb *LevelDB) set(k, v string, ttl int) error {
 
 // Set - sets a key with the specified value and optional ttl
 func (ldb *LevelDB) Set(k, v string, ttl int) error {
-	ldb.RLock()
-	defer ldb.RUnlock()
+	ldb.Lock()
+	defer ldb.Unlock()
 
 	return ldb.set(k, v, ttl)
 }
 
 // MSet - sets multiple key-value pairs
 func (ldb *LevelDB) MSet(data map[string]string) error {
-	ldb.RLock()
-	defer ldb.RUnlock()
+	ldb.Lock()
+	defer ldb.Unlock()
 
 	for k, v := range data {
 		v = "0;" + v
@@ -160,10 +160,6 @@ func (ldb *LevelDB) MGet(keys []string) (data []string) {
 			data = append(data, "")
 			continue
 		}
-		if err != nil {
-			data = append(data, "")
-			continue
-		}
 		data = append(data, val)
 	}
 	return data
@@ -194,8 +190,8 @@ func (ldb *LevelDB) TTL(key string) int64 {
 
 // Del - removes key(s) from the store
 func (ldb *LevelDB) Del(keys []string) error {
-	ldb.RLock()
-	defer ldb.RUnlock()
+	ldb.Lock()
+	defer ldb.Unlock()
 
 	for _, key := range keys {
 		ldb.db.Delete([]byte(key), nil)
@@ -205,8 +201,8 @@ func (ldb *LevelDB) Del(keys []string) error {
 
 // Scan - iterate over the whole store using the handler function
 func (ldb *LevelDB) Scan(scannerOpt kvstore.ScannerOptions) error {
-	ldb.RLock()
-	defer ldb.RUnlock()
+	ldb.Lock()
+	defer ldb.Unlock()
 
 	var iter iterator.Iterator
 
@@ -214,6 +210,9 @@ func (ldb *LevelDB) Scan(scannerOpt kvstore.ScannerOptions) error {
 		iter = ldb.db.NewIterator(nil, nil)
 	} else {
 		iter = ldb.db.NewIterator(&util.Range{Start: []byte(scannerOpt.Offset)}, nil)
+		if !scannerOpt.IncludeOffset {
+			iter.Next()
+		}
 	}
 
 	valid := func(k []byte) bool {
