@@ -40,21 +40,13 @@ func OpenLevelDB(path string) (*LevelDB, error) {
 	return ldb, nil
 }
 
-// Size - returns the size of the database (LevelSize) in bytes
+// Size - returns the size of the database in bytes
 func (ldb *LevelDB) Size() int64 {
 	ldb.RLock()
 	defer ldb.RUnlock()
 
-	stats := new(leveldb.DBStats)
-	ldb.db.Stats(stats)
-
-	// TODO only flush disk need calc memory size
-	total := int64(0)
-	for _, val := range stats.LevelSizes {
-		total += val
-	}
-
-	return total
+	// TODO need to find efficiency method stat dbsize
+	return int64(0)
 }
 
 // GC - runs the garbage collector
@@ -105,11 +97,13 @@ func (ldb *LevelDB) MSet(data map[string]string) error {
 	ldb.Lock()
 	defer ldb.Unlock()
 
+	batch := new(leveldb.Batch)
 	for k, v := range data {
 		v = "0;" + v
-		ldb.db.Put([]byte(k), []byte(v), nil)
+		batch.Put([]byte(k), []byte(v))
 	}
-	return nil
+
+	return ldb.db.Write(batch, nil)
 }
 
 func (ldb *LevelDB) get(k string) (string, error) {
@@ -193,10 +187,12 @@ func (ldb *LevelDB) Del(keys []string) error {
 	ldb.Lock()
 	defer ldb.Unlock()
 
+	batch := new(leveldb.Batch)
 	for _, key := range keys {
-		ldb.db.Delete([]byte(key), nil)
+		batch.Delete([]byte(key))
 	}
-	return nil
+
+	return ldb.db.Write(batch, nil)
 }
 
 // Scan - iterate over the whole store using the handler function
