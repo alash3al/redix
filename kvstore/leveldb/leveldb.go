@@ -201,8 +201,8 @@ func (ldb *LevelDB) Del(keys []string) error {
 
 // Scan - iterate over the whole store using the handler function
 func (ldb *LevelDB) Scan(scannerOpt kvstore.ScannerOptions) error {
-	ldb.Lock()
-	defer ldb.Unlock()
+	ldb.RLock()
+	defer ldb.RUnlock()
 
 	var iter iterator.Iterator
 
