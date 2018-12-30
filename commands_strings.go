@@ -26,6 +26,9 @@ func setCommand(c Context) {
 	}
 
 	ttlVal, _ := strconv.Atoi(ttl)
+	if ttlVal < 0 {
+		ttlVal = 0
+	}
 
 	if err := c.db.Set(k, v, ttlVal); err != nil {
 		c.WriteError(err.Error())

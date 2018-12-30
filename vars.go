@@ -88,28 +88,41 @@ var (
 		"ratelimitset":  ratelimitsetCommand,
 		"ratelimittake": ratelimittakeCommand,
 		"ratelimitget":  ratelimitgetCommand,
+
+		// documents
+		// "dset":    dsetCommand,
+		// "dget":    dgetCommand,
+		// "dgetall": dgetallCommand,
+		// "dfilter": dfilterCommand,
 	}
+)
 
-	defaultPubSubAllTopic = "*"
-
+var (
 	supportedEngines = map[string]bool{
 		"badger":   true,
 		"badgerdb": true,
 		"bolt":     true,
 		"boltdb":   true,
+		"level":    true,
+		"leveldb":  true,
 	}
 
-	redixBrand = `
+	defaultPubSubAllTopic = "*"
+)
 
-	_______  _______  ______  _________         
-	(  ____ )(  ____ \(  __  \ \__   __/|\     /|
-	| (    )|| (    \/| (  \  )   ) (   ( \   / )
-	| (____)|| (__    | |   ) |   | |    \ (_) / 
-	|     __)|  __)   | |   | |   | |     ) _ (  
-	| (\ (   | (      | |   ) |   | |    / ( ) \ 
-	| ) \ \__| (____/\| (__/  )___) (___( /   \ )
-	|/   \__/(_______/(______/ \_______/|/     \|
-												 
+var (
+	redixVersion = "1.7"
+	redixBrand   = `
+
+		_______  _______  ______  _________         
+		(  ____ )(  ____ \(  __  \ \__   __/|\     /|
+		| (    )|| (    \/| (  \  )   ) (   ( \   / )
+		| (____)|| (__    | |   ) |   | |    \ (_) / 
+		|     __)|  __)   | |   | |   | |     ) _ (  
+		| (\ (   | (      | |   ) |   | |    / ( ) \ 
+		| ) \ \__| (____/\| (__/  )___) (___( /   \ )
+		|/   \__/(_______/(______/ \_______/|/     \|
+
 
 A high-concurrency standalone NoSQL datastore with the support for redis protocol 
 and multiple backends/engines, also there is a native support for

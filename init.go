@@ -36,7 +36,7 @@ func init() {
 		return
 	}
 
-	color.Cyan(redixBrand)
+	color.Blue(redixBrand)
 
 	databases = new(sync.Map)
 	changelog = pubsub.NewBroker()
@@ -53,7 +53,9 @@ func init() {
 		if !f.IsDir() {
 			continue
 		}
+
 		name := filepath.Base(f.Name())
+
 		_, err := selectDB(name)
 		if err != nil {
 			log.Println(color.RedString(err.Error()))

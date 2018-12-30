@@ -8,11 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alash3al/redix/kvstore/bolt"
-
-	"github.com/alash3al/redix/kvstore/badger"
-
 	"github.com/alash3al/redix/kvstore"
+	"github.com/alash3al/redix/kvstore/badger"
+	"github.com/alash3al/redix/kvstore/bolt"
+	"github.com/alash3al/redix/kvstore/level"
 )
 
 // selectDB - load/fetches the requested db
@@ -41,5 +40,7 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 		return badger.OpenBadger(dbpath)
 	case "bolt", "boltdb":
 		return bolt.OpenBolt(dbpath)
+	case "level", "leveldb":
+		return level.OpenLevelDB(dbpath)
 	}
 }
