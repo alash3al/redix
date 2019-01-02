@@ -111,7 +111,7 @@ var (
 )
 
 var (
-	redixVersion = "1.7"
+	redixVersion = "1.8"
 	redixBrand   = `
 
 		_______  _______  ______  _________         
