@@ -134,7 +134,6 @@ const (
 		| ) \ \__| (____/\| (__/  )___) (___( /   \ )
 		|/   \__/(_______/(______/ \_______/|/     \|
 
-
 A high-concurrency standalone NoSQL datastore with the support for redis protocol 
 and multiple backends/engines, also there is a native support for
 real-time apps via webhook & websockets besides the basic redis channels.
