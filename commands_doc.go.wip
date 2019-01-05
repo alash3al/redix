@@ -1,15 +1,12 @@
 package main
 
 import (
-	"encoding/csv"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/alash3al/redix/kvstore"
 	"github.com/jeremywohl/flatten"
-	"github.com/rs/xid"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -134,79 +131,6 @@ func dgetallCommand(c Context) {
 		c.WriteError(err.Error())
 		return
 	}
-
-	c.WriteArray(len(data))
-
-	for _, v := range data {
-		c.WriteBulkString(v)
-	}
-}
-
-func dfilterCommand(c Context) {
-	if len(c.args) < 2 {
-		c.WriteError("DFILTER command requires at least one argument: DFILTER <collection> <filter> [<offset> <limit>]")
-		return
-	}
-
-	prefix := c.args[0] + "/{DOCUMENT}/{INDEX}/"
-	filters, err := (func() ([]string, error) {
-		r := csv.NewReader(strings.NewReader(c.args[1]))
-		r.Comma = ' '
-		return r.Read()
-	})()
-
-	if err != nil {
-		c.WriteError(err.Error())
-		return
-	}
-
-	offset := prefix
-	limit := 5
-
-	if len(c.args) > 1 && c.args[1] != "" {
-		offset = prefix + c.args[1]
-	}
-
-	if len(c.args) > 2 {
-		limit, _ = strconv.Atoi(c.args[2])
-	}
-
-	data := []string{}
-	length := 0
-
-	// all := map[string][]string{}
-	wg := sync.WaitGroup{}
-
-	for _, filter := range filters {
-		parts := strings.SplitN(filter, ":", 2)
-		if len(parts) < 2 {
-			continue
-		}
-		wg.Add(1)
-		go (func() {
-			defer wg.Done()
-			c.db.Scan(kvstore.ScannerOptions{
-				FetchValues:   true,
-				IncludeOffset: offset == prefix,
-				Prefix:        prefix,
-				Offset:        offset,
-				Handler: func(k, v string) bool {
-					length++
-					p := strings.SplitN(k, "/{DOCUMENT}/{RAW}/", 2)
-					if len(p) < 2 {
-						return true
-					}
-					data = append(data, p[1], v)
-					if length >= limit {
-						return false
-					}
-					return true
-				},
-			})
-		})()
-	}
-
-	wg.Wait()
 
 	c.WriteArray(len(data))
 

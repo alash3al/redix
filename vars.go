@@ -107,7 +107,6 @@ var (
 		// "dset":    dsetCommand,
 		// "dget":    dgetCommand,
 		// "dgetall": dgetallCommand,
-		// "dfilter": dfilterCommand,
 	}
 )
 
