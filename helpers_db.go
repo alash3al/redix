@@ -5,13 +5,11 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
-	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/alash3al/color"
+	"github.com/alash3al/redix/kvstore/null"
+
 	"github.com/alash3al/redix/kvstore"
 	"github.com/alash3al/redix/kvstore/badgerdb"
 	"github.com/alash3al/redix/kvstore/boltdb"
@@ -46,27 +44,8 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 		return boltdb.OpenBolt(dbpath)
 	case "leveldb":
 		return leveldb.OpenLevelDB(dbpath)
-	}
-}
-
-// initDBs - initialize databases from the disk for faster access
-func initDBs() {
-	os.MkdirAll(*flagStorageDir, 0644)
-
-	dirs, _ := ioutil.ReadDir(*flagStorageDir)
-
-	for _, f := range dirs {
-		if !f.IsDir() {
-			continue
-		}
-
-		name := filepath.Base(f.Name())
-
-		_, err := selectDB(name)
-		if err != nil {
-			log.Println(color.RedString(err.Error()))
-			continue
-		}
+	case "null":
+		return null.OpenNull()
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -50,8 +51,6 @@ func init() {
 		return &ret
 	})()
 
-	initDBs()
-
 	snowflakenode, err := snowflake.NewNode(1)
 	if err != nil {
 		fmt.Println(color.RedString(err.Error()))
@@ -60,4 +59,27 @@ func init() {
 	}
 
 	snowflakeGenerator = snowflakenode
+
+	initDBs()
+}
+
+// initDBs - initialize databases from the disk for faster access
+func initDBs() {
+	os.MkdirAll(*flagStorageDir, 0644)
+
+	dirs, _ := ioutil.ReadDir(*flagStorageDir)
+
+	for _, f := range dirs {
+		if !f.IsDir() {
+			continue
+		}
+
+		name := filepath.Base(f.Name())
+
+		_, err := selectDB(name)
+		if err != nil {
+			log.Println(color.RedString(err.Error()))
+			continue
+		}
+	}
 }

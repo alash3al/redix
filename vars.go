@@ -21,6 +21,7 @@ var (
 	flagEngineOpions   = flag.String("engine-options", "", "options related to used engine in the url query format, i.e (opt1=val2&opt2=val2)")
 	flagWorkers        = flag.Int("workers", runtime.NumCPU(), "the default workers number")
 	flagVerbose        = flag.Bool("verbose", false, "verbose or not")
+	flagACK            = flag.Bool("ack", true, "acknowledge write or return immediately")
 )
 
 var (
@@ -29,6 +30,7 @@ var (
 	webhooks           *sync.Map
 	websockets         *sync.Map
 	snowflakeGenerator *snowflake.Node
+	kvjobs             chan func()
 )
 
 var (
@@ -114,7 +116,7 @@ var (
 		"badgerdb": true,
 		"boltdb":   true,
 		"leveldb":  true,
-		"tikv":     true,
+		"null":     true,
 	}
 	engineOptions         = url.Values{}
 	defaultPubSubAllTopic = "*"
@@ -124,7 +126,7 @@ const (
 	redixVersion = "1.9"
 	redixBrand   = `
 
-		_______  _______  ______  _________         
+		 _______  _______  ______  _________         
 		(  ____ )(  ____ \(  __  \ \__   __/|\     /|
 		| (    )|| (    \/| (  \  )   ) (   ( \   / )
 		| (____)|| (__    | |   ) |   | |    \ (_) / 
