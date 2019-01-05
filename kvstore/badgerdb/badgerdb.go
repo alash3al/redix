@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 //
 // badger is a db engine based on badgerdb
-package badger
+package badgerdb
 
 import (
 	"fmt"

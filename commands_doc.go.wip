@@ -30,7 +30,7 @@ func dsetCommand(c Context) {
 			continue
 		}
 
-		randID := xid.New().String()
+		randID := getUniqueString()
 		parseddoc := gjson.Parse(j)
 		docid := ""
 
@@ -57,7 +57,7 @@ func dsetCommand(c Context) {
 
 		gjson.Parse(flatdoc).ForEach(func(k, v gjson.Result) bool {
 			// <collection>/{DOCUMENT}/{INDEX}/<docfield>/<docfieldvalue>/<sequence> = <docid>
-			indexes[collection+"/{DOCUMENT}/{INDEX}/"+k.String()+"/"+v.Raw+"/"+xid.New().String()] = docid
+			indexes[collection+"/{DOCUMENT}/{INDEX}/"+k.String()+"/"+v.Raw+"/"+getUniqueString()] = docid
 			return true
 		})
 	}

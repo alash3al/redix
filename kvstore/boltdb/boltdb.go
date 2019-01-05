@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 //
 // bolt is a db engine based on boltdb
-package bolt
+package boltdb
 
 import (
 	"bytes"

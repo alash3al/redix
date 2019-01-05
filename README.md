@@ -19,7 +19,7 @@ Features
 =========
 - Core data structure: `KV`, `List`, `Hashmap` with advanced implementations.
 - Advanced Publish/Subscribe using webhook and websocket!
-- Pluggable Storage Engine (`badger`, `bolt`, 'level')
+- Pluggable Storage Engine (`badgerdb`, `boltdb`, 'leveldb')
 - Very compatible with any `redis client` including `redis-cli`
 - Standalone with no external dependencies
 - Helpers commands for `Time`, `Encode <hex|md5|sha1|sha256|sha512> <payload>`, `RANDINT`, `RANDSTR`
@@ -146,15 +146,23 @@ Supported Commands
 
 - `LPUSH <LIST> <val1> [<val2> ...]` (push the item into the list "it doesn't check for uniqueness, it will append anyway (duplicate)")
 - `LPUSHU <LIST> <val1> [<val2> ...]` (push the item into the list only if it isn't exists)
-- `LGETALL <LIST> [<offset> <size>]`
+- `LRANGE <LIST> [<offset> <size>]`
 - `LREM <LIST> [<val1> <val2> <val3> ...]` (deletes the list itself or values in the list)
 - `LCOUNT <LIST>` (get the list members count)
+- `LCARD <LIST>` (alias of `LCOUNT`)
 - `LSUM <LIST>` (sum the members of the list "in case they were numbers")
 - `LAVG <LIST>` (get the avg of the members of the list "in case they were numbers")
 - `LMIN <LIST>` (get the minimum of the members of the list "in case they were numbers")
 - `LMAX <LIST>` (get the maximum of the members of the list "in case they were numbers")
 - `LSRCH <LIST> <NEEDLE>` (text-search using (string search or regex) in the list)
 - `LSRCHCOUNT <LIST> <NEEDLE>` (size of text-search result using (string search or regex) in the list)
+
+## # SET
+- `SADD <LIST> <val1> [<val2> ...]` (alias of `LUPUSH`)
+- `SMEMBERS <LIST> [<offset> <size>]` (alias of `LRANGE`)
+- `SSCAN <LIST> [<offset> <size>]` (alias of `LRANGE`)
+- `SCARD <LIST>` (aliad of `LCOUNT`)
+- `SREM <LIST> [<val1> <val2> <val3> ...]` (alias of `LREM`)
 
 ## # Pub/Sub
 > `Redix` has very simple pub/sub functionality, you can subscribe to internal logs on the `*` channel or any custom defined channel, and publish to any custom channel.

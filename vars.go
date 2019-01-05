@@ -5,26 +5,30 @@ package main
 
 import (
 	"flag"
+	"net/url"
 	"runtime"
 	"sync"
 
 	"github.com/alash3al/go-pubsub"
+	"github.com/bwmarrin/snowflake"
 )
 
 var (
 	flagRESPListenAddr = flag.String("resp-addr", ":6380", "the address of resp server")
 	flagHTTPListenAddr = flag.String("http-addr", ":7090", "the address of the http server")
 	flagStorageDir     = flag.String("storage", "./redix-data", "the storage directory")
-	flagEngine         = flag.String("engine", "badger", "the storage engine to be used")
+	flagEngine         = flag.String("engine", "leveldb", "the storage engine to be used")
+	flagEngineOpions   = flag.String("engine-options", "", "options related to used engine in the url query format, i.e (opt1=val2&opt2=val2)")
 	flagWorkers        = flag.Int("workers", runtime.NumCPU(), "the default workers number")
 	flagVerbose        = flag.Bool("verbose", false, "verbose or not")
 )
 
 var (
-	databases  *sync.Map
-	changelog  *pubsub.Broker
-	webhooks   *sync.Map
-	websockets *sync.Map
+	databases          *sync.Map
+	changelog          *pubsub.Broker
+	webhooks           *sync.Map
+	websockets         *sync.Map
+	snowflakeGenerator *snowflake.Node
 )
 
 var (
@@ -46,12 +50,20 @@ var (
 		"lrange":     lrangeCommand,
 		"lrem":       lremCommand,
 		"lcount":     lcountCommand,
+		"lcard":      lcountCommand,
 		"lsum":       lsumCommand,
 		"lavg":       lavgCommand,
 		"lmin":       lminCommand,
 		"lmax":       lmaxCommand,
 		"lsrch":      lsearchCommand,
 		"lsrchcount": lsearchcountCommand,
+
+		// sets (list alias)
+		"sadd":     lpushuCommand,
+		"smembers": lrangeCommand,
+		"srem":     lremCommand,
+		"scard":    lcountCommand,
+		"sscan":    lrangeCommand,
 
 		// hashes
 		"hset":    hsetCommand,
@@ -99,19 +111,17 @@ var (
 
 var (
 	supportedEngines = map[string]bool{
-		"badger":   true,
 		"badgerdb": true,
-		"bolt":     true,
 		"boltdb":   true,
-		"level":    true,
 		"leveldb":  true,
+		"tikv":     true,
 	}
-
+	engineOptions         = url.Values{}
 	defaultPubSubAllTopic = "*"
 )
 
-var (
-	redixVersion = "1.8"
+const (
+	redixVersion = "1.9"
 	redixBrand   = `
 
 		_______  _______  ______  _________         

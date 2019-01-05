@@ -5,12 +5,16 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
+	"log"
+	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/alash3al/color"
 	"github.com/alash3al/redix/kvstore"
-	"github.com/alash3al/redix/kvstore/badger"
-	"github.com/alash3al/redix/kvstore/bolt"
+	"github.com/alash3al/redix/kvstore/badgerdb"
+	"github.com/alash3al/redix/kvstore/boltdb"
 	"github.com/alash3al/redix/kvstore/leveldb"
 )
 
@@ -36,11 +40,42 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 	switch strings.ToLower(engine) {
 	default:
 		return nil, errors.New("unsupported engine: " + engine)
-	case "badger", "badgerdb":
-		return badger.OpenBadger(dbpath)
-	case "bolt", "boltdb":
-		return bolt.OpenBolt(dbpath)
-	case "level", "leveldb":
+	case "badgerdb":
+		return badgerdb.OpenBadger(dbpath)
+	case "boltdb":
+		return boltdb.OpenBolt(dbpath)
+	case "leveldb":
 		return leveldb.OpenLevelDB(dbpath)
 	}
+}
+
+// initDBs - initialize databases from the disk for faster access
+func initDBs() {
+	os.MkdirAll(*flagStorageDir, 0644)
+
+	dirs, _ := ioutil.ReadDir(*flagStorageDir)
+
+	for _, f := range dirs {
+		if !f.IsDir() {
+			continue
+		}
+
+		name := filepath.Base(f.Name())
+
+		_, err := selectDB(name)
+		if err != nil {
+			log.Println(color.RedString(err.Error()))
+			continue
+		}
+	}
+}
+
+// returns a unique string
+func getUniqueString() string {
+	return snowflakeGenerator.Generate().String()
+}
+
+// returns a unique int
+func getUniqueInt() int64 {
+	return snowflakeGenerator.Generate().Int64()
 }
