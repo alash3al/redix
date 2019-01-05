@@ -4,6 +4,7 @@ require (
 	github.com/AndreasBriese/bbloom v0.0.0-20180913140656-343706a395b7 // indirect
 	github.com/alash3al/go-color v1.7.0
 	github.com/alash3al/go-pubsub v0.0.0-20181220233502-636a19c01258
+	github.com/bwmarrin/snowflake v0.0.0-20180412010544-68117e6bbede
 	github.com/dgraph-io/badger v1.5.5-0.20181221193704-accd59b14998
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dgryski/go-farm v0.0.0-20180109070241-2de33835d102 // indirect
@@ -17,7 +18,7 @@ require (
 	github.com/labstack/gommon v0.2.8 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
-	github.com/pkg/errors v0.8.0 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/rs/xid v1.2.1
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/sirupsen/logrus v1.2.0
