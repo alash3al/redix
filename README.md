@@ -205,10 +205,5 @@ TODO
 - [x] Adding LevelDB engine
 - [x] Adding Null engine
 - [x] Adding SQLite engine
-- [x] Adding TiKV engine
+- [ ] Adding TiKV engine
 - [ ] Adding RAM engine
-- [ ] Writing MyOwn DB Engine 
-
-License
-=======
-This project licensed under MIT License
