@@ -137,12 +137,14 @@ func lrangeCommand(c Context) {
 
 	lastKey = hex.EncodeToString([]byte(lastKey))
 
-	c.WriteArray(2)
+	if limit > 0 {
+		c.WriteArray(2)
 
-	if lastKey != "" {
-		c.WriteBulkString(lastKey)
-	} else {
-		c.WriteNull()
+		if lastKey != "" {
+			c.WriteBulkString(lastKey)
+		} else {
+			c.WriteNull()
+		}
 	}
 
 	c.WriteArray(len(data) / 2)

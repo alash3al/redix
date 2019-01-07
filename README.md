@@ -19,7 +19,7 @@ Features
 =========
 - Core data structure: `KV`, `List`, `Hashmap` with advanced implementations.
 - Advanced Publish/Subscribe using webhook and websocket!
-- Pluggable Storage Engine (`badgerdb`, `boltdb`, `leveldb`)
+- Pluggable Storage Engine (`badgerdb`, `boltdb`, `leveldb`, `null`, `sqlite`)
 - Very compatible with any `redis client` including `redis-cli`
 - Standalone with no external dependencies
 - Helpers commands for `Time`, `Encode <hex|md5|sha1|sha256|sha512> <payload>`, `RANDINT`, `RANDSTR`
@@ -202,11 +202,12 @@ TODO
 - [x] PubSub Commands
 - [x] Utils Commands
 - [x] Adding BoltDB engine
+- [x] Adding LevelDB engine
+- [x] Adding Null engine
+- [x] Adding SQLite engine
+- [x] Adding TiKV engine
 - [ ] Adding RAM engine
 - [ ] Writing MyOwn DB Engine 
-- [ ] Writing Test Cases
-- [ ] Document/JSON Commands
-- [ ] GIS Commands
 
 License
 =======
