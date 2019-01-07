@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/alash3al/redix/kvstore/sqlite"
+
 	"github.com/alash3al/redix/kvstore/null"
 
 	"github.com/alash3al/redix/kvstore"
@@ -46,6 +48,8 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 		return leveldb.OpenLevelDB(dbpath)
 	case "null":
 		return null.OpenNull()
+	case "sqlite":
+		return sqlite.OpenSQLite(dbpath)
 	}
 }
 

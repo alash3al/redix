@@ -65,7 +65,7 @@ func init() {
 
 // initDBs - initialize databases from the disk for faster access
 func initDBs() {
-	os.MkdirAll(*flagStorageDir, 0644)
+	os.MkdirAll(*flagStorageDir, 0755)
 
 	dirs, _ := ioutil.ReadDir(*flagStorageDir)
 

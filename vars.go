@@ -116,6 +116,7 @@ var (
 		"boltdb":   true,
 		"leveldb":  true,
 		"null":     true,
+		"sqlite":   true,
 	}
 	engineOptions         = url.Values{}
 	defaultPubSubAllTopic = "*"

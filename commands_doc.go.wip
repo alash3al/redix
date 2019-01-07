@@ -11,6 +11,7 @@ import (
 	"github.com/tidwall/sjson"
 )
 
+// dsetCommand - DSET <collection> <json> [<json> ...]
 func dsetCommand(c Context) {
 	if len(c.args) < 2 {
 		c.WriteError("DSET command requires at least 2 arguments: DSET <collection> [<json> <json> ...]")
@@ -71,6 +72,7 @@ func dsetCommand(c Context) {
 	}
 }
 
+// dgetCommand - DGET <collection> <docid>
 func dgetCommand(c Context) {
 	if len(c.args) < 2 {
 		c.WriteError("DGET requires at least 2 arguments: DGET <collection> <docid>")
@@ -88,6 +90,7 @@ func dgetCommand(c Context) {
 	c.WriteBulkString(doc)
 }
 
+// dgetallCommand - DGETALL <collection> [<offset> <limit>]
 func dgetallCommand(c Context) {
 	if len(c.args) < 1 {
 		c.WriteError("DGETALL command requires at least one argument: DGETALL <collection> [<offset> <limit>]")
@@ -133,7 +136,57 @@ func dgetallCommand(c Context) {
 	}
 
 	c.WriteArray(len(data))
+	for _, v := range data {
+		c.WriteBulkString(v)
+	}
+}
 
+// dgetallbyindexCommand - DGETALLBYINDEX <collection> <index> <value> [<offset> <limit>]
+func dgetallbyindexCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("DGETALL command requires at least one argument: DGETALL <collection> [<offset> <limit>]")
+		return
+	}
+
+	prefix := c.args[0] + "/{DOCUMENT}/{RAW}/"
+	offset := prefix
+	limit := 5
+
+	if len(c.args) > 1 && c.args[1] != "" {
+		offset = prefix + c.args[1]
+	}
+
+	if len(c.args) > 2 {
+		limit, _ = strconv.Atoi(c.args[2])
+	}
+
+	data := []string{}
+	length := 0
+	err := c.db.Scan(kvstore.ScannerOptions{
+		FetchValues:   true,
+		IncludeOffset: offset == prefix,
+		Prefix:        prefix,
+		Offset:        offset,
+		Handler: func(k, v string) bool {
+			length++
+			p := strings.SplitN(k, "/{DOCUMENT}/{RAW}/", 2)
+			if len(p) < 2 {
+				return true
+			}
+			data = append(data, p[1], v)
+			if length >= limit {
+				return false
+			}
+			return true
+		},
+	})
+
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	c.WriteArray(len(data))
 	for _, v := range data {
 		c.WriteBulkString(v)
 	}
