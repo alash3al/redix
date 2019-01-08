@@ -77,6 +77,7 @@ var (
 		"hexists": hexistsCommand,
 		"hincr":   hincrCommand,
 		"httl":    httlCommand,
+		"hlen":    hlenCommand,
 
 		// pubsub
 		"publish":        publishCommand,

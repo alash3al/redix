@@ -225,6 +225,34 @@ func hexistsCommand(c Context) {
 	c.WriteInt(found)
 }
 
+func hlenCommand(c Context) {
+	if len(c.args) < 1 {
+		c.WriteError("HLEN command requires at least one argument: HLEN <hashmap>")
+		return
+	}
+
+	found := 0
+	prefix := c.args[0] + "/{HASH}/"
+
+	err := c.db.Scan(kvstore.ScannerOptions{
+		FetchValues:   false,
+		IncludeOffset: true,
+		Prefix:        prefix,
+		Offset:        prefix,
+		Handler: func(_, _ string) bool {
+			found++
+			return true
+		},
+	})
+
+	if err != nil {
+		c.WriteError(err.Error())
+		return
+	}
+
+	c.WriteInt(found)
+}
+
 // hincrCommand - HINCR <hash> <key> [<number>]
 func hincrCommand(c Context) {
 	if len(c.args) < 2 {
