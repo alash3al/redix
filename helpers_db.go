@@ -5,17 +5,15 @@ package main
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/alash3al/redix/kvstore/sqlite"
-
-	"github.com/alash3al/redix/kvstore/null"
 
 	"github.com/alash3al/redix/kvstore"
 	"github.com/alash3al/redix/kvstore/badgerdb"
 	"github.com/alash3al/redix/kvstore/boltdb"
 	"github.com/alash3al/redix/kvstore/leveldb"
+	"github.com/alash3al/redix/kvstore/null"
 )
 
 // selectDB - load/fetches the requested db
@@ -48,9 +46,22 @@ func openDB(engine, dbpath string) (kvstore.DB, error) {
 		return leveldb.OpenLevelDB(dbpath)
 	case "null":
 		return null.OpenNull()
-	case "sqlite":
-		return sqlite.OpenSQLite(dbpath)
 	}
+}
+
+// flushDB clear the specified database
+func flushDB(n string) {
+	dbpath := filepath.Join(*flagStorageDir, n)
+	os.RemoveAll(dbpath)
+	databases.Delete(n)
+
+	selectDB(n)
+}
+
+// flushall clear all databases
+func flushall() {
+	os.RemoveAll(*flagStorageDir)
+	os.MkdirAll(*flagStorageDir, 0755)
 }
 
 // returns a unique string

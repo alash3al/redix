@@ -87,26 +87,23 @@ var (
 		"websocketclose": websocketcloseCommand,
 
 		// utils
-		"encode":  encodeCommand,
-		"uuidv4":  uuid4Command,
-		"uniqid":  uniqidCommand,
-		"randstr": randstrCommand,
-		"randint": randintCommand,
-		"time":    timeCommand,
-		"dbsize":  dbsizeCommand,
-		"gc":      gcCommand,
-		"info":    infoCommand,
-		"echo":    echoCommand,
+		"encode":   encodeCommand,
+		"uuidv4":   uuid4Command,
+		"uniqid":   uniqidCommand,
+		"randstr":  randstrCommand,
+		"randint":  randintCommand,
+		"time":     timeCommand,
+		"dbsize":   dbsizeCommand,
+		"gc":       gcCommand,
+		"info":     infoCommand,
+		"echo":     echoCommand,
+		"flushdb":  flushdbCommand,
+		"flushall": flushallCommand,
 
 		// ratelimit
 		"ratelimitset":  ratelimitsetCommand,
 		"ratelimittake": ratelimittakeCommand,
 		"ratelimitget":  ratelimitgetCommand,
-
-		// documents
-		// "dset":    dsetCommand,
-		// "dget":    dgetCommand,
-		// "dgetall": dgetallCommand,
 	}
 )
 
@@ -123,7 +120,7 @@ var (
 )
 
 const (
-	redixVersion = "1.9"
+	redixVersion = "1.10"
 	redixBrand   = `
 
 		 _______  _______  ______  _________         

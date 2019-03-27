@@ -166,3 +166,16 @@ func infoCommand(c Context) {
 func echoCommand(c Context) {
 	c.WriteString(strings.Join(c.args, " "))
 }
+
+// flushdbCommand - FLUSHDB
+func flushdbCommand(ctx Context) {
+	c := ctx.Context().(map[string]interface{})
+	flushDB(c["db"].(string))
+	ctx.WriteString("OK")
+}
+
+// flushallCommand - FLUSHALL
+func flushallCommand(ctx Context) {
+	flushall()
+	ctx.WriteString("OK")
+}

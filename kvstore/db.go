@@ -17,6 +17,7 @@ type DB interface {
 	Scan(ScannerOpt ScannerOptions) error
 	Size() int64
 	GC() error
+	Close()
 }
 
 // ScannerOptions - represents the options for a scanner

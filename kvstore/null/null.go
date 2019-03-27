@@ -22,6 +22,9 @@ func (ldb *Null) Size() int64 {
 	return 0
 }
 
+// Close ...
+func (ldb *Null) Close() {}
+
 // GC - runs the garbage collector
 func (ldb *Null) GC() error {
 	return nil

@@ -53,6 +53,11 @@ func (ldb *LevelDB) Size() int64 {
 	return size
 }
 
+// Close ...
+func (ldb *LevelDB) Close() {
+	ldb.Close()
+}
+
 // GC - runs the garbage collector
 func (ldb *LevelDB) GC() error {
 	return ldb.db.CompactRange(util.Range{})
