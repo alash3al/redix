@@ -136,6 +136,7 @@ Supported Commands
 - `HINCR <HASHMAP> <key> [<by>]`
 - `HTTL <HASHMAP> <key>`, the same as `TTL` but for `HASHMAP`
 - `HKEYS <HASHMAP>`
+- `HLEN <HASHMAP>`
 
 ## # LIST
 > I applied a new concept, you can push or push-unique values into the list,
