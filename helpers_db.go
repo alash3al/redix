@@ -5,7 +5,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,7 +62,7 @@ func flushDB(n string) {
 
 // flushall clear all databases
 func flushall() {
-	log.Println(os.RemoveAll(filepath.Join(*flagStorageDir, "/*")))
+	rmdir(*flagStorageDir)
 	os.MkdirAll(*flagStorageDir, 0755)
 }
 
@@ -75,4 +74,23 @@ func getUniqueString() string {
 // returns a unique int
 func getUniqueInt() int64 {
 	return snowflakeGenerator.Generate().Int64()
+}
+
+func rmdir(dir string) error {
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
