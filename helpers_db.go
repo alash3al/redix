@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/alash3al/redix/kvstore"
 	"github.com/alash3al/redix/kvstore/badgerdb"
@@ -53,16 +54,20 @@ func openDB(n string) (kvstore.DB, error) {
 
 // flushDB clear the specified database
 func flushDB(n string) {
-	dbpath := filepath.Join(*flagStorageDir, n)
-	os.RemoveAll(dbpath)
+	db, err := selectDB(n)
+	if err != nil {
+		return
+	}
+	db.Close()
+	rmdir(getEngineDirectory())
 	databases.Delete(n)
-
 	selectDB(n)
 }
 
 // flushall clear all databases
 func flushall() {
 	rmdir(*flagStorageDir)
+	databases = new(sync.Map)
 	os.MkdirAll(*flagStorageDir, 0755)
 }
 
@@ -74,6 +79,22 @@ func getUniqueString() string {
 // returns a unique int
 func getUniqueInt() int64 {
 	return snowflakeGenerator.Generate().Int64()
+}
+
+func getEngineDirectory() string {
+	engine := *flagEngine
+	dbpath := *flagStorageDir
+
+	switch strings.ToLower(engine) {
+	default:
+		return ""
+	case "badgerdb", "badger":
+		return (filepath.Join(dbpath, "badger"))
+	case "boltdb":
+		return (filepath.Join(dbpath, "bolt"))
+	case "leveldb":
+		return (filepath.Join(dbpath, "level"))
+	}
 }
 
 func rmdir(dir string) error {

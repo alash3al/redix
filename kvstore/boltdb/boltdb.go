@@ -47,7 +47,7 @@ func OpenBolt(path string) (*BoltDB, error) {
 
 // Close ...
 func (db *BoltDB) Close() {
-	db.Close()
+	db.bolt.Close()
 }
 
 // Size - returns the size of the database (LSM + ValueLog) in bytes

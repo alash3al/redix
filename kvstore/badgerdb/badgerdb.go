@@ -57,7 +57,7 @@ func OpenBadger(path string) (*BadgerDB, error) {
 
 // Close ...
 func (db *BadgerDB) Close() {
-	db.Close()
+	db.badger.Close()
 }
 
 // Size - returns the size of the database (LSM + ValueLog) in bytes

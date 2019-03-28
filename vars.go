@@ -18,7 +18,7 @@ var (
 	flagHTTPListenAddr = flag.String("http-addr", ":7090", "the address of the http server")
 	flagStorageDir     = flag.String("storage", "./redix-data", "the storage directory")
 	flagEngine         = flag.String("engine", "leveldb", "the storage engine to be used")
-	flagEngineOpions   = flag.String("engine-options", "", "options related to used engine in the url query format, i.e (opt1=val2&opt2=val2)")
+	flagEngineOptions  = flag.String("engine-options", "", "options related to used engine in the url query format, i.e (opt1=val2&opt2=val2)")
 	flagWorkers        = flag.Int("workers", runtime.NumCPU(), "the default workers number")
 	flagVerbose        = flag.Bool("verbose", false, "verbose or not")
 	flagACK            = flag.Bool("ack", true, "acknowledge write or return immediately")

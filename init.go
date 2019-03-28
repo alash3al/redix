@@ -7,10 +7,8 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sync"
 
@@ -43,7 +41,7 @@ func init() {
 	webhooks = new(sync.Map)
 	websockets = new(sync.Map)
 	engineOptions = (func() url.Values {
-		opts, _ := url.ParseQuery(*flagEngineOpions)
+		opts, _ := url.ParseQuery(*flagEngineOptions)
 		return opts
 	})()
 
@@ -56,26 +54,26 @@ func init() {
 
 	snowflakeGenerator = snowflakenode
 
-	initDBs()
+	// initDBs()
 }
 
-// initDBs - initialize databases from the disk for faster access
-func initDBs() {
-	os.MkdirAll(*flagStorageDir, 0755)
+// // initDBs - initialize databases from the disk for faster access
+// func initDBs() {
+// 	os.MkdirAll(*flagStorageDir, 0755)
 
-	dirs, _ := ioutil.ReadDir(*flagStorageDir)
+// 	dirs, _ := ioutil.ReadDir(get)
 
-	for _, f := range dirs {
-		if !f.IsDir() {
-			continue
-		}
+// 	for _, f := range dirs {
+// 		if !f.IsDir() {
+// 			continue
+// 		}
 
-		name := filepath.Base(f.Name())
+// 		name := filepath.Base(f.Name())
 
-		_, err := selectDB(name)
-		if err != nil {
-			log.Println(color.RedString(err.Error()))
-			continue
-		}
-	}
-}
+// 		_, err := selectDB(name)
+// 		if err != nil {
+// 			log.Println(color.RedString(err.Error()))
+// 			continue
+// 		}
+// 	}
+// }
