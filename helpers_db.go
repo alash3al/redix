@@ -5,6 +5,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,10 +19,9 @@ import (
 
 // selectDB - load/fetches the requested db
 func selectDB(n string) (db kvstore.DB, err error) {
-	dbpath := filepath.Join(*flagStorageDir, n)
 	dbi, found := databases.Load(n)
 	if !found {
-		db, err = openDB(*flagEngine, dbpath)
+		db, err = openDB(n)
 		if err != nil {
 			return nil, err
 		}
@@ -34,16 +34,19 @@ func selectDB(n string) (db kvstore.DB, err error) {
 }
 
 // openDB - initialize a db in the specified path and engine
-func openDB(engine, dbpath string) (kvstore.DB, error) {
+func openDB(n string) (kvstore.DB, error) {
+	engine := *flagEngine
+	dbpath := *flagStorageDir
+
 	switch strings.ToLower(engine) {
 	default:
 		return nil, errors.New("unsupported engine: " + engine)
-	case "badgerdb":
-		return badgerdb.OpenBadger(dbpath)
+	case "badgerdb", "badger":
+		return badgerdb.OpenBadger(filepath.Join(dbpath, "badger", n))
 	case "boltdb":
-		return boltdb.OpenBolt(dbpath)
+		return boltdb.OpenBolt(filepath.Join(dbpath, "bolt", n))
 	case "leveldb":
-		return leveldb.OpenLevelDB(dbpath)
+		return leveldb.OpenLevelDB(filepath.Join(dbpath, "level", n))
 	case "null":
 		return null.OpenNull()
 	}
@@ -60,7 +63,7 @@ func flushDB(n string) {
 
 // flushall clear all databases
 func flushall() {
-	os.RemoveAll(*flagStorageDir)
+	log.Println(os.RemoveAll(filepath.Join(*flagStorageDir, "/*")))
 	os.MkdirAll(*flagStorageDir, 0755)
 }
 

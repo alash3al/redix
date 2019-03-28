@@ -46,10 +46,6 @@ func init() {
 		opts, _ := url.ParseQuery(*flagEngineOpions)
 		return opts
 	})()
-	flagStorageDir = (func() *string {
-		ret := filepath.Join(*flagStorageDir, *flagEngine)
-		return &ret
-	})()
 
 	snowflakenode, err := snowflake.NewNode(1)
 	if err != nil {
