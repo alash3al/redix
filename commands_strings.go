@@ -30,10 +30,16 @@ func setCommand(c Context) {
 		ttlVal = 0
 	}
 
+	// if *flagACK {
 	if err := c.db.Set(k, v, ttlVal); err != nil {
 		c.WriteError(err.Error())
 		return
 	}
+	// } else {
+	// 	kvjobs <- func() {
+	// 		c.db.Set(k, v, ttlVal)
+	// 	}
+	// }
 
 	c.WriteString("OK")
 }

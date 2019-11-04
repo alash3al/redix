@@ -7,14 +7,14 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"net/url"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sync"
 
 	"github.com/alash3al/go-color"
-	pubsub "github.com/alash3al/go-pubsub"
+	"github.com/alash3al/go-pubsub"
+	"github.com/bwmarrin/snowflake"
 	"github.com/dgraph-io/badger"
 	"github.com/sirupsen/logrus"
 )
@@ -36,30 +36,44 @@ func init() {
 		return
 	}
 
-	color.Blue(redixBrand)
-
 	databases = new(sync.Map)
 	changelog = pubsub.NewBroker()
 	webhooks = new(sync.Map)
 	websockets = new(sync.Map)
+	engineOptions = (func() url.Values {
+		opts, _ := url.ParseQuery(*flagEngineOptions)
+		return opts
+	})()
 
-	*flagStorageDir = filepath.Join(*flagStorageDir, *flagEngine)
-
-	os.MkdirAll(*flagStorageDir, 0744)
-
-	dirs, _ := ioutil.ReadDir(*flagStorageDir)
-
-	for _, f := range dirs {
-		if !f.IsDir() {
-			continue
-		}
-
-		name := filepath.Base(f.Name())
-
-		_, err := selectDB(name)
-		if err != nil {
-			log.Println(color.RedString(err.Error()))
-			continue
-		}
+	snowflakenode, err := snowflake.NewNode(1)
+	if err != nil {
+		fmt.Println(color.RedString(err.Error()))
+		os.Exit(0)
+		return
 	}
+
+	snowflakeGenerator = snowflakenode
+
+	// initDBs()
 }
+
+// // initDBs - initialize databases from the disk for faster access
+// func initDBs() {
+// 	os.MkdirAll(*flagStorageDir, 0755)
+
+// 	dirs, _ := ioutil.ReadDir(get)
+
+// 	for _, f := range dirs {
+// 		if !f.IsDir() {
+// 			continue
+// 		}
+
+// 		name := filepath.Base(f.Name())
+
+// 		_, err := selectDB(name)
+// 		if err != nil {
+// 			log.Println(color.RedString(err.Error()))
+// 			continue
+// 		}
+// 	}
+// }

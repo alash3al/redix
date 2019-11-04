@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 //
 // bolt is a db engine based on boltdb
-package bolt
+package boltdb
 
 import (
 	"bytes"
@@ -43,6 +43,11 @@ func OpenBolt(path string) (*BoltDB, error) {
 	db.countersLocks = sync.RWMutex{}
 
 	return db, nil
+}
+
+// Close ...
+func (db *BoltDB) Close() {
+	db.bolt.Close()
 }
 
 // Size - returns the size of the database (LSM + ValueLog) in bytes

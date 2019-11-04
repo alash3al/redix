@@ -17,7 +17,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rs/xid"
 	"github.com/satori/go.uuid"
 )
 
@@ -33,7 +32,7 @@ func uuid4Command(c Context) {
 
 // uniqidCommand - UNIQID
 func uniqidCommand(c Context) {
-	c.WriteString(xid.New().String())
+	c.WriteString(getUniqueString())
 }
 
 // randstrCommand - randstr [<size>, default size is 10]
@@ -148,6 +147,7 @@ func gcCommand(c Context) {
 // infoCommand - INFO
 func infoCommand(c Context) {
 	info := map[string]string{
+		"version":            redixVersion,
 		"database":           *flagEngine,
 		"database_size":      strconv.Itoa(int(c.db.Size())),
 		"database_directory": *flagStorageDir,
@@ -165,4 +165,17 @@ func infoCommand(c Context) {
 // echoCommand - ECHO [<arg1> <arg2>]
 func echoCommand(c Context) {
 	c.WriteString(strings.Join(c.args, " "))
+}
+
+// flushdbCommand - FLUSHDB
+func flushdbCommand(ctx Context) {
+	c := ctx.Context().(map[string]interface{})
+	flushDB(c["db"].(string))
+	ctx.WriteString("OK")
+}
+
+// flushallCommand - FLUSHALL
+func flushallCommand(ctx Context) {
+	flushall()
+	ctx.WriteString("OK")
 }

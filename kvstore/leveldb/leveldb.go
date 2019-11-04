@@ -53,6 +53,11 @@ func (ldb *LevelDB) Size() int64 {
 	return size
 }
 
+// Close ...
+func (ldb *LevelDB) Close() {
+	ldb.db.Close()
+}
+
 // GC - runs the garbage collector
 func (ldb *LevelDB) GC() error {
 	return ldb.db.CompactRange(util.Range{})
@@ -208,7 +213,7 @@ func (ldb *LevelDB) Scan(scannerOpt kvstore.ScannerOptions) error {
 	for iter.Next() {
 		key := iter.Key()
 		val := strings.SplitN(string(iter.Value()), ";", 2)[1]
-		if valid(key) && !scannerOpt.Handler(string(key), string(val)) {
+		if !valid(key) || !scannerOpt.Handler(string(key), string(val)) {
 			break
 		}
 	}

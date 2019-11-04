@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 //
 // badger is a db engine based on badgerdb
-package badger
+package badgerdb
 
 import (
 	"fmt"
@@ -29,11 +29,12 @@ func OpenBadger(path string) (*BadgerDB, error) {
 	opts.Dir = path
 	opts.ValueDir = path
 	opts.Truncate = true
-	opts.TableLoadingMode = options.FileIO
+	opts.SyncWrites = false
+	opts.TableLoadingMode = options.MemoryMap
 	opts.ValueLogLoadingMode = options.FileIO
-	opts.NumMemtables = 1
-	opts.MaxTableSize = 4 << 20
-	opts.NumLevelZeroTables = 1
+	opts.NumMemtables = 2
+	opts.MaxTableSize = 10 << 20
+	opts.NumLevelZeroTables = 2
 	opts.ValueThreshold = 1
 
 	bdb, err := badger.Open(opts)
@@ -52,6 +53,11 @@ func OpenBadger(path string) (*BadgerDB, error) {
 	})()
 
 	return db, nil
+}
+
+// Close ...
+func (db *BadgerDB) Close() {
+	db.badger.Close()
 }
 
 // Size - returns the size of the database (LSM + ValueLog) in bytes

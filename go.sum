@@ -4,6 +4,8 @@ github.com/alash3al/go-color v1.7.0 h1:DwA/TZI94S0iZkFPY6d35HPkgIDYan6teSvhhhhQq
 github.com/alash3al/go-color v1.7.0/go.mod h1:Jbm7iR5nlzCOtSGx02fWbWzs5+qXqI8epyJQYwY3Gjk=
 github.com/alash3al/go-pubsub v0.0.0-20181220233502-636a19c01258 h1:bM4QUFU/x62iynx6iQeUp4YxTmL6g6IhiXO6yIqUgTA=
 github.com/alash3al/go-pubsub v0.0.0-20181220233502-636a19c01258/go.mod h1:OFNZAVEGEivuAfXw6Kc5539cV2jhjycsoSmXKwf9yBs=
+github.com/bwmarrin/snowflake v0.0.0-20180412010544-68117e6bbede h1:lTJlWdyhwqq7h29GtuIDHW/xi+sMN+JOLMgYAwQ5O74=
+github.com/bwmarrin/snowflake v0.0.0-20180412010544-68117e6bbede/go.mod h1:NdZxfVWX+oR6y2K0o6qAYv6gIOP9rjG0/E9WsDpxqwE=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgraph-io/badger v1.5.5-0.20181221193704-accd59b14998 h1:q3LLmv+wZ8AAkYr+1VRpYynNHewejc89ujeUojjjKts=
@@ -38,6 +40,8 @@ github.com/mattn/go-isatty v0.0.4 h1:bnP0vzxcAdeI1zdubAl5PjU6zsERjGZb7raWodagDYs
 github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rs/xid v1.2.1 h1:mhH9Nq+C1fY2l1XIpgxIiUOfNpRBYH1kKcr+qfKgjRc=

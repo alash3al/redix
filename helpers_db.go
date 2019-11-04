@@ -5,21 +5,23 @@ package main
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/alash3al/redix/kvstore"
-	"github.com/alash3al/redix/kvstore/badger"
-	"github.com/alash3al/redix/kvstore/bolt"
+	"github.com/alash3al/redix/kvstore/badgerdb"
+	"github.com/alash3al/redix/kvstore/boltdb"
 	"github.com/alash3al/redix/kvstore/leveldb"
+	"github.com/alash3al/redix/kvstore/null"
 )
 
 // selectDB - load/fetches the requested db
 func selectDB(n string) (db kvstore.DB, err error) {
-	dbpath := filepath.Join(*flagStorageDir, n)
 	dbi, found := databases.Load(n)
 	if !found {
-		db, err = openDB(*flagEngine, dbpath)
+		db, err = openDB(n)
 		if err != nil {
 			return nil, err
 		}
@@ -32,15 +34,84 @@ func selectDB(n string) (db kvstore.DB, err error) {
 }
 
 // openDB - initialize a db in the specified path and engine
-func openDB(engine, dbpath string) (kvstore.DB, error) {
+func openDB(n string) (kvstore.DB, error) {
+	engine := *flagEngine
+	dbpath := *flagStorageDir
+
 	switch strings.ToLower(engine) {
 	default:
 		return nil, errors.New("unsupported engine: " + engine)
-	case "badger", "badgerdb":
-		return badger.OpenBadger(dbpath)
-	case "bolt", "boltdb":
-		return bolt.OpenBolt(dbpath)
-	case "level", "leveldb":
-		return leveldb.OpenLevelDB(dbpath)
+	case "badgerdb", "badger":
+		return badgerdb.OpenBadger(filepath.Join(dbpath, "badger", n))
+	case "boltdb":
+		return boltdb.OpenBolt(filepath.Join(dbpath, "bolt", n))
+	case "leveldb":
+		return leveldb.OpenLevelDB(filepath.Join(dbpath, "level", n))
+	case "null":
+		return null.OpenNull()
 	}
+}
+
+// flushDB clear the specified database
+func flushDB(n string) {
+	db, err := selectDB(n)
+	if err != nil {
+		return
+	}
+	db.Close()
+	rmdir(getEngineDirectory())
+	databases.Delete(n)
+	selectDB(n)
+}
+
+// flushall clear all databases
+func flushall() {
+	rmdir(*flagStorageDir)
+	databases = new(sync.Map)
+	os.MkdirAll(*flagStorageDir, 0755)
+}
+
+// returns a unique string
+func getUniqueString() string {
+	return snowflakeGenerator.Generate().String()
+}
+
+// returns a unique int
+func getUniqueInt() int64 {
+	return snowflakeGenerator.Generate().Int64()
+}
+
+func getEngineDirectory() string {
+	engine := *flagEngine
+	dbpath := *flagStorageDir
+
+	switch strings.ToLower(engine) {
+	default:
+		return ""
+	case "badgerdb", "badger":
+		return (filepath.Join(dbpath, "badger"))
+	case "boltdb":
+		return (filepath.Join(dbpath, "bolt"))
+	case "leveldb":
+		return (filepath.Join(dbpath, "level"))
+	}
+}
+
+func rmdir(dir string) error {
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

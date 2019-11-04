@@ -5,26 +5,32 @@ package main
 
 import (
 	"flag"
+	"net/url"
 	"runtime"
 	"sync"
 
 	"github.com/alash3al/go-pubsub"
+	"github.com/bwmarrin/snowflake"
 )
 
 var (
 	flagRESPListenAddr = flag.String("resp-addr", ":6380", "the address of resp server")
 	flagHTTPListenAddr = flag.String("http-addr", ":7090", "the address of the http server")
 	flagStorageDir     = flag.String("storage", "./redix-data", "the storage directory")
-	flagEngine         = flag.String("engine", "badger", "the storage engine to be used")
+	flagEngine         = flag.String("engine", "leveldb", "the storage engine to be used")
+	flagEngineOptions  = flag.String("engine-options", "", "options related to used engine in the url query format, i.e (opt1=val2&opt2=val2)")
 	flagWorkers        = flag.Int("workers", runtime.NumCPU(), "the default workers number")
 	flagVerbose        = flag.Bool("verbose", false, "verbose or not")
+	flagACK            = flag.Bool("ack", true, "acknowledge write or return immediately")
 )
 
 var (
-	databases  *sync.Map
-	changelog  *pubsub.Broker
-	webhooks   *sync.Map
-	websockets *sync.Map
+	databases          *sync.Map
+	changelog          *pubsub.Broker
+	webhooks           *sync.Map
+	websockets         *sync.Map
+	snowflakeGenerator *snowflake.Node
+	kvjobs             chan func()
 )
 
 var (
@@ -46,12 +52,20 @@ var (
 		"lrange":     lrangeCommand,
 		"lrem":       lremCommand,
 		"lcount":     lcountCommand,
+		"lcard":      lcountCommand,
 		"lsum":       lsumCommand,
 		"lavg":       lavgCommand,
 		"lmin":       lminCommand,
 		"lmax":       lmaxCommand,
 		"lsrch":      lsearchCommand,
 		"lsrchcount": lsearchcountCommand,
+
+		// sets (list alias)
+		"sadd":     lpushuCommand,
+		"smembers": lrangeCommand,
+		"srem":     lremCommand,
+		"scard":    lcountCommand,
+		"sscan":    lrangeCommand,
 
 		// hashes
 		"hset":    hsetCommand,
@@ -63,6 +77,7 @@ var (
 		"hexists": hexistsCommand,
 		"hincr":   hincrCommand,
 		"httl":    httlCommand,
+		"hlen":    hlenCommand,
 
 		// pubsub
 		"publish":        publishCommand,
@@ -73,48 +88,43 @@ var (
 		"websocketclose": websocketcloseCommand,
 
 		// utils
-		"encode":  encodeCommand,
-		"uuidv4":  uuid4Command,
-		"uniqid":  uniqidCommand,
-		"randstr": randstrCommand,
-		"randint": randintCommand,
-		"time":    timeCommand,
-		"dbsize":  dbsizeCommand,
-		"gc":      gcCommand,
-		"info":    infoCommand,
-		"echo":    echoCommand,
+		"encode":   encodeCommand,
+		"uuidv4":   uuid4Command,
+		"uniqid":   uniqidCommand,
+		"randstr":  randstrCommand,
+		"randint":  randintCommand,
+		"time":     timeCommand,
+		"dbsize":   dbsizeCommand,
+		"gc":       gcCommand,
+		"info":     infoCommand,
+		"echo":     echoCommand,
+		"flushdb":  flushdbCommand,
+		"flushall": flushallCommand,
 
 		// ratelimit
 		"ratelimitset":  ratelimitsetCommand,
 		"ratelimittake": ratelimittakeCommand,
 		"ratelimitget":  ratelimitgetCommand,
-
-		// documents
-		// "dset":    dsetCommand,
-		// "dget":    dgetCommand,
-		// "dgetall": dgetallCommand,
-		// "dfilter": dfilterCommand,
 	}
 )
 
 var (
 	supportedEngines = map[string]bool{
-		"badger":   true,
 		"badgerdb": true,
-		"bolt":     true,
 		"boltdb":   true,
-		"level":    true,
 		"leveldb":  true,
+		"null":     true,
+		"sqlite":   true,
 	}
-
+	engineOptions         = url.Values{}
 	defaultPubSubAllTopic = "*"
 )
 
-var (
-	redixVersion = "1.8"
+const (
+	redixVersion = "1.10"
 	redixBrand   = `
 
-		_______  _______  ______  _________         
+		 _______  _______  ______  _________         
 		(  ____ )(  ____ \(  __  \ \__   __/|\     /|
 		| (    )|| (    \/| (  \  )   ) (   ( \   / )
 		| (____)|| (__    | |   ) |   | |    \ (_) / 
@@ -122,7 +132,6 @@ var (
 		| (\ (   | (      | |   ) |   | |    / ( ) \ 
 		| ) \ \__| (____/\| (__/  )___) (___( /   \ )
 		|/   \__/(_______/(______/ \_______/|/     \|
-
 
 A high-concurrency standalone NoSQL datastore with the support for redis protocol 
 and multiple backends/engines, also there is a native support for
