@@ -46,7 +46,7 @@ Configurations
 $ ./redix_linux_amd64 -h
 
   -engine string
-        the storage engine to be used, available (default "badger")
+        the storage engine to be used, available (default "leveldb")
   -http-addr string
         the address of the http server (default ":7090")
   -resp-addr string
