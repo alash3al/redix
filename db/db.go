@@ -63,9 +63,19 @@ func (db DB) Put(key []byte, value []byte) error {
 	return db.db.Put(key, value)
 }
 
+// Batch a bulk pairs writer
+func (db DB) Batch(pairs []driver.KeyValue) error {
+	return db.db.Batch(pairs)
+}
+
 // Get fetches a document using its primary key
 func (db DB) Get(key []byte) ([]byte, error) {
 	return db.db.Get(key)
+}
+
+// Has whether a key exists or not
+func (db DB) Has(key []byte) (bool, error) {
+	return db.db.Has(key)
 }
 
 // Delete remove a key from the database

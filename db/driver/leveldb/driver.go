@@ -31,12 +31,16 @@ func (drv Driver) Put(k, v []byte) error {
 	return drv.db.Put(k, v, nil)
 }
 
-// BulkPut perform multi put operation
-func (drv Driver) BulkPut(pairs []driver.KeyValue) error {
+// Batch perform multi put operation, empty value means *delete*
+func (drv Driver) Batch(pairs []driver.KeyValue) error {
 	batch := new(leveldb.Batch)
 
 	for _, pair := range pairs {
-		batch.Put(pair.Key, pair.Value)
+		if pair.Value == nil {
+			batch.Delete(pair.Key)
+		} else {
+			batch.Put(pair.Key, pair.Value)
+		}
 	}
 
 	return drv.db.Write(batch, nil)
@@ -45,6 +49,11 @@ func (drv Driver) BulkPut(pairs []driver.KeyValue) error {
 // Get implements driver.Get
 func (drv Driver) Get(k []byte) ([]byte, error) {
 	return drv.db.Get(k, nil)
+}
+
+// Has implements driver.Has
+func (drv Driver) Has(k []byte) (bool, error) {
+	return drv.db.Has(k, nil)
 }
 
 // Delete implements driver.Delete

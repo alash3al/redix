@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/alash3al/redix/db"
 	"github.com/alash3al/redix/server"
@@ -21,6 +22,8 @@ var (
 	flagDataDriver     = flag.String("storage.driver", "leveldb", "the storage driver to use")
 	flagDataDir        = flag.String("storage.datadir", "./.redix", "the storage data directory")
 	flagDriverOpts     = flag.String("storage.opts", "", "the storage engine options")
+	flagWorkers        = flag.Int("workers", 2, "the server workers count")
+	flagVerbose        = flag.Bool("verbose", false, "whether to enable verbose mode or not")
 )
 
 var (
@@ -29,6 +32,8 @@ var (
 
 func main() {
 	flag.Parse()
+
+	runtime.GOMAXPROCS(*flagWorkers)
 
 	if *flagDriverOpts != "" {
 		if err := json.Unmarshal([]byte(*flagDriverOpts), &parsedDriverOpts); err != nil {
@@ -41,6 +46,7 @@ func main() {
 	initDBs()
 
 	serverOpts := server.Options{
+		Verbose: *flagVerbose,
 		Openner: func(dbname string) (*db.DB, error) {
 			return db.Open(*flagDataDriver, *flagDataDir, dbname, parsedDriverOpts)
 		},

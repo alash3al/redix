@@ -5,7 +5,8 @@ type Interface interface {
 	Open(string, map[string]interface{}) (Interface, error)
 	Put([]byte, []byte) error
 	Get([]byte) ([]byte, error)
-	BulkPut([]KeyValue) error
+	Has([]byte) (bool, error)
+	Batch([]KeyValue) error
 	Delete([]byte) error
 	Scan(ScanOpts)
 	Close() error

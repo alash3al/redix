@@ -1,7 +1,9 @@
 package server
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/alash3al/redix/db"
@@ -12,6 +14,7 @@ import (
 type Options struct {
 	RESPAddr string
 	Openner  OpenFunc
+	Verbose  bool
 }
 
 // OpenFunc a database selector function
@@ -24,9 +27,13 @@ func ListenAndServe(opts Options) error {
 		func(incommingConn redcon.Conn, incommingCommand redcon.Command) {
 			defer (func() {
 				if err := recover(); err != nil {
-					incommingConn.WriteError(fmt.Sprintf("fatal error: %s", (err.(error)).Error()))
+					incommingConn.WriteError(fmt.Sprintf("Err %s", (err.(error)).Error()))
 				}
 			})()
+
+			if opts.Verbose {
+				log.Println("<= ", string(bytes.Join(incommingCommand.Args, []byte(" "))))
+			}
 
 			if len(incommingCommand.Args) < 1 {
 				incommingConn.WriteError(errNoCommand.Error())
