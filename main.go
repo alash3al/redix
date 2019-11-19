@@ -36,12 +36,15 @@ func main() {
 		}
 	}
 
+	*flagDataDir = filepath.Join(*flagDataDir, *flagDataDriver)
+
 	initDBs()
 
 	serverOpts := server.Options{
-		DriverName: *flagDataDriver,
-		DriverOpts: parsedDriverOpts,
-		RESPAddr:   *flagRespListenAddr,
+		Openner: func(dbname string) (*db.DB, error) {
+			return db.Open(*flagDataDriver, *flagDataDir, dbname, parsedDriverOpts)
+		},
+		RESPAddr: *flagRespListenAddr,
 	}
 
 	fmt.Println("=> redis server is running on address", *flagRespListenAddr)
@@ -58,7 +61,7 @@ func initDBs() {
 	os.MkdirAll(*flagDataDir, 0755)
 
 	// ping the default db '0'
-	if _, err := db.Open(*flagDataDriver, filepath.Join(*flagDataDir, "0"), parsedDriverOpts); err != nil {
+	if _, err := db.Open(*flagDataDriver, *flagDataDir, "0", parsedDriverOpts); err != nil {
 		log.Fatal(err.Error())
 	}
 
@@ -71,7 +74,7 @@ func initDBs() {
 
 		name := filepath.Base(f.Name())
 
-		_, err := db.Open(*flagDataDriver, filepath.Join(*flagDataDir, name), parsedDriverOpts)
+		_, err := db.Open(*flagDataDriver, *flagDataDir, name, parsedDriverOpts)
 		if err != nil {
 			log.Fatal(err.Error())
 			continue

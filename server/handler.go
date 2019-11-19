@@ -4,13 +4,15 @@ package server
 var Handlers = map[string]Handler{}
 
 // HandlerFunc a command handler
-type HandlerFunc func(Context) error
+type HandlerFunc func(*Context) error
 
 // Handler represents a command handler
 type Handler struct {
 	Title       string
 	Description string
+	Examples    []string
 	Writer      bool
 	Reader      bool
-	Func        HandlerFunc
+	Group       string
+	Callback    HandlerFunc
 }

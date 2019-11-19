@@ -2,34 +2,39 @@ package db
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/alash3al/redix/db/driver"
 )
 
 // DB represents datastore
 type DB struct {
-	db driver.Interface
+	db     driver.Interface
+	name   string
+	driver string
 }
 
 // Open a database
-func Open(driverName string, dbName string, opts map[string]interface{}) (*DB, error) {
-	dbkey := fmt.Sprintf("%s_%s", dbName, driverName)
+func Open(drivername, dirname string, dbname string, opts map[string]interface{}) (*DB, error) {
+	dbkey := fmt.Sprintf("%s_%s", drivername, dbname)
 	if dbInterface, loaded := databases.Load(dbkey); loaded {
 		return dbInterface.(*DB), nil
 	}
 
-	driverImpl, exist := driver.Registry[driverName]
+	driverImpl, exist := driver.Registry[drivername]
 	if !exist {
 		return nil, ErrDriverNotFound
 	}
 
-	driverInstance, err := driverImpl.Open(dbkey, opts)
+	driverInstance, err := driverImpl.Open(filepath.Join(dirname, dbname), opts)
 	if err != nil {
 		return nil, err
 	}
 
 	db := &DB{
-		db: driverInstance,
+		db:     driverInstance,
+		name:   dbname,
+		driver: drivername,
 	}
 
 	databases.Store(dbkey, db)
@@ -46,6 +51,11 @@ func CloseAll() {
 		}
 		return true
 	})
+}
+
+// Name return the current database name
+func (db DB) Name() string {
+	return db.name
 }
 
 // Put puts new document into the storage

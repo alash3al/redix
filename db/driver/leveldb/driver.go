@@ -31,6 +31,17 @@ func (drv Driver) Put(k, v []byte) error {
 	return drv.db.Put(k, v, nil)
 }
 
+// BulkPut perform multi put operation
+func (drv Driver) BulkPut(pairs []driver.KeyValue) error {
+	batch := new(leveldb.Batch)
+
+	for _, pair := range pairs {
+		batch.Put(pair.Key, pair.Value)
+	}
+
+	return drv.db.Write(batch, nil)
+}
+
 // Get implements driver.Get
 func (drv Driver) Get(k []byte) ([]byte, error) {
 	return drv.db.Get(k, nil)
