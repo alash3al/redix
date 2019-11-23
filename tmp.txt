@@ -1,0 +1,566 @@
+=> redis server is running on address :6380
+=> selected storage driver is (leveldb) with options () 
+=> redix store data in (.redix/leveldb) 
+=> redis server is running on address :6380
+=> selected storage driver is (leveldb) with options () 
+=> redix store data in (.redix/leveldb) 
+fatal error: concurrent map writes
+
+goroutine 71 [running]:
+runtime.throw(0xa256db, 0x15)
+	/home/alash3al/Dev/core/go/root/src/runtime/panic.go:774 +0x72 fp=0xc00019ea90 sp=0xc00019ea60 pc=0x43c112
+runtime.mapassign_faststr(0x97a460, 0xc000020b10, 0xc00028e800, 0x14, 0xc00028e800)
+	/home/alash3al/Dev/core/go/root/src/runtime/map_faststr.go:291 +0x3fe fp=0xc00019eaf8 sp=0xc00019ea90 pc=0x4210ae
+github.com/alash3al/redix/db.(*DB).Incr(0xc00007c4e0, 0xc0002855d3, 0x14, 0x1d, 0x1, 0x4, 0x0, 0x0)
+	/home/alash3al/Dev/playground/redix-src/db/db.go:152 +0xcc fp=0xc00019eb78 sp=0xc00019eaf8 pc=0x5233dc
+github.com/alash3al/redix/server/handlers.init.0.func5(0xc0000c6c80, 0x9a00e0, 0xc0000c6c80)
+	/home/alash3al/Dev/playground/redix-src/server/handlers/basic.go:145 +0xd2 fp=0xc00019ecd0 sp=0xc00019eb78 pc=0x87b1a2
+github.com/alash3al/redix/server.ListenAndServe.func1(0xadeae0, 0xc0001e3380, 0xc0002855c0, 0x29, 0x30, 0xc00028d8c0, 0x2, 0x2)
+	/home/alash3al/Dev/playground/redix-src/server/server.go:59 +0x255 fp=0xc00019ee68 sp=0xc00019ecd0 pc=0x6786c5
+github.com/tidwall/redcon.handle.func2(0xc0001e3380, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:393 +0x74 fp=0xc00019ef48 sp=0xc00019ee68 pc=0x677274
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e3380)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91 fp=0xc00019efd0 sp=0xc00019ef48 pc=0x6738f1
+runtime.goexit()
+	/home/alash3al/Dev/core/go/root/src/runtime/asm_amd64.s:1357 +0x1 fp=0xc00019efd8 sp=0xc00019efd0 pc=0x468761
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 1 [syscall]:
+syscall.Syscall6(0x120, 0x71, 0xc0001178c8, 0xc0001178ac, 0x80800, 0x0, 0x0, 0x419f01, 0x73, 0x3f)
+	/home/alash3al/Dev/core/go/root/src/syscall/asm_linux_amd64.s:44 +0x5
+syscall.accept4(0x71, 0xc0001178c8, 0xc0001178ac, 0x80800, 0x41bd4b, 0xc000117940, 0xc00011e4e8)
+	/home/alash3al/Dev/core/go/root/src/syscall/zsyscall_linux_amd64.go:1484 +0x7b
+syscall.Accept4(0x71, 0x80800, 0x95b540, 0xc0001179f0, 0x9e3d40, 0xc00007c4e0, 0xc0000be401)
+	/home/alash3al/Dev/core/go/root/src/syscall/syscall_linux.go:541 +0x88
+internal/poll.accept(0x71, 0x72, 0x400, 0x0, 0x0, 0xc0000be460, 0x9, 0x425b5e)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/sock_cloexec.go:17 +0x3f
+internal/poll.(*FD).Accept(0xc000106800, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:377 +0x113
+net.(*netFD).accept(0xc000106800, 0x50, 0x9dfa60, 0x1)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:238 +0x42
+net.(*TCPListener).accept(0xc00000e4a0, 0xc000117bd8, 0xc000117be0, 0x10)
+	/home/alash3al/Dev/core/go/root/src/net/tcpsock_posix.go:139 +0x32
+net.(*TCPListener).Accept(0xc00000e4a0, 0xa42370, 0xc000146240, 0xc000146360, 0xc0000101c0)
+	/home/alash3al/Dev/core/go/root/src/net/tcpsock.go:261 +0x47
+github.com/tidwall/redcon.serve(0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:319 +0x91
+github.com/tidwall/redcon.(*Server).ListenServeAndSignal(0xc000146240, 0x0, 0x99b8c0, 0xc00011e001)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:278 +0xf9
+github.com/tidwall/redcon.(*Server).ListenAndServe(...)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:178
+github.com/tidwall/redcon.ListenAndServeNetwork(0xa1ad45, 0x3, 0xa1b579, 0x5, 0xc000021d70, 0xc000021da0, 0x0, 0x43aeba, 0xc00011e000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:249 +0xc2
+github.com/tidwall/redcon.ListenAndServe(...)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:228
+github.com/alash3al/redix/server.ListenAndServe(0xa1b579, 0x5, 0xa425a8, 0x0, 0xc000117ed0, 0x1)
+	/home/alash3al/Dev/playground/redix-src/server/server.go:25 +0xfb
+main.main()
+	/home/alash3al/Dev/playground/redix-src/main.go:63 +0x3d0
+
+goroutine 5 [select]:
+github.com/syndtr/goleveldb/leveldb/util.(*BufferPool).drain(0xc000120000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:206 +0x134
+created by github.com/syndtr/goleveldb/leveldb/util.NewBufferPool
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:237 +0x176
+
+goroutine 8 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).compactionError(0xc0000ad6c0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:90 +0xcd
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:142 +0x40c
+
+goroutine 9 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mpoolDrain(0xc0000ad6c0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_state.go:101 +0xf6
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:143 +0x42e
+
+goroutine 10 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).tCompaction(0xc0000ad6c0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:825 +0x25d
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:149 +0x582
+
+goroutine 11 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mCompaction(0xc0000ad6c0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:762 +0x150
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:150 +0x5a4
+
+goroutine 12 [chan receive]:
+github.com/alash3al/redix/db.Open.func1(0xc00007c4e0)
+	/home/alash3al/Dev/playground/redix-src/db/db.go:75 +0xd1
+created by github.com/alash3al/redix/db.Open
+	/home/alash3al/Dev/playground/redix-src/db/db.go:69 +0x398
+
+goroutine 13 [select]:
+github.com/syndtr/goleveldb/leveldb/util.(*BufferPool).drain(0xc0001200e0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:206 +0x134
+created by github.com/syndtr/goleveldb/leveldb/util.NewBufferPool
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:237 +0x176
+
+goroutine 14 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).compactionError(0xc0000ac000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:90 +0xcd
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:142 +0x40c
+
+goroutine 15 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mpoolDrain(0xc0000ac000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_state.go:101 +0xf6
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:143 +0x42e
+
+goroutine 16 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).tCompaction(0xc0000ac000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:825 +0x25d
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:149 +0x582
+
+goroutine 50 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mCompaction(0xc0000ac000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:762 +0x150
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:150 +0x5a4
+
+goroutine 51 [chan receive]:
+github.com/alash3al/redix/db.Open.func1(0xc00007c6c0)
+	/home/alash3al/Dev/playground/redix-src/db/db.go:75 +0xd1
+created by github.com/alash3al/redix/db.Open
+	/home/alash3al/Dev/playground/redix-src/db/db.go:69 +0x398
+
+goroutine 52 [select]:
+github.com/syndtr/goleveldb/leveldb/util.(*BufferPool).drain(0xc00012a000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:206 +0x134
+created by github.com/syndtr/goleveldb/leveldb/util.NewBufferPool
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:237 +0x176
+
+goroutine 35 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).compactionError(0xc0000ac1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:90 +0xcd
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:142 +0x40c
+
+goroutine 36 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mpoolDrain(0xc0000ac1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_state.go:101 +0xf6
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:143 +0x42e
+
+goroutine 37 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).tCompaction(0xc0000ac1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:825 +0x25d
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:149 +0x582
+
+goroutine 38 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mCompaction(0xc0000ac1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:762 +0x150
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:150 +0x5a4
+
+goroutine 39 [chan receive]:
+github.com/alash3al/redix/db.Open.func1(0xc0000c5560)
+	/home/alash3al/Dev/playground/redix-src/db/db.go:75 +0xd1
+created by github.com/alash3al/redix/db.Open
+	/home/alash3al/Dev/playground/redix-src/db/db.go:69 +0x398
+
+goroutine 40 [select]:
+github.com/syndtr/goleveldb/leveldb/util.(*BufferPool).drain(0xc0001202a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:206 +0x134
+created by github.com/syndtr/goleveldb/leveldb/util.NewBufferPool
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:237 +0x176
+
+goroutine 54 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).compactionError(0xc0000ac340)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:90 +0xcd
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:142 +0x40c
+
+goroutine 55 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mpoolDrain(0xc0000ac340)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_state.go:101 +0xf6
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:143 +0x42e
+
+goroutine 56 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).tCompaction(0xc0000ac340)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:825 +0x25d
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:149 +0x582
+
+goroutine 57 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mCompaction(0xc0000ac340)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:762 +0x150
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:150 +0x5a4
+
+goroutine 58 [chan receive]:
+github.com/alash3al/redix/db.Open.func1(0xc00007d680)
+	/home/alash3al/Dev/playground/redix-src/db/db.go:75 +0xd1
+created by github.com/alash3al/redix/db.Open
+	/home/alash3al/Dev/playground/redix-src/db/db.go:69 +0x398
+
+goroutine 59 [select]:
+github.com/syndtr/goleveldb/leveldb/util.(*BufferPool).drain(0xc00012a1c0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:206 +0x134
+created by github.com/syndtr/goleveldb/leveldb/util.NewBufferPool
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:237 +0x176
+
+goroutine 41 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).compactionError(0xc0001fe000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:90 +0xcd
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:142 +0x40c
+
+goroutine 42 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mpoolDrain(0xc0001fe000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_state.go:101 +0xf6
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:143 +0x42e
+
+goroutine 43 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).tCompaction(0xc0001fe000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:825 +0x25d
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:149 +0x582
+
+goroutine 44 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mCompaction(0xc0001fe000)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:762 +0x150
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:150 +0x5a4
+
+goroutine 45 [chan receive]:
+github.com/alash3al/redix/db.Open.func1(0xc0000c5440)
+	/home/alash3al/Dev/playground/redix-src/db/db.go:75 +0xd1
+created by github.com/alash3al/redix/db.Open
+	/home/alash3al/Dev/playground/redix-src/db/db.go:69 +0x398
+
+goroutine 46 [select]:
+github.com/syndtr/goleveldb/leveldb/util.(*BufferPool).drain(0xc00012a0e0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:206 +0x134
+created by github.com/syndtr/goleveldb/leveldb/util.NewBufferPool
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/util/buffer_pool.go:237 +0x176
+
+goroutine 60 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).compactionError(0xc0001fe1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:90 +0xcd
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:142 +0x40c
+
+goroutine 61 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mpoolDrain(0xc0001fe1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_state.go:101 +0xf6
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:143 +0x42e
+
+goroutine 62 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).tCompaction(0xc0001fe1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:825 +0x25d
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:149 +0x582
+
+goroutine 63 [select]:
+github.com/syndtr/goleveldb/leveldb.(*DB).mCompaction(0xc0001fe1a0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db_compaction.go:762 +0x150
+created by github.com/syndtr/goleveldb/leveldb.openDB
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/syndtr/goleveldb@v1.0.0/leveldb/db.go:150 +0x5a4
+
+goroutine 64 [chan receive]:
+github.com/alash3al/redix/db.Open.func1(0xc0001461e0)
+	/home/alash3al/Dev/playground/redix-src/db/db.go:75 +0xd1
+created by github.com/alash3al/redix/db.Open
+	/home/alash3al/Dev/playground/redix-src/db/db.go:69 +0x398
+
+goroutine 47 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfbdd8, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de418, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de400, 0xc0001c2000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de400, 0xc0001c2000, 0x1000, 0x1000, 0x190, 0xc000026768, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c2190, 0xc0001c2000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e2cc0, 0xc0001c3549, 0xab7, 0xab7, 0xc00025bc30, 0x4445cc, 0xc00018cd80)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6730, 0x0, 0x0, 0x29, 0x30, 0xc00028d620, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e2d20, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e2d20)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 48 [runnable]:
+internal/poll.runtime_pollWait(0x7f0479bfbd08, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de498, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de480, 0xc0001d8000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de480, 0xc0001d8000, 0x1000, 0x1000, 0x18d, 0xc0000267b0, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c2198, 0xc0001d8000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e2de0, 0xc0001d9520, 0xae0, 0xae0, 0xc00025cc30, 0x4445cc, 0xc00018cf00)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c67d0, 0x0, 0x0, 0x29, 0x30, 0xc00028d500, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e2e40, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e2e40)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 49 [runnable]:
+internal/poll.runtime_pollWait(0x7f0479bfbc38, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de518, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de500, 0xc0001da000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de500, 0xc0001da000, 0x1000, 0x1000, 0x18a, 0xc000026798, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21a0, 0xc0001da000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e2ea0, 0xc0001db520, 0xae0, 0xae0, 0xc00025dc30, 0x4445cc, 0xc00018d080)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6870, 0x0, 0x0, 0x29, 0x30, 0xc00028d3e0, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e2f00, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e2f00)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 66 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfbb68, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de598, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de580, 0xc0001e0000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de580, 0xc0001e0000, 0x1000, 0x1000, 0x193, 0xc000026780, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21a8, 0xc0001e0000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e2f60, 0xc0001e1520, 0xae0, 0xae0, 0xc00025ec30, 0x4445cc, 0xc00018d200)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6910, 0x0, 0x0, 0x29, 0x30, 0xc00028d740, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e2fc0, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e2fc0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 67 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfba98, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de618, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de600, 0xc0001ec000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de600, 0xc0001ec000, 0x1000, 0x1000, 0x197, 0xc0000be478, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21b0, 0xc0001ec000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e3020, 0xc0001ed520, 0xae0, 0xae0, 0xc000067c30, 0x4445cc, 0xc00018d380)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c69b0, 0x0, 0x0, 0x29, 0x30, 0xc00027db30, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e3080, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e3080)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 68 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfb9c8, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de698, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de680, 0xc0001fa000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de680, 0xc0001fa000, 0x1000, 0x1000, 0x192, 0xc0000267f8, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21b8, 0xc0001fa000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e30e0, 0xc0001fb4f7, 0xb09, 0xb09, 0xc00025fc30, 0x4445cc, 0xc00018d500)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6a50, 0x0, 0x0, 0x29, 0x30, 0xc00028d6e0, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e3140, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e3140)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 69 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfb8f8, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de718, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de700, 0xc0001fc000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de700, 0xc0001fc000, 0x1000, 0x1000, 0x196, 0xc0000267e0, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21c0, 0xc0001fc000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e31a0, 0xc0001fd4f7, 0xb09, 0xb09, 0xc00019cc30, 0x4445cc, 0xc00018d680)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6af0, 0x0, 0x0, 0x29, 0x30, 0xc00028d860, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e3200, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e3200)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 70 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfb828, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de798, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de780, 0xc000200000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de780, 0xc000200000, 0x1000, 0x1000, 0x191, 0xc0000267c8, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21c8, 0xc000200000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e3260, 0xc0002014ce, 0xb32, 0xb32, 0xc00019dc30, 0x4445cc, 0xc00018d800)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6b90, 0x0, 0x0, 0x29, 0x30, 0xc00028d680, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e32c0, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e32c0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 72 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfb688, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de898, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de880, 0xc000256000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de880, 0xc000256000, 0x1000, 0x1000, 0x18f, 0xc000026840, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21d8, 0xc000256000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e33e0, 0xc0002574f7, 0xb09, 0xb09, 0xc0001a2c30, 0x4445cc, 0xc00018db00)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6cd0, 0x0, 0x0, 0x29, 0x30, 0xc00028d5c0, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e3440, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e3440)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 73 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfb5b8, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de918, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de900, 0xc000260000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de900, 0xc000260000, 0x1000, 0x1000, 0x195, 0xc0000be4a8, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21e0, 0xc000260000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e34a0, 0xc000261520, 0xae0, 0xae0, 0xc000269c30, 0x4445cc, 0xc00018dc80)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6d70, 0x0, 0x0, 0x29, 0x30, 0xc00028d800, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e3500, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e3500)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 74 [IO wait]:
+internal/poll.runtime_pollWait(0x7f0479bfb4e8, 0x72, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/runtime/netpoll.go:184 +0x55
+internal/poll.(*pollDesc).wait(0xc0001de998, 0x72, 0x1000, 0x1000, 0xffffffffffffffff)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:87 +0x45
+internal/poll.(*pollDesc).waitRead(...)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_poll_runtime.go:92
+internal/poll.(*FD).Read(0xc0001de980, 0xc00026a000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:169 +0x1cf
+net.(*netFD).Read(0xc0001de980, 0xc00026a000, 0x1000, 0x1000, 0x194, 0xc0000be490, 0x6)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:202 +0x4f
+net.(*conn).Read(0xc0000c21e8, 0xc00026a000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:184 +0x68
+bufio.(*Reader).Read(0xc0001e3560, 0xc00026b520, 0xae0, 0xae0, 0xc000258c30, 0x4445cc, 0xc00018de00)
+	/home/alash3al/Dev/core/go/root/src/bufio/bufio.go:226 +0x26a
+github.com/tidwall/redcon.(*Reader).readCommands(0xc0000c6e10, 0x0, 0x0, 0x29, 0x30, 0xc00028d7a0, 0x2)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:866 +0x4ac
+github.com/tidwall/redcon.handle.func2(0xc0001e35c0, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:375 +0x190
+github.com/tidwall/redcon.handle(0xc000146240, 0xc0001e35c0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+
+goroutine 65 [runnable]:
+syscall.Syscall(0x1, 0x7f, 0xc000026810, 0x6, 0x6, 0x6, 0x0)
+	/home/alash3al/Dev/core/go/root/src/syscall/asm_linux_amd64.s:18 +0x5
+syscall.write(0x7f, 0xc000026810, 0x6, 0x8, 0x0, 0x4, 0xc0000b11e0)
+	/home/alash3al/Dev/core/go/root/src/syscall/zsyscall_linux_amd64.go:1005 +0x5a
+syscall.Write(...)
+	/home/alash3al/Dev/core/go/root/src/syscall/syscall_unix.go:202
+internal/poll.(*FD).Write(0xc000106880, 0xc000026810, 0x6, 0x8, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/internal/poll/fd_unix.go:268 +0x1a1
+net.(*netFD).Write(0xc000106880, 0xc000026810, 0x6, 0x8, 0x0, 0xa1b113, 0x4)
+	/home/alash3al/Dev/core/go/root/src/net/fd_unix.go:220 +0x4f
+net.(*conn).Write(0xc0000101c0, 0xc000026810, 0x6, 0x8, 0x0, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/root/src/net/net.go:196 +0x68
+github.com/tidwall/redcon.(*Writer).Flush(0xc000021f80, 0xc000146360, 0xc0002801e0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:592 +0x52
+github.com/tidwall/redcon.handle.func2(0xc000146360, 0xc000146240, 0x0, 0x0)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:402 +0x163
+github.com/tidwall/redcon.handle(0xc000146240, 0xc000146360)
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:406 +0x91
+created by github.com/tidwall/redcon.serve
+	/home/alash3al/Dev/core/go/path/pkg/mod/github.com/tidwall/redcon@v1.0.0/redcon.go:345 +0x40c
+exit status 2
+=> redis server is running on address :6380
+=> selected storage driver is (leveldb) with options () 
+=> redix store data in (.redix/leveldb) 
+signal: interrupt

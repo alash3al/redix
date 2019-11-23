@@ -68,7 +68,7 @@ func (drv Driver) Close() error {
 
 // Scan implements driver.Scan
 func (drv Driver) Scan(opts driver.ScanOpts) {
-	if opts.Filter == nil {
+	if opts.Scanner == nil {
 		return
 	}
 
@@ -121,7 +121,7 @@ func (drv Driver) Scan(opts driver.ScanOpts) {
 		copy(newK, _k)
 		copy(newV, _v)
 
-		if !opts.Filter(newK, newV) {
+		if !opts.Scanner(newK, newV) {
 			break
 		}
 	}

@@ -1,15 +1,18 @@
 package handlers
 
 import (
-	"bytes"
 	"errors"
-	"fmt"
 	"strconv"
-	"time"
+	"sync/atomic"
 
 	"github.com/alash3al/redix/db/driver"
-
 	"github.com/alash3al/redix/server"
+)
+
+var (
+	writes atomic.Value
+
+	prefix = []byte("")
 )
 
 func init() {
@@ -17,7 +20,7 @@ func init() {
 		Title:       "del",
 		Description: "remove key(s) from the database",
 		Examples:    []string{"del key1 key2 ..."},
-		Group:       "genric",
+		Group:       "core",
 		Callback: func(c *server.Context) error {
 			args := c.Args()
 
@@ -29,12 +32,7 @@ func init() {
 			pairs := []driver.KeyValue{}
 
 			for _, k := range args {
-				k = append([]byte("data/strings/keys/"), k...)
-				pairs = append(pairs, driver.KeyValue{Key: k, Value: nil})
-			}
-
-			if err := c.DB().Batch(pairs); err != nil {
-				return err
+				c.DB().DeleteAsync(append(prefix, k...))
 			}
 
 			c.Conn().WriteInt(len(pairs))
@@ -46,7 +44,7 @@ func init() {
 		Title:       "exists",
 		Description: "check whether specified key(s) already in the database",
 		Examples:    []string{"exists key1 key2 ..."},
-		Group:       "genric",
+		Group:       "core",
 		Callback: func(c *server.Context) error {
 			args := c.Args()
 
@@ -58,7 +56,7 @@ func init() {
 			i := 0
 
 			for _, k := range args {
-				k = append([]byte("data/strings/keys/"), k...)
+				k = append(prefix, k...)
 				if ok, _ := c.DB().Has(k); ok {
 					i++
 				}
@@ -73,34 +71,17 @@ func init() {
 		Title:       "get",
 		Description: "fetches a key",
 		Examples:    []string{"get foobar"},
-		Group:       "string",
+		Group:       "core",
 		Callback: func(c *server.Context) error {
 			args := c.Args()
 			if len(args) != 1 {
 				return errors.New("ERR wrong number of arguments for 'get' command")
 			}
 
-			key := append([]byte("data/strings/keys/"), args[0]...)
-
+			key := args[0]
 			val, err := c.DB().Get(key)
 			if err != nil {
-				c.Conn().WriteNull()
-				return nil
-			}
-
-			parts := bytes.SplitN(val, []byte(";"), 2)
-			if len(parts) < 2 {
-				c.Conn().WriteNull()
-				return nil
-			}
-
-			val = parts[1]
-
-			expires, _ := strconv.ParseInt(string(parts[0]), 10, 64)
-			if expires > 0 && time.Now().UnixNano() >= expires {
-				c.DB().Delete(key)
-				c.Conn().WriteNull()
-				return nil
+				return err
 			}
 
 			c.Conn().WriteString(string(val))
@@ -111,14 +92,12 @@ func init() {
 
 	server.Handlers["set"] = server.Handler{
 		Title:       "set",
-		Description: "upsert a new key value pair",
+		Description: "upsert a new key value pair (and optionally a ttl in milliseconds)",
 		Examples: []string{
 			"set key 'value'",
-			"set key 'value' EX 12",
-			"set key 'value' EX 12 NX",
-			"set key 'value' EX 12 XX",
+			"set key 'value' 1000",
 		},
-		Group: "string",
+		Group: "core",
 		Callback: func(c *server.Context) error {
 			args := c.Args()
 
@@ -126,62 +105,49 @@ func init() {
 				return errors.New("not enough argument specified")
 			}
 
-			key, value := append([]byte("data/strings/keys/"), args[0]...), args[1]
+			key, value := args[0], args[1]
+			ttl := -1
 
-			opts := args[1:]
-			ex, px := int64(0), int64(0)
-			nx, xx := false, false
-			exists, _ := c.DB().Has(key)
-
-			for i, val := range opts {
-				if bytes.EqualFold(val, []byte("ex")) || bytes.EqualFold(val, []byte("px")) {
-					if (len(opts) - 1) < (i + 1) {
-						return errors.New("you must specifiy the ttl")
-					} else if bytes.EqualFold(val, []byte("ex")) {
-						ex, _ = strconv.ParseInt(string(opts[i+1]), 10, 64)
-					} else {
-						px, _ = strconv.ParseInt(string(opts[i+1]), 10, 64)
-					}
-				}
-
-				if bytes.EqualFold(val, []byte("nx")) {
-					nx = true
-				} else if bytes.EqualFold(val, []byte("xx")) {
-					xx = true
-				}
+			if len(args) > 2 {
+				ttl, _ = strconv.Atoi(string(args[2]))
 			}
 
-			ttl := time.Duration(-1)
-			if ex > 0 {
-				ttl = time.Second * time.Duration(ex)
-			} else if px > 0 {
-				ttl = time.Second * time.Duration(px)
-			}
-
-			put := false
-
-			if nx && !exists {
-				put = true
-			} else if xx && exists {
-				put = true
-			} else if !xx && !nx {
-				put = true
-			}
-
-			expires := int64(-1)
-			if int64(ttl) > 1 {
-				expires = time.Now().Add(ttl).UnixNano()
-			}
-
-			value = append([]byte(fmt.Sprintf("%d;", expires)), value...)
-
-			if put {
-				if err := c.DB().Put(key, value); err != nil {
-					return err
-				}
-			}
+			c.DB().PutAsync(key, value, ttl)
 
 			c.Conn().WriteString("OK")
+
+			return nil
+		},
+	}
+
+	server.Handlers["incr"] = server.Handler{
+		Title:       "incr",
+		Description: "increment a key's value",
+		Examples: []string{
+			"incr key 1",
+		},
+		Group: "core",
+		Callback: func(c *server.Context) error {
+			args := c.Args()
+
+			if len(args) < 1 {
+				return errors.New("not enough argument specified")
+			}
+
+			key, delta := args[0], 1
+			if len(args) > 1 {
+				delta, _ = strconv.Atoi(string(args[1]))
+			}
+			if delta == 0 {
+				delta = 1
+			}
+
+			newVal, err := c.DB().Incr(key, delta)
+			if err != nil {
+				return err
+			}
+
+			c.Conn().WriteInt64(newVal)
 
 			return nil
 		},

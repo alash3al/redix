@@ -13,16 +13,17 @@ import (
 	"github.com/alash3al/redix/db"
 	"github.com/alash3al/redix/server"
 
+	_ "github.com/alash3al/redix/db/driver/badgerdb"
 	_ "github.com/alash3al/redix/db/driver/leveldb"
 	_ "github.com/alash3al/redix/server/handlers"
 )
 
 var (
 	flagRespListenAddr = flag.String("listen.resp", ":6380", "the local interface address to bind the server to")
-	flagDataDriver     = flag.String("storage.driver", "leveldb", "the storage driver to use")
+	flagDataDriver     = flag.String("storage.driver", "badgerdb", "the storage driver to use")
 	flagDataDir        = flag.String("storage.datadir", "./.redix", "the storage data directory")
 	flagDriverOpts     = flag.String("storage.opts", "", "the storage engine options")
-	flagWorkers        = flag.Int("workers", 2, "the server workers count")
+	flagWorkers        = flag.Int("workers", 2, "how many threads should redix use, change it based on your needs")
 	flagVerbose        = flag.Bool("verbose", false, "whether to enable verbose mode or not")
 )
 

@@ -16,6 +16,7 @@ type Interface interface {
 type KeyValue struct {
 	Key   []byte
 	Value []byte
+	TTL   int
 }
 
 // Registry a registry for available drivers

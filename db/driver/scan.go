@@ -4,10 +4,10 @@ package driver
 type ScanOpts struct {
 	Prefix        []byte
 	Offset        []byte
-	Filter        ScanFilter
+	Scanner       Scanner
 	IncludeOffset bool
 	ReverseScan   bool
 }
 
-// ScanFilter a function that performs the scanning/filterig
-type ScanFilter func([]byte, []byte) bool
+// Scanner a function that performs the scanning/filterig
+type Scanner func([]byte, []byte) bool
