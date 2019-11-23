@@ -14,6 +14,7 @@ import (
 	"github.com/alash3al/redix/server"
 
 	_ "github.com/alash3al/redix/db/driver/badgerdb"
+	_ "github.com/alash3al/redix/db/driver/boltdb"
 	_ "github.com/alash3al/redix/db/driver/leveldb"
 	_ "github.com/alash3al/redix/server/handlers"
 )

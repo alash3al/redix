@@ -128,10 +128,10 @@ func (db DB) Put(key []byte, value []byte, ttl int) error {
 	return db.put(key, value, ttl)
 }
 
-// Batch a bulk pairs writer
-func (db DB) Batch(pairs []driver.KeyValue) error {
-	return db.db.Batch(pairs)
-}
+// // Batch a bulk pairs writer
+// func (db DB) Batch(pairs []driver.KeyValue) error {
+// 	return db.db.Batch(pairs)
+// }
 
 // Incr increments a key
 func (db *DB) Incr(key []byte, delta int) (int64, error) {

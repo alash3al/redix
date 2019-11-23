@@ -19,10 +19,12 @@ func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver drive
 	// badgerOpts.SyncWrites = false
 	// badgerOpts.TableLoadingMode = options.FileIO
 	// badgerOpts.ValueLogLoadingMode = options.FileIO
-	// badgerOpts.NumMemtables = 2
-	// badgerOpts.MaxTableSize = 5 << 20
-	// badgerOpts.NumLevelZeroTables = 2
+	// badgerOpts.NumMemtables = 1
+	// badgerOpts.MaxTableSize = 1 << 20
+	// badgerOpts.NumLevelZeroTables = 1
 	// badgerOpts.ValueThreshold = 1
+	// badgerOpts.KeepL0InMemory = false
+
 	db, err := badger.Open(badgerOpts)
 
 	if err != nil {

@@ -2,7 +2,9 @@ package leveldb
 
 import (
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/filter"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
 
 	"github.com/alash3al/redix/db/driver"
@@ -15,7 +17,11 @@ type Driver struct {
 
 // Open implements driver.Open
 func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver driver.Interface, err error) {
-	db, err := leveldb.OpenFile(dbname, nil)
+	o := &opt.Options{
+		Filter: filter.NewBloomFilter(10),
+	}
+
+	db, err := leveldb.OpenFile(dbname, o)
 
 	if err != nil {
 		return driver, err

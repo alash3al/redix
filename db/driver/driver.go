@@ -6,7 +6,7 @@ type Interface interface {
 	Put([]byte, []byte) error
 	Get([]byte) ([]byte, error)
 	Has([]byte) (bool, error)
-	Batch([]KeyValue) error
+	// Batch([]KeyValue) error
 	Delete([]byte) error
 	Scan(ScanOpts)
 	Close() error
