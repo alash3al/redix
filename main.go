@@ -21,27 +21,32 @@ import (
 
 var (
 	flagRespListenAddr = flag.String("listen.resp", ":6380", "the local interface address to bind the server to")
-	flagDataDriver     = flag.String("storage.driver", "badgerdb", "the storage driver to use")
+	flagDataDriver     = flag.String("storage.driver", "leveldb", "the storage driver to use")
 	flagDataDir        = flag.String("storage.datadir", "./.redix", "the storage data directory")
 	flagDriverOpts     = flag.String("storage.opts", "", "the storage engine options")
-	flagWorkers        = flag.Int("workers", 2, "how many threads should redix use, change it based on your needs")
+	flagAsyncWrites    = flag.Bool("storage.async", true, "the writing mode sync/async, sync means 'write the data now' unlike async mode which writes the data in the background enables you to handle more writes per seconds")
+	flagWorkers        = flag.Int("workers", 0, "how many threads should redix use, change it based on your needs, 0 means auto")
 	flagVerbose        = flag.Bool("verbose", false, "whether to enable verbose mode or not")
 )
 
 var (
-	parsedDriverOpts map[string]interface{}
+	parsedDriverOpts = map[string]interface{}{}
 )
 
 func main() {
 	flag.Parse()
 
-	runtime.GOMAXPROCS(*flagWorkers)
+	if *flagWorkers > 0 {
+		runtime.GOMAXPROCS(*flagWorkers)
+	}
 
 	if *flagDriverOpts != "" {
 		if err := json.Unmarshal([]byte(*flagDriverOpts), &parsedDriverOpts); err != nil {
 			log.Fatal("You must specified a valid json string in the storage options flag")
 		}
 	}
+
+	parsedDriverOpts["async"] = *flagAsyncWrites
 
 	*flagDataDir = filepath.Join(*flagDataDir, *flagDataDriver)
 

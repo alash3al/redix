@@ -16,57 +16,6 @@ var (
 )
 
 func init() {
-	server.Handlers["del"] = server.Handler{
-		Title:       "del",
-		Description: "remove key(s) from the database",
-		Examples:    []string{"del key1 key2 ..."},
-		Group:       "core",
-		Callback: func(c *server.Context) error {
-			args := c.Args()
-
-			if len(args) < 1 {
-				c.Conn().WriteInt(0)
-				return nil
-			}
-
-			pairs := []driver.KeyValue{}
-
-			for _, k := range args {
-				c.DB().DeleteAsync(append(prefix, k...))
-			}
-
-			c.Conn().WriteInt(len(pairs))
-			return nil
-		},
-	}
-
-	server.Handlers["exists"] = server.Handler{
-		Title:       "exists",
-		Description: "check whether specified key(s) already in the database",
-		Examples:    []string{"exists key1 key2 ..."},
-		Group:       "core",
-		Callback: func(c *server.Context) error {
-			args := c.Args()
-
-			if len(args) < 1 {
-				c.Conn().WriteInt(0)
-				return nil
-			}
-
-			i := 0
-
-			for _, k := range args {
-				k = append(prefix, k...)
-				if ok, _ := c.DB().Has(k); ok {
-					i++
-				}
-			}
-
-			c.Conn().WriteInt(i)
-			return nil
-		},
-	}
-
 	server.Handlers["get"] = server.Handler{
 		Title:       "get",
 		Description: "fetches a key",
@@ -112,7 +61,7 @@ func init() {
 				ttl, _ = strconv.Atoi(string(args[2]))
 			}
 
-			c.DB().PutAsync(key, value, ttl)
+			c.DB().Put(key, value, ttl)
 
 			c.Conn().WriteString("OK")
 
@@ -120,35 +69,53 @@ func init() {
 		},
 	}
 
-	server.Handlers["incr"] = server.Handler{
-		Title:       "incr",
-		Description: "increment a key's value",
-		Examples: []string{
-			"incr key 1",
-		},
-		Group: "core",
+	server.Handlers["exists"] = server.Handler{
+		Title:       "exists",
+		Description: "check whether specified key(s) already in the database",
+		Examples:    []string{"exists key1 key2 ..."},
+		Group:       "core",
 		Callback: func(c *server.Context) error {
 			args := c.Args()
 
 			if len(args) < 1 {
-				return errors.New("not enough argument specified")
+				c.Conn().WriteInt(0)
+				return nil
 			}
 
-			key, delta := args[0], 1
-			if len(args) > 1 {
-				delta, _ = strconv.Atoi(string(args[1]))
-			}
-			if delta == 0 {
-				delta = 1
-			}
+			i := 0
 
-			newVal, err := c.DB().Incr(key, delta)
-			if err != nil {
-				return err
+			for _, k := range args {
+				k = append(prefix, k...)
+				if ok, _ := c.DB().Has(k); ok {
+					i++
+				}
 			}
 
-			c.Conn().WriteInt64(newVal)
+			c.Conn().WriteInt(i)
+			return nil
+		},
+	}
 
+	server.Handlers["del"] = server.Handler{
+		Title:       "del",
+		Description: "remove key(s) from the database",
+		Examples:    []string{"del key1 key2 ..."},
+		Group:       "core",
+		Callback: func(c *server.Context) error {
+			args := c.Args()
+
+			if len(args) < 1 {
+				c.Conn().WriteInt(0)
+				return nil
+			}
+
+			pairs := []driver.KeyValue{}
+
+			for _, k := range args {
+				c.DB().Put(append(prefix, k...), nil, 0)
+			}
+
+			c.Conn().WriteInt(len(pairs))
 			return nil
 		},
 	}
