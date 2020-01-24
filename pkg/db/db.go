@@ -14,7 +14,6 @@ type DB struct {
 	provider driver.Interface
 	name     string
 	driver   string
-	writes   chan driver.Pair
 	buffer   []driver.Pair
 	l        *sync.RWMutex
 }
@@ -41,7 +40,6 @@ func Open(provider, dirname string, dbname string, opts map[string]interface{}) 
 		provider: driverInstance,
 		name:     dbname,
 		driver:   provider,
-		writes:   make(chan driver.Pair, 1000),
 		buffer:   []driver.Pair{},
 		l:        &sync.RWMutex{},
 	}
@@ -53,9 +51,10 @@ func Open(provider, dirname string, dbname string, opts map[string]interface{}) 
 			time.Sleep(time.Second * 1)
 
 			db.l.Lock()
+
 			newBuffer := make([]driver.Pair, len(db.buffer))
 			copy(newBuffer, db.buffer)
-			db.buffer = db.buffer[:0]
+			db.buffer = nil
 
 			db.l.Unlock()
 
@@ -85,7 +84,7 @@ func (db DB) Name() string {
 }
 
 // Put writes a key - value pair into the database
-func (db DB) Put(pair driver.Pair) error {
+func (db *DB) Put(pair driver.Pair) error {
 	if pair.Async {
 		return db.commitAsync(pair)
 	}
@@ -105,7 +104,16 @@ func (db DB) Get(key []byte) (*driver.Pair, error) {
 		return nil, err
 	}
 
-	return &pair, nil
+	if pair == nil {
+		return nil, nil
+	}
+
+	if pair.TTL > 0 && time.Now().Sub(pair.CommitedAt).Seconds() >= float64(pair.TTL) {
+		db.commitAsync(driver.Pair{Key: pair.Key})
+		return nil, nil
+	}
+
+	return pair, nil
 }
 
 // Has whether a key exists or not

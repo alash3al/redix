@@ -18,7 +18,8 @@ type Driver struct {
 // Open implements driver.Open
 func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver driver.Interface, err error) {
 	o := &opt.Options{
-		Filter: filter.NewBloomFilter(10),
+		Filter:         filter.NewBloomFilter(10),
+		ErrorIfMissing: false,
 	}
 
 	db, err := leveldb.OpenFile(dbname, o)
@@ -54,7 +55,12 @@ func (drv Driver) Batch(pairs []driver.Pair) error {
 
 // Get implements driver.Get
 func (drv Driver) Get(k []byte) ([]byte, error) {
-	return drv.db.Get(k, nil)
+	val, err := drv.db.Get(k, nil)
+	if err == leveldb.ErrNotFound {
+		return nil, nil
+	}
+
+	return val, err
 }
 
 // Has implements driver.Has

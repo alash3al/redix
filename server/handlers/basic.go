@@ -33,8 +33,12 @@ func init() {
 				return err
 			}
 
-			c.Conn().WriteString(string(pair.Value))
+			if pair == nil {
+				c.Conn().WriteNull()
+				return nil
+			}
 
+			c.Conn().WriteString(string(pair.Value))
 			return nil
 		},
 	}
@@ -61,12 +65,14 @@ func init() {
 				ttl, _ = strconv.Atoi(string(args[2]))
 			}
 
-			c.DB().Put(driver.Pair{
+			if err := c.DB().Put(driver.Pair{
 				Key:   key,
 				Value: value,
 				TTL:   ttl,
 				Async: true,
-			})
+			}); err != nil {
+				return err
+			}
 
 			c.Conn().WriteString("OK")
 

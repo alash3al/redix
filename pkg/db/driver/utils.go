@@ -8,7 +8,10 @@ func EncodePair(pair Pair) ([]byte, error) {
 }
 
 // DecodePair decodes the specified bytes as pair
-func DecodePair(data []byte) (pair Pair, err error) {
+func DecodePair(data []byte) (pair *Pair, err error) {
+	if data == nil {
+		return
+	}
 	err = msgpack.Unmarshal(data, &pair)
 	return
 }

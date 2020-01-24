@@ -25,6 +25,6 @@ type Pair struct {
 	Value       []byte
 	TTL         int
 	Async       bool
-	WriteMerger func(Pair, Pair) []byte
+	WriteMerger func(Pair, Pair) []byte `msgpack:"-"`
 	CommitedAt  time.Time
 }
