@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/alash3al/redix/db"
+	"github.com/alash3al/redix/pkg/db"
 	"github.com/tidwall/redcon"
 )
 

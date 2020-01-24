@@ -1,7 +1,7 @@
 package boltdb
 
 import (
-	"github.com/alash3al/redix/db/driver"
+	"github.com/alash3al/redix/pkg/db/driver"
 )
 
 const (

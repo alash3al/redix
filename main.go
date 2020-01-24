@@ -10,12 +10,12 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/alash3al/redix/db"
+	"github.com/alash3al/redix/pkg/db"
 	"github.com/alash3al/redix/server"
 
-	_ "github.com/alash3al/redix/db/driver/badgerdb"
-	_ "github.com/alash3al/redix/db/driver/boltdb"
-	_ "github.com/alash3al/redix/db/driver/leveldb"
+	_ "github.com/alash3al/redix/pkg/db/providers/badgerdb"
+	_ "github.com/alash3al/redix/pkg/db/providers/boltdb"
+	_ "github.com/alash3al/redix/pkg/db/providers/leveldb"
 	_ "github.com/alash3al/redix/server/handlers"
 )
 
@@ -24,7 +24,6 @@ var (
 	flagDataDriver     = flag.String("storage.driver", "leveldb", "the storage driver to use")
 	flagDataDir        = flag.String("storage.datadir", "./.redix", "the storage data directory")
 	flagDriverOpts     = flag.String("storage.opts", "", "the storage engine options")
-	flagAsyncWrites    = flag.Bool("storage.async", true, "the writing mode sync/async, sync means 'write the data now' unlike async mode which writes the data in the background enables you to handle more writes per seconds")
 	flagWorkers        = flag.Int("workers", 0, "how many threads should redix use, change it based on your needs, 0 means auto")
 	flagVerbose        = flag.Bool("verbose", false, "whether to enable verbose mode or not")
 )
@@ -46,8 +45,6 @@ func main() {
 		}
 	}
 
-	parsedDriverOpts["async"] = *flagAsyncWrites
-
 	*flagDataDir = filepath.Join(*flagDataDir, *flagDataDriver)
 
 	initDBs()
@@ -61,7 +58,7 @@ func main() {
 	}
 
 	fmt.Println("=> redis server is running on address", *flagRespListenAddr)
-	fmt.Printf("=> selected storage driver is (%s) with options (%s) \n", *flagDataDriver, *flagDriverOpts)
+	fmt.Printf("=> selected storage driver provider is (%s) with options (%s) \n", *flagDataDriver, *flagDriverOpts)
 	fmt.Printf("=> redix store data in (%s) \n", *flagDataDir)
 
 	defer db.CloseAll()

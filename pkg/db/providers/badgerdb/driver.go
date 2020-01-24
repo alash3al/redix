@@ -3,7 +3,7 @@ package badgerdb
 import (
 	"time"
 
-	"github.com/alash3al/redix/db/driver"
+	"github.com/alash3al/redix/pkg/db/driver"
 	"github.com/dgraph-io/badger/v2"
 )
 
@@ -58,7 +58,7 @@ func (drv Driver) Put(k, v []byte) error {
 }
 
 // Batch perform multi put operation, empty value means *delete*
-func (drv Driver) Batch(pairs []driver.KeyValue) error {
+func (drv Driver) Batch(pairs []driver.Pair) error {
 	batch := drv.db.NewWriteBatch()
 
 	for _, pair := range pairs {

@@ -3,7 +3,7 @@ package boltdb
 import (
 	"bytes"
 
-	"github.com/alash3al/redix/db/driver"
+	"github.com/alash3al/redix/pkg/db/driver"
 
 	bbolt "go.etcd.io/bbolt"
 )

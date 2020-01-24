@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"github.com/alash3al/redix/db/driver"
+	"github.com/alash3al/redix/pkg/db/driver"
 	"github.com/alash3al/redix/server"
 )
 
@@ -28,12 +28,12 @@ func init() {
 			}
 
 			key := args[0]
-			val, err := c.DB().Get(key)
+			pair, err := c.DB().Get(key)
 			if err != nil {
 				return err
 			}
 
-			c.Conn().WriteString(string(val))
+			c.Conn().WriteString(string(pair.Value))
 
 			return nil
 		},
@@ -61,7 +61,12 @@ func init() {
 				ttl, _ = strconv.Atoi(string(args[2]))
 			}
 
-			c.DB().Put(key, value, ttl)
+			c.DB().Put(driver.Pair{
+				Key:   key,
+				Value: value,
+				TTL:   ttl,
+				Async: true,
+			})
 
 			c.Conn().WriteString("OK")
 
@@ -109,13 +114,15 @@ func init() {
 				return nil
 			}
 
-			pairs := []driver.KeyValue{}
-
 			for _, k := range args {
-				c.DB().Put(append(prefix, k...), nil, 0)
+				c.DB().Put(driver.Pair{
+					Key:   append(prefix, k...),
+					Async: true,
+				})
 			}
 
-			c.Conn().WriteInt(len(pairs))
+			c.Conn().WriteInt(len(args))
+
 			return nil
 		},
 	}
