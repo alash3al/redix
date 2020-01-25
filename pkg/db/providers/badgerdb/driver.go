@@ -13,7 +13,7 @@ type Driver struct {
 }
 
 // Open implements driver.Open
-func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver driver.Interface, err error) {
+func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver driver.IDriver, err error) {
 	badgerOpts := badger.DefaultOptions(dbname)
 	// badgerOpts.Truncate = true
 	// badgerOpts.SyncWrites = false

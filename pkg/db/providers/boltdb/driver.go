@@ -14,7 +14,7 @@ type Driver struct {
 }
 
 // Open - Opens the specified path
-func (db Driver) Open(path string, opts map[string]interface{}) (driver.Interface, error) {
+func (db Driver) Open(path string, opts map[string]interface{}) (driver.IDriver, error) {
 	bdb, err := bbolt.Open(path, 0600, nil)
 	if err != nil {
 		return nil, err

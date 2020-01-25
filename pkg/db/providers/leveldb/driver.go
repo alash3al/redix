@@ -16,7 +16,7 @@ type Driver struct {
 }
 
 // Open implements driver.Open
-func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver driver.Interface, err error) {
+func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver driver.IDriver, err error) {
 	o := &opt.Options{
 		Filter:         filter.NewBloomFilter(10),
 		ErrorIfMissing: false,

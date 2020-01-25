@@ -11,7 +11,7 @@ import (
 
 // DB represents datastore
 type DB struct {
-	provider driver.Interface
+	provider driver.IDriver
 	name     string
 	driver   string
 	buffer   []driver.Pair
@@ -26,9 +26,9 @@ func Open(provider, dirname string, dbname string, opts map[string]interface{}) 
 		return dbInterface.(*DB), nil
 	}
 
-	driverImpl, exist := driver.Registry[provider]
-	if !exist {
-		return nil, ErrDriverNotFound
+	driverImpl, err := driver.Get(provider)
+	if err != nil {
+		return nil, err
 	}
 
 	driverInstance, err := driverImpl.Open(filepath.Join(dirname, dbname), opts)

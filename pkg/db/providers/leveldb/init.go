@@ -9,5 +9,5 @@ const (
 )
 
 func init() {
-	driver.Registry["leveldb"] = Driver{}
+	driver.Register("leveldb", Driver{})
 }
