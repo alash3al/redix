@@ -1,6 +1,8 @@
 package leveldb
 
 import (
+	"fmt"
+
 	"github.com/alash3al/redix/pkg/db/driver"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/filter"
@@ -49,6 +51,7 @@ func (drv Driver) Batch(entries []driver.Entry) error {
 	batch := new(leveldb.Batch)
 
 	for _, entry := range entries {
+		fmt.Println(entry)
 		if entry.Value == nil {
 			batch.Delete(entry.Key)
 		} else {
@@ -69,8 +72,9 @@ func (drv Driver) Get(k []byte) ([]byte, error) {
 	}
 
 	val := BytesToValue(b)
+
 	if val.Expires != nil && val.IsExpired() {
-		return nil, nil
+		return nil, driver.ErrKeyExpired
 	}
 
 	return val.Value, err

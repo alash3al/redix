@@ -16,7 +16,7 @@ var (
 )
 
 const (
-	defaultAsyncModeWindowDuration = time.Second * 5
+	defaultAsyncModeWindowDuration = time.Second * 1
 )
 
 // CloseAll close all opened dbs
@@ -142,16 +142,17 @@ func (db *DB) Put(entry driver.Entry) error {
 }
 
 // Get fetches a document using its primary key
-func (db DB) Get(key []byte) ([]byte, error) {
+func (db *DB) Get(key []byte) ([]byte, error) {
 	data, err := db.provider.Get(key)
 	if err == driver.ErrKeyExpired {
 		db.l.Lock()
 		defer db.l.Unlock()
 
-		db.writes = append(db.writes, driver.Entry{Key: key})
+		db.writes = append(db.writes, driver.Entry{Key: key, Value: nil})
 
 		return nil, nil
 	}
+
 	if err != nil {
 		return nil, err
 	}

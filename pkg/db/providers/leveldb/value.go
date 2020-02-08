@@ -1,9 +1,10 @@
 package leveldb
 
 import (
+	"time"
+
 	"github.com/alash3al/redix/pkg/db/driver"
 	"github.com/vmihailenco/msgpack/v4"
-	"time"
 )
 
 // Value represents a value with expiration date
@@ -32,7 +33,7 @@ func EntryToValue(e driver.Entry) Value {
 	}
 
 	if e.TTL > 0 {
-		expires := time.Now().Add(time.Duration(e.TTL))
+		expires := time.Now().Add(time.Duration(e.TTL) * time.Second)
 		val.Expires = &expires
 	}
 
