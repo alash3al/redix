@@ -2,8 +2,9 @@ package container
 
 import (
 	"fmt"
-	"github.com/alash3al/redix/pkg/db/driver"
 	"strconv"
+
+	"github.com/alash3al/redix/pkg/db/driver"
 )
 
 func (c Container) Set(k, v []byte, ttl int) error {
@@ -24,18 +25,20 @@ func (c Container) Del(k []byte) error {
 	})
 }
 
-func (c Container) Incr(k []byte, delta float64, ttl int) error {
-	return c.db.Put(driver.Entry{
+func (c Container) Incr(k []byte, delta float64, ttl int) (counter float64, err error) {
+	err = c.db.Put(driver.Entry{
 		Key:   k,
 		Value: []byte(fmt.Sprintf("%f", delta)),
 		TTL:   ttl,
 		WriteMerger: func(oldValue []byte, newValue []byte) []byte {
-			c, _ := strconv.ParseFloat(string(oldValue), 64)
+			counter, _ = strconv.ParseFloat(string(oldValue), 64)
 			delta, _ := strconv.ParseFloat(string(newValue), 64)
 
-			c += delta
+			counter += delta
 
-			return []byte(fmt.Sprintf("%f", c))
+			return []byte(fmt.Sprintf("%f", counter))
 		},
 	})
+
+	return
 }
