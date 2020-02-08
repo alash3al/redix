@@ -1,4 +1,4 @@
-package server
+package resp
 
 import "errors"
 

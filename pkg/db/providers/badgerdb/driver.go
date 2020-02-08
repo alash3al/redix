@@ -3,8 +3,11 @@ package badgerdb
 import (
 	"time"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/alash3al/redix/pkg/db/driver"
 	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v2/options"
 )
 
 // Driver represents a driver
@@ -13,20 +16,13 @@ type Driver struct {
 }
 
 // Open implements driver.Open
-func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver driver.IDriver, err error) {
-	badgerOpts := badger.DefaultOptions(dbname)
-	// badgerOpts.Truncate = true
-	// badgerOpts.SyncWrites = false
-	// badgerOpts.TableLoadingMode = options.FileIO
-	// badgerOpts.ValueLogLoadingMode = options.FileIO
-	// badgerOpts.NumMemtables = 1
-	// badgerOpts.MaxTableSize = 1 << 20
-	// badgerOpts.NumLevelZeroTables = 1
-	// badgerOpts.ValueThreshold = 1
-	// badgerOpts.KeepL0InMemory = false
+func (drv Driver) Open(dbname string, opts gjson.Result) (driver driver.IDriver, err error) {
+	badgerOpts := badger.LSMOnlyOptions(dbname)
+	badgerOpts.Compression = options.Snappy
+	badgerOpts.SyncWrites = !opts.Get("sync_writes").Exists() || opts.Get("sync_writes").Bool()
+	badgerOpts.Logger = nil
 
 	db, err := badger.Open(badgerOpts)
-
 	if err != nil {
 		return driver, err
 	}
@@ -51,21 +47,41 @@ func (drv Driver) Open(dbname string, opts map[string]interface{}) (driver drive
 }
 
 // Put implements driver.Put
-func (drv Driver) Put(k, v []byte) error {
+func (drv Driver) Put(entry driver.Entry) error {
 	return drv.db.Update(func(txn *badger.Txn) error {
-		return txn.Set(k, v)
+		if entry.TTL > 0 {
+			badgerEntry := badger.NewEntry(entry.Key, entry.Value)
+			badgerEntry.WithTTL(time.Duration(entry.TTL) * time.Second)
+			return txn.SetEntry(badgerEntry)
+		}
+
+		return txn.Set(entry.Key, entry.Value)
 	})
 }
 
 // Batch perform multi put operation, empty value means *delete*
-func (drv Driver) Batch(pairs []driver.Pair) error {
+func (drv Driver) Batch(entries []driver.Entry) error {
 	batch := drv.db.NewWriteBatch()
+	defer batch.Cancel()
 
-	for _, pair := range pairs {
-		if pair.Value == nil {
-			batch.Delete(pair.Key)
+	for _, entry := range entries {
+		var err error
+		if entry.Value == nil {
+			err = batch.Delete(entry.Key)
 		} else {
-			batch.Set(pair.Key, pair.Value)
+			if entry.TTL > 0 {
+				badgerEntry := badger.NewEntry(entry.Key, entry.Value)
+				badgerEntry.WithTTL(time.Duration(entry.TTL) * time.Second)
+
+				err = batch.SetEntry(badgerEntry)
+			} else {
+				err = batch.Set(entry.Key, entry.Value)
+			}
+		}
+
+		if err != nil {
+			batch.Cancel()
+			return err
 		}
 	}
 
@@ -77,6 +93,10 @@ func (drv Driver) Get(k []byte) ([]byte, error) {
 	var data []byte
 	err := drv.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(k)
+		if err == badger.ErrKeyNotFound {
+			data = nil
+			return nil
+		}
 		if err != nil {
 			return err
 		}
@@ -133,26 +153,20 @@ func (drv Driver) Scan(opts driver.ScanOpts) {
 	iterOpts := badger.DefaultIteratorOptions
 	iterOpts.Reverse = opts.ReverseScan
 
+	if len(opts.Prefix) > 0 {
+		iterOpts.Prefix = opts.Prefix
+	}
+
 	iter := txn.NewIterator(iterOpts)
 	defer iter.Close()
 
-	valid := func() bool {
-		if opts.Prefix != nil {
-			return iter.ValidForPrefix(opts.Prefix)
-		}
-
-		return iter.Valid()
+	if opts.Offset != nil {
+		iter.Seek(opts.Offset)
+	} else {
+		iter.Rewind()
 	}
 
-	rewind := func() {
-		if opts.Offset != nil {
-			iter.Seek(opts.Offset)
-		} else {
-			iter.Rewind()
-		}
-	}
-
-	for rewind(); valid(); iter.Next() {
+	for ; iter.Valid(); iter.Next() {
 		item := iter.Item()
 
 		key := item.KeyCopy(nil)

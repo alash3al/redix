@@ -1,8 +1,9 @@
-package server
+package resp
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/alash3al/redix/pkg/db/container"
 	"log"
 	"strings"
 
@@ -56,10 +57,7 @@ func ListenAndServe(opts Options) error {
 
 			ctx.args = incommingCommand.Args[1:]
 
-			if err := handler.Callback(ctx); err != nil {
-				incommingConn.WriteError(err.Error())
-				return
-			}
+			handler.Callback(ctx)
 		},
 		func(conn redcon.Conn) bool {
 			defaultDB, err := opts.Openner("0")
@@ -71,7 +69,7 @@ func ListenAndServe(opts Options) error {
 			conn.SetContext(&Context{
 				conn:       conn,
 				serverOpts: opts,
-				db:         defaultDB,
+				container:  container.NewContainer(defaultDB),
 			})
 
 			return true

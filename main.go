@@ -1,51 +1,40 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 
+	server "github.com/alash3al/redix/internal/server/resp"
 	"github.com/alash3al/redix/pkg/db"
-	"github.com/alash3al/redix/server"
+	"github.com/tidwall/gjson"
 
+	_ "github.com/alash3al/redix/internal/server/resp/commands"
 	_ "github.com/alash3al/redix/pkg/db/providers/badgerdb"
-	_ "github.com/alash3al/redix/pkg/db/providers/boltdb"
 	_ "github.com/alash3al/redix/pkg/db/providers/leveldb"
-	_ "github.com/alash3al/redix/server/handlers"
 )
 
 var (
 	flagRespListenAddr = flag.String("listen.resp", ":6380", "the local interface address to bind the server to")
-	flagDataDriver     = flag.String("storage.driver", "leveldb", "the storage driver to use")
+	flagDataDriver     = flag.String("storage.driver", "badgerdb", "the storage driver to use")
 	flagDataDir        = flag.String("storage.datadir", "./.redix", "the storage data directory")
 	flagDriverOpts     = flag.String("storage.opts", "", "the storage engine options")
-	flagWorkers        = flag.Int("workers", 0, "how many threads should redix use, change it based on your needs, 0 means auto")
 	flagVerbose        = flag.Bool("verbose", false, "whether to enable verbose mode or not")
 )
 
 var (
-	parsedDriverOpts = map[string]interface{}{}
+	parsedDriverOpts gjson.Result
 )
 
 func main() {
 	flag.Parse()
 
-	if *flagWorkers > 0 {
-		runtime.GOMAXPROCS(*flagWorkers)
-	}
-
-	if *flagDriverOpts != "" {
-		if err := json.Unmarshal([]byte(*flagDriverOpts), &parsedDriverOpts); err != nil {
-			log.Fatal("You must specified a valid json string in the storage options flag")
-		}
-	}
-
 	*flagDataDir = filepath.Join(*flagDataDir, *flagDataDriver)
+
+	parsedDriverOpts = gjson.Parse(*flagDriverOpts)
 
 	initDBs()
 

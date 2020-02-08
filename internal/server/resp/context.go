@@ -1,7 +1,7 @@
-package server
+package resp
 
 import (
-	"github.com/alash3al/redix/pkg/db"
+	containerapi "github.com/alash3al/redix/pkg/db/container"
 	"github.com/tidwall/redcon"
 )
 
@@ -9,7 +9,7 @@ import (
 type Context struct {
 	conn       redcon.Conn
 	args       [][]byte
-	db         *db.DB
+	container  *containerapi.Container
 	serverOpts Options
 }
 
@@ -24,19 +24,19 @@ func (c Context) Args() [][]byte {
 }
 
 // DB returns the underlying database instance
-func (c Context) DB() *db.DB {
-	return c.db
+func (c Context) Container() *containerapi.Container {
+	return c.container
 }
 
 // ChangeDB opens the specified database and set it into the context
-func (c Context) ChangeDB(dbname string) (*db.DB, error) {
+func (c Context) ChangeDB(dbname string) (*containerapi.Container, error) {
 	db, err := c.serverOpts.Openner(dbname)
 
 	if err != nil {
 		return nil, err
 	}
 
-	c.db = db
+	c.container = containerapi.NewContainer(db)
 
-	return c.db, nil
+	return c.container, nil
 }

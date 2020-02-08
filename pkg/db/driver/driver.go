@@ -2,7 +2,8 @@ package driver
 
 import (
 	"sync"
-	"time"
+
+	"github.com/tidwall/gjson"
 )
 
 // providers a providers for available drivers
@@ -13,24 +14,14 @@ var (
 
 // IDriver an interface describes a storage backend
 type IDriver interface {
-	Open(string, map[string]interface{}) (IDriver, error)
-	Put([]byte, []byte) error
+	Open(name string, options gjson.Result) (IDriver, error)
+	Put(Entry) error
 	Get([]byte) ([]byte, error)
 	Has([]byte) (bool, error)
-	// Batch([]Pair) error
 	Delete([]byte) error
+	Batch([]Entry) error
 	Scan(ScanOpts)
 	Close() error
-}
-
-// Pair represents a key - value pair
-type Pair struct {
-	Key         []byte
-	Value       []byte
-	TTL         int
-	Async       bool
-	WriteMerger func(Pair, Pair) []byte `msgpack:"-"`
-	CommitedAt  time.Time
 }
 
 // Register register a new driver
