@@ -7,12 +7,13 @@ import (
 
 	"github.com/alash3al/redix/internals/db"
 	"github.com/alash3al/redix/internals/resp"
+	_ "github.com/alash3al/redix/internals/resp/commands"
 )
 
 var (
 	flagRespListenAddr = flag.String("listen.resp", ":6380", "the local interface address to bind the server to")
 	flagDataDir        = flag.String("storage.datadir", "./.redix", "the storage data directory")
-	flagWriteQueueSize = flag.Int("storage.write_queue_size", 0, "the write queue size, <= 0 means disable queue and write to the underlying storage directly else, write into the memory first, then flush to the disk")
+	flagWriteQueueSize = flag.Int("storage.queue.size", 0, "the write queue size, <= 0 means disable queue and write to the underlying storage directly else, write into the memory first, then flush to the disk")
 	flagVerbose        = flag.Bool("verbose", false, "whether to enable verbose mode or not")
 )
 

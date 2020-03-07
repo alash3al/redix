@@ -8,8 +8,6 @@ import (
 
 	"github.com/alash3al/redix/internals/db"
 	"github.com/tidwall/redcon"
-
-	_ "github.com/alash3al/redix/internals/resp/commands"
 )
 
 // Options a server related options
