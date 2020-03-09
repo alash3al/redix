@@ -3,6 +3,8 @@ package db
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/alash3al/goukv"
 )
@@ -51,7 +53,53 @@ func (db *DB) Batch(entries []*Entry) {
 }
 
 func (db *DB) Get(k []byte) ([]byte, error) {
-	return db.store.Get(k)
+	val, err := db.store.Get(k)
+	if err == goukv.ErrKeyExpired {
+		entry := Entry{Key: k}
+		db.Put(&entry)
+		return nil, nil
+	}
+
+	return val, err
+}
+
+func (db *DB) TTL(k []byte) (*time.Time, error) {
+	return db.store.TTL(k)
+}
+
+func (db *DB) Incr(k []byte, delta float64, ttl time.Duration) (*float64, error) {
+	oldValBin, err := db.Get(k)
+	if err != nil {
+		return nil, err
+	}
+
+	if ttl < 1 {
+		oldTTL, err := db.TTL(k)
+		if err != nil {
+			return nil, err
+		}
+		if oldTTL != nil {
+			ttl = oldTTL.Sub(time.Now())
+		}
+	}
+
+	oldValFloat, _ := strconv.ParseFloat(string(oldValBin), 64)
+
+	if delta == 0 {
+		delta = 1
+	}
+
+	oldValFloat += delta
+
+	entry := Entry{
+		Key:   k,
+		Value: []byte(strconv.FormatFloat(oldValFloat, 'f', -1, 64)),
+		TTL:   ttl,
+	}
+
+	db.Put(&entry)
+
+	return &oldValFloat, nil
 }
 
 func (db *DB) Close() {

@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/alash3al/goukv"
 	"github.com/alash3al/redix/internals/db"
 	"github.com/alash3al/redix/internals/resp"
 )
@@ -26,12 +25,13 @@ func init() {
 		}
 
 		if len(args) > 2 {
-			ttlSec, err := strconv.Atoi(string(args[2]))
+			parsedDur, err := time.ParseDuration(string(args[2]))
 			if err != nil {
 				c.Conn().WriteError(err.Error())
 				return
 			}
-			entry.TTL = time.Second * time.Duration(ttlSec)
+
+			entry.TTL = parsedDur
 		}
 
 		c.DB().Put(&entry)
@@ -49,12 +49,6 @@ func init() {
 		k := append(prefix, args[0]...)
 		val, err := c.DB().Get(k)
 
-		if err == goukv.ErrKeyExpired {
-			err = nil
-			entry := db.Entry{Key: k}
-			c.DB().Put(&entry)
-		}
-
 		if err != nil {
 			c.Conn().WriteError(err.Error())
 			return
@@ -65,7 +59,7 @@ func init() {
 			return
 		}
 
-		c.Conn().WriteBulk((val))
+		c.Conn().WriteBulk(val)
 	}
 
 	resp.Handlers["del"] = func(c *resp.Context) {
@@ -98,32 +92,31 @@ func init() {
 			Key: append(prefix, args[0]...),
 		}
 
-		oldValueBin, _ := c.DB().Get(entry.Key)
-		oldValueNum, _ := strconv.ParseFloat(string(oldValueBin), 64)
+		delta := float64(0)
 
 		if len(args) > 1 {
-			delta, err := strconv.ParseFloat(string(args[1]), 64)
+			delta, _ = strconv.ParseFloat(string(args[1]), 64)
+		}
+
+		if len(args) > 2 {
+			parsedDur, err := time.ParseDuration(string(args[2]))
 			if err != nil {
 				c.Conn().WriteError(err.Error())
 				return
 			}
-			if delta == 0 {
-				delta = 1
-			}
-			oldValueNum += float64(delta)
-		} else {
-			oldValueNum += 1
+			entry.TTL = parsedDur
 		}
 
-		newValueString := strconv.FormatFloat(oldValueNum, 'f', -1, 64)
-		entry.Value = []byte(newValueString)
+		newVal, err := c.DB().Incr(entry.Key, delta, entry.TTL)
+		if err != nil {
+			c.Conn().WriteError(err.Error())
+			return
+		}
 
-		c.DB().Put(&entry)
-
-		if float64(int64(oldValueNum)) == oldValueNum {
-			c.Conn().WriteInt64(int64(oldValueNum))
+		if float64(int64(*newVal)) == *newVal {
+			c.Conn().WriteInt64(int64(*newVal))
 		} else {
-			c.Conn().WriteBulkString(newValueString)
+			c.Conn().WriteBulkString(strconv.FormatFloat(*newVal, 'f', -1, 64))
 		}
 	}
 }
