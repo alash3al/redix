@@ -1,6 +1,6 @@
 Redix v2 (Koka)
 ==================
-> here is redix v2 (`koka` codename), it is the fully refactored, optimized and rich verion not only for redix v2, but also for redis itself!
+> here is redix v2 (`koka` codename), it is the fully refactored, optimized and rich version not only for redix v2, but also for redis itself!
 
 Features
 =========
