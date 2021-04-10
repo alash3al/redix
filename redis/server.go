@@ -13,7 +13,7 @@ import (
 )
 
 func ListenAndServe(config *configparser.Config) error {
-	fmt.Println("=> initializing the storage engine: ", config.Engine)
+	fmt.Println("=> initializing redis storage engine:", config.Engine)
 	engineConn, err := engines.OpenStorageEngine(config)
 	if err != nil {
 		return err

@@ -6,6 +6,8 @@ import "github.com/hashicorp/hcl/v2/hclsimple"
 type Config struct {
 	Engine DatabaseEngine `hcl:"engine"`
 
+	Modules []string `hcl:"modules"`
+
 	Server struct {
 		Redis struct {
 			ListenAddr string `hcl:"listen"`

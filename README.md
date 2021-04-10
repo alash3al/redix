@@ -1,38 +1,10 @@
-Redix v2 (Koka)
-==================
-> here is redix v2 (`koka` codename), it is the fully refactored, optimized and rich version not only for redix v2, but also for redis itself!
+Redix v2
+========
+> here is the home of v2 which is under construction
 
-Features
+Thoughts
 =========
-- Multi core support.
-- Uses Serializable Transactions.
-- Optimizable for write-heavy workloads.
-- Flixible Datastructure(s).
-
-Supported Commands
-==================
-### SET
-> `SET <key> <value> [<ttl_duration_string>]` 
-
-**Examples**
-- `SET key value`
-- `SET key value 10s`
-- `SET key value 10ms`
-- `SET key value 22ns`
-- `SET key value 1000us`
-- `SET key value 2h30m`
-
-#### GET
-> `GET <key>`
-
-#### DEL
-> `DEL <key> [<key2>, ....]`
-
-#### INCR
-> `INCR <key> [<delta>] [<ttl_duration_string>]`
-
-**Examples**
-- `INCR key`
-- `INCR key 5`
-- `INCR key 8.24`
-- `INCR key 1 1h30m10s`
+- Enterprise ready
+- New Modules System to allow premium commands, features.
+- There should be a premium middleware that changes that tells the context which db (namespace) should be used, tell now I'm thinking about creating a central databases table that hold the database name (i.e "0"), internal id and token_id (who owns the db), then the middleware should detect the actual db via the token + dbname, so the client must use AUTH before anything.
+- If we removed that middleware, the context will use the db directly without any hassle. 
