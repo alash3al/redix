@@ -1,17 +1,26 @@
 package main
 
 import (
-	"github.com/alash3al/redix/db"
-	"github.com/alash3al/redix/pb"
+	"flag"
+	"log"
 
-	_ "github.com/alash3al/goukv/providers/leveldb"
+	"github.com/alash3al/redix/configparser"
+	"github.com/alash3al/redix/redis"
+)
+
+var (
+	flagConfigFilename = flag.String("config", "./redix.hcl", "the configuration filename")
 )
 
 func main() {
-	db, err := db.Open("leveldb://./redix")
+	flag.Parse()
+
+	config, err := configparser.Parse(*flagConfigFilename)
 	if err != nil {
-		panic(err)
+		log.Fatal(err.Error())
 	}
 
-	panic(pb.ListenAndServe(":3035", db))
+	_ = config
+
+	log.Fatal(redis.ListenAndServe(config))
 }
