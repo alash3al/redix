@@ -29,6 +29,7 @@ func ListenAndServe(config *configparser.Config) error {
 			}
 
 			ctx := context.Context{
+				Conn:    clientConn,
 				Command: cmd.Args[0],
 				Args:    cmd.Args[1:],
 			}
