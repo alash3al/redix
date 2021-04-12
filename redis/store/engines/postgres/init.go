@@ -5,8 +5,8 @@ import (
 	"github.com/alash3al/redix/redis/store/engines"
 )
 
-const engineName = configparser.DatabaseEngine("postgres")
+const DriverPostgres = configparser.DatabaseEngine("postgres")
 
 func init() {
-	engines.RegisterStorageEngine(engineName, &Store{})
+	engines.RegisterStorageEngine(DriverPostgres, &Store{})
 }

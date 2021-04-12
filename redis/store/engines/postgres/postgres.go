@@ -24,7 +24,7 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 	newStore.readConn = []*sqlx.DB{}
 	newStore.writeConn = []*sqlx.DB{}
 
-	for _, dsn := range config.Connections.Read {
+	for _, dsn := range config.Storage.Connection.Cluster.Read {
 		conn, err := sqlx.Connect("postgres", dsn)
 		if err != nil {
 			return nil, err
@@ -33,7 +33,7 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 		newStore.readConn = append(s.readConn, conn)
 	}
 
-	for _, dsn := range config.Connections.Write {
+	for _, dsn := range config.Storage.Connection.Cluster.Write {
 		conn, err := sqlx.Connect("postgres", dsn)
 		if err != nil {
 			return nil, err
@@ -57,8 +57,8 @@ func (s *Store) TokenValidate(token string) (bool, error) {
 	return true, nil
 }
 
-func (s *Store) Exec(ctx context.Context) interface{} {
-	return errors.New("COMMAND NOT IMPLEMENTED")
+func (s *Store) Exec(ctx context.Context) (interface{}, error) {
+	return nil, errors.New("COMMAND NOT IMPLEMENTED")
 }
 
 func (s *Store) Close() error {

@@ -31,9 +31,9 @@ func OpenStorageEngine(config *configparser.Config) (store.Store, error) {
 	enginesMutex.Lock()
 	defer enginesMutex.Unlock()
 
-	engine, exists := engines[config.Engine]
+	engine, exists := engines[config.Storage.Driver]
 	if !exists {
-		return nil, fmt.Errorf("engine %s is unknown", config.Engine)
+		return nil, fmt.Errorf("engine %s is unknown", config.Storage.Driver)
 	}
 
 	return engine.Connect(config)

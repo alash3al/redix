@@ -20,7 +20,5 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	_ = config
-
 	log.Fatal(redis.ListenAndServe(config))
 }

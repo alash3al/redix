@@ -12,8 +12,9 @@ import (
 	_ "github.com/alash3al/redix/redis/store/engines/postgres"
 )
 
+// ListenAndServe start a RESP listener and serve the incoming requests
 func ListenAndServe(config *configparser.Config) error {
-	fmt.Println("=> initializing redis storage engine:", config.Engine)
+	fmt.Println("=> initializing redis storage engine:", config.Storage.Driver)
 	engineConn, err := engines.OpenStorageEngine(config)
 	if err != nil {
 		return err
@@ -34,7 +35,13 @@ func ListenAndServe(config *configparser.Config) error {
 				Args:    cmd.Args[1:],
 			}
 
-			clientConn.WriteAny(engineConn.Exec(ctx))
+			result, err := engineConn.Exec(ctx)
+			if err != nil {
+				clientConn.WriteError(err.Error())
+				return
+			}
+
+			clientConn.WriteAny(result)
 		},
 		nil, nil,
 	)
