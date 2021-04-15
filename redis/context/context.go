@@ -4,7 +4,7 @@ package context
 import "github.com/tidwall/redcon"
 
 type Context struct {
-	redcon.Conn
+	Conn redcon.Conn
 
 	CurrentToken    string
 	CurrentDatabase int

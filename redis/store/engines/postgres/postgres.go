@@ -8,8 +8,14 @@ import (
 	"github.com/alash3al/redix/redis/context"
 	"github.com/alash3al/redix/redis/store"
 	"github.com/jmoiron/sqlx"
+
+	_ "embed"
+
 	_ "github.com/lib/pq"
 )
+
+//go:embed schema.sql
+var schemaSQL string
 
 type Store struct {
 	config    *configparser.Config
@@ -42,18 +48,28 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 		newStore.writeConn = append(s.writeConn, conn)
 	}
 
-	return newStore, nil
+	return newStore, newStore.migrate()
 }
 
-func (s *Store) TokenCreate() error {
+func (s Store) migrate() error {
+	for _, conn := range s.writeConn {
+		if _, err := conn.Exec(schemaSQL); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func (s *Store) TokenReset(token string) error {
+func (s *Store) AuthCreate() error {
 	return nil
 }
 
-func (s *Store) TokenValidate(token string) (bool, error) {
+func (s *Store) AuthReset(token string) error {
+	return nil
+}
+
+func (s *Store) AuthValidate(token string) (bool, error) {
 	return true, nil
 }
 

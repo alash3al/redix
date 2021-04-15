@@ -3,6 +3,6 @@ package store
 
 type Store interface {
 	Connector
-	TokenManager
+	Auth
 	Executer
 }
