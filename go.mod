@@ -6,5 +6,6 @@ require (
 	github.com/hashicorp/hcl/v2 v2.9.1
 	github.com/jmoiron/sqlx v1.3.3
 	github.com/lib/pq v1.10.0
+	github.com/rs/xid v1.3.0
 	github.com/tidwall/redcon v1.3.2
 )

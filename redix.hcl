@@ -20,6 +20,7 @@ modules = []
 // here we define configure our main servers
 // currently there is only one server which is: redis
 server {
+    // redis related configs
     redis {
         listen = ":6380"
     }

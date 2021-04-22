@@ -1,7 +1,8 @@
 package store
 
 type Auth interface {
-	AuthCreate() error
-	AuthReset(token string) error
+	AuthRequired() bool
+	AuthCreate() (string, error)
+	AuthReset(token string) (string, error)
 	AuthValidate(token string) (bool, error)
 }

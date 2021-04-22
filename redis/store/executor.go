@@ -5,5 +5,5 @@ import (
 )
 
 type Executer interface {
-	Exec(context.Context) (interface{}, error)
+	Exec(*context.Context) (interface{}, error)
 }
