@@ -42,6 +42,10 @@ func (rr *RR) Remove(target interface{}) *RR {
 	return rr
 }
 
+func (rr *RR) Len() int {
+	return len(rr.targets)
+}
+
 func (rr *RR) Next() interface{} {
 	rr.Lock()
 	defer rr.Unlock()

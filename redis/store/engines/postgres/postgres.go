@@ -2,8 +2,6 @@
 package postgres
 
 import (
-	"errors"
-
 	"github.com/alash3al/redix/configparser"
 	"github.com/alash3al/redix/redis/context"
 	"github.com/alash3al/redix/redis/store"
@@ -19,18 +17,20 @@ import (
 //go:embed schema.sql
 var schemaSQL string
 
+type HandlerFunc func(*Store, *context.Context) (interface{}, error)
+
 type Store struct {
 	config    *configparser.Config
 	readConn  *roundrobin.RR
 	writeConn *roundrobin.RR
+	commands  map[string]HandlerFunc
 }
 
 func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
-	newStore := &Store{}
-
-	newStore.config = config
-	newStore.readConn = roundrobin.New([]interface{}{})
-	newStore.writeConn = roundrobin.New([]interface{}{})
+	s.config = config
+	s.readConn = roundrobin.New([]interface{}{})
+	s.writeConn = roundrobin.New([]interface{}{})
+	s.commands = map[string]HandlerFunc{}
 
 	for _, dsn := range config.Storage.Connection.Cluster.Read {
 		conn, err := sqlx.Connect("postgres", dsn)
@@ -38,7 +38,7 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 			return nil, err
 		}
 
-		newStore.readConn.Add(conn)
+		s.readConn.Add(conn)
 	}
 
 	for _, dsn := range config.Storage.Connection.Cluster.Write {
@@ -47,21 +47,17 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 			return nil, err
 		}
 
-		newStore.writeConn.Add(conn)
+		s.writeConn.Add(conn)
 	}
 
-	return newStore, newStore.migrate()
-}
-
-func (s Store) migrate() error {
-	if _, err := s.getWriteConn().Exec(schemaSQL); err != nil {
-		return err
+	if _, err := s.Writer().Exec(schemaSQL); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return s, nil
 }
 
-func (s Store) AuthRequired() bool {
+func (s Store) IsAuthRequired() bool {
 	return true
 }
 
@@ -70,7 +66,7 @@ func (s *Store) AuthCreate() (string, error) {
 
 	var id string
 
-	err := s.getWriteConn().QueryRowx(
+	err := s.Writer().QueryRowx(
 		`INSERT INTO redix_users(secret) values($1) RETURNING id`,
 		secret,
 	).Scan(&id)
@@ -93,7 +89,7 @@ func (s *Store) AuthReset(token string) (string, error) {
 		Secret string `db:"secret"`
 	}
 
-	err = s.getReadConn().QueryRowx(
+	err = s.Reader().QueryRowx(
 		`select id, secret from redix_users where id = $1 and secret = $2`,
 		inputID,
 		inputSecret,
@@ -105,7 +101,7 @@ func (s *Store) AuthReset(token string) (string, error) {
 
 	user.Secret = xid.New().String()
 
-	_, err = s.getWriteConn().Exec(`update redix_users set secret = $1 where id = $2`, user.Secret, user.ID)
+	_, err = s.Writer().Exec(`update redix_users set secret = $1 where id = $2`, user.Secret, user.ID)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +117,7 @@ func (s *Store) AuthValidate(token string) (bool, error) {
 		return false, err
 	}
 
-	err = s.getReadConn().QueryRowx(
+	err = s.Reader().QueryRowx(
 		`select exists(select * from redix_users where id = $1 and secret = $2)`,
 		id,
 		secret,
@@ -134,15 +130,24 @@ func (s *Store) AuthValidate(token string) (bool, error) {
 	return exists, nil
 }
 
-func (s *Store) Exec(ctx *context.Context) (interface{}, error) {
-	return nil, errors.New("COMMAND NOT IMPLEMENTED")
+func (s *Store) Select(ctx *context.Context, db string) error {
+	userID, _, err := parseToken(ctx.CurrentToken)
+	if err != nil {
+		return err
+	}
+
+	return s.Writer().QueryRowx(`
+		insert into redix_databases (user_id, name) 
+		values($1, $2) 
+		on conflict (user_id, name) do update set name = excluded.name returning id;
+	`, userID, db).Scan(&ctx.CurrentDatabase)
 }
 
-func (s *Store) getWriteConn() *sqlx.DB {
+func (s *Store) Writer() *sqlx.DB {
 	return s.writeConn.Next().(*sqlx.DB)
 }
 
-func (s *Store) getReadConn() *sqlx.DB {
+func (s *Store) Reader() *sqlx.DB {
 	return s.readConn.Next().(*sqlx.DB)
 }
 

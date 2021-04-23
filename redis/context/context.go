@@ -4,10 +4,10 @@ package context
 import "github.com/tidwall/redcon"
 
 type Context struct {
-	Conn redcon.Conn
+	redcon.Conn
 
 	CurrentToken    string
-	CurrentDatabase int
+	CurrentDatabase string
 	IsAuthorized    bool
 	Command         []byte
 	Args            [][]byte
