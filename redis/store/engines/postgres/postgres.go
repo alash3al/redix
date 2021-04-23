@@ -17,20 +17,24 @@ import (
 //go:embed schema.sql
 var schemaSQL string
 
-type HandlerFunc func(*Store, *context.Context) (interface{}, error)
+type KeyType string
+
+const (
+	KEYTYPE_STRING KeyType = "str"
+	KEYTYPE_INT    KeyType = "int"
+	KEYTYPE_FLOAT  KeyType = "float"
+)
 
 type Store struct {
 	config    *configparser.Config
 	readConn  *roundrobin.RR
 	writeConn *roundrobin.RR
-	commands  map[string]HandlerFunc
 }
 
 func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 	s.config = config
 	s.readConn = roundrobin.New([]interface{}{})
 	s.writeConn = roundrobin.New([]interface{}{})
-	s.commands = map[string]HandlerFunc{}
 
 	for _, dsn := range config.Storage.Connection.Cluster.Read {
 		conn, err := sqlx.Connect("postgres", dsn)

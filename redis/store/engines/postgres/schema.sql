@@ -22,3 +22,23 @@ CREATE TABLE IF NOT EXISTS redix_databases (
 
 -- database table indexes
 CREATE UNIQUE INDEX IF NOT EXISTS idx_databases_userid_name ON redix_databases (user_id, name);
+
+-- root table
+-- this is the root table that holds the keys as well its meta info
+-- read more about redis datatypes from here: https://redis.io/topics/data-types
+CREATE TABLE IF NOT EXISTS redix_kv (
+    _id bigserial NOT NULL,
+    _db uuid NOT NULL,
+    _type varchar(20) DEFAULT 'str',
+
+    _key varchar NOT NULL,
+    _subkey varchar DEFAULT '@',
+
+    -- we can store multiple datatypes in jsonb that may be longer (in length) than varchar
+    _value jsonb,
+
+    PRIMARY KEY (_id)
+);
+
+-- kv indexes
+CREATE UNIQUE INDEX IF NOT EXISTS idx_root_key_subkey ON redix_kv (_db, _key, _subkey);
