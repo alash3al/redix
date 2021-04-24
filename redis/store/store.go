@@ -11,6 +11,7 @@ type Store interface {
 	Close() error
 
 	IsAuthRequired() bool
+
 	AuthCreate() (string, error)
 	AuthReset(token string) (string, error)
 	AuthValidate(token string) (bool, error)

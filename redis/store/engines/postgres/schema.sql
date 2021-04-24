@@ -32,39 +32,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_databases_userid_name ON redix_databases (
 CREATE TABLE IF NOT EXISTS redix_meta (
     _id bigserial NOT NULL,
     _db uuid NOT NULL,
-
     _type varchar(20) DEFAULT 'str',
-
-    /*
-        HSET N K V
-    
-        SET X Y
-
-        LPUSH N v1 v2 v3
-
-        KEYS ..
-    */
-
     _key varchar NOT NULL,
-    -- _subkey varchar DEFAULT '@',
-
-    -- -- we can store multiple datatypes in jsonb that may be longer (in length) than varchar
-    -- _value jsonb,
 
     PRIMARY KEY (_id)
 );
 
--- redix_hashmaps (
---     hk
---     k
---     v
--- )
+CREATE TABLE IF NOT EXISTS redix_strings (
+    _key_id bigserial NOT NULL,
+    _value jsonb not null,
 
--- lists (
---     id bigserial
---     lk
---     v
--- )
+    PRIMARY KEY(_key_id)
+);
 
--- -- kv indexes
--- CREATE UNIQUE INDEX IF NOT EXISTS idx_root_key_subkey ON redix_kv (_db, _key, _subkey);
+CREATE TABLE IF NOT EXISTS redix_numbers (
+    _key_id bigserial NOT NULL,
+    _value numeric DEFAULT 0.0,
+
+    PRIMARY KEY(_key_id)
+);

@@ -1,7 +1,8 @@
+// any environment var here will be expanded first, e.x: `"${REDIX_DRIVER}"`
 // engine represents the storage driver to be used
 // engine = "postgres"
 storage {
-    driver = "${REDIX_DRIVER}"
+    driver = "postgres"
     
     connection {
         default = "postgres://postgres@localhost/tstdb"
