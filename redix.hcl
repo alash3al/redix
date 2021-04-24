@@ -1,7 +1,7 @@
 // engine represents the storage driver to be used
 // engine = "postgres"
 storage {
-    driver = "postgres"
+    driver = "${REDIX_DRIVER}"
     
     connection {
         default = "postgres://postgres@localhost/tstdb"
@@ -24,4 +24,8 @@ server {
     redis {
         listen = ":6380"
     }
+
+    // TODO
+    // used as a replacement for base64.encode
+    // server_master_key = ""
 }

@@ -1,7 +1,12 @@
 // Package configparser provides a set of utilities for parsing and populating configs
 package configparser
 
-import "github.com/hashicorp/hcl/v2/hclsimple"
+import (
+	"io/ioutil"
+	"os"
+
+	"github.com/hashicorp/hcl/v2/hclsimple"
+)
 
 type Config struct {
 	Storage struct {
@@ -34,7 +39,15 @@ const (
 func Parse(filename string) (*Config, error) {
 	var config Config
 
-	err := hclsimple.DecodeFile(filename, nil, &config)
+	// TODO: use os.ExpandEnvVars in the config filename
+	fileContents, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	fileContentsExpanded := os.ExpandEnv(string(fileContents))
+
+	err = hclsimple.Decode(filename, []byte(fileContentsExpanded), nil, &config)
 
 	if config.Storage.Connection.Default != "" {
 		config.Storage.Connection.Cluster.Read = append(config.Storage.Connection.Cluster.Read, config.Storage.Connection.Default)
