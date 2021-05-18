@@ -2,8 +2,9 @@
 package postgres
 
 import (
+	"context"
+
 	"github.com/alash3al/redix/configparser"
-	"github.com/alash3al/redix/redis/context"
 	"github.com/alash3al/redix/redis/store"
 	"github.com/alash3al/redix/utils/roundrobin"
 	"github.com/jmoiron/sqlx"
@@ -11,7 +12,7 @@ import (
 
 	_ "embed"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 //go:embed schema.sql
@@ -37,7 +38,7 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 	s.writeConn = roundrobin.New([]interface{}{})
 
 	for _, dsn := range config.Storage.Connection.Cluster.Read {
-		conn, err := sqlx.Connect("postgres", dsn)
+		conn, err := pgxpool.Connect(context.Background(), dsn)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +47,7 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 	}
 
 	for _, dsn := range config.Storage.Connection.Cluster.Write {
-		conn, err := sqlx.Connect("postgres", dsn)
+		conn, err := pgxpool.Connect(context.Background(), dsn)
 		if err != nil {
 			return nil, err
 		}
@@ -54,15 +55,11 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 		s.writeConn.Add(conn)
 	}
 
-	if _, err := s.Writer().Exec(schemaSQL); err != nil {
+	if _, err := s.Writer().Exec(context.Background(), schemaSQL); err != nil {
 		return nil, err
 	}
 
 	return s, nil
-}
-
-func (s Store) IsAuthRequired() bool {
-	return true
 }
 
 func (s *Store) AuthCreate() (string, error) {
@@ -70,7 +67,8 @@ func (s *Store) AuthCreate() (string, error) {
 
 	var id string
 
-	err := s.Writer().QueryRowx(
+	err := s.Writer().QueryRow(
+		context.Background(),
 		`INSERT INTO redix_users(secret) values($1) RETURNING id`,
 		secret,
 	).Scan(&id)
@@ -93,11 +91,12 @@ func (s *Store) AuthReset(token string) (string, error) {
 		Secret string `db:"secret"`
 	}
 
-	err = s.Reader().QueryRowx(
+	err = s.Reader().QueryRow(
+		context.Background(),
 		`select id, secret from redix_users where id = $1 and secret = $2`,
 		inputID,
 		inputSecret,
-	).StructScan(&user)
+	).Scan(&user.ID, &user.Secret)
 
 	if err != nil {
 		return "", err
@@ -105,7 +104,12 @@ func (s *Store) AuthReset(token string) (string, error) {
 
 	user.Secret = xid.New().String()
 
-	_, err = s.Writer().Exec(`update redix_users set secret = $1 where id = $2`, user.Secret, user.ID)
+	_, err = s.Writer().Exec(
+		context.Background(),
+		`update redix_users set secret = $1 where id = $2`,
+		user.Secret,
+		user.ID,
+	)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +125,8 @@ func (s *Store) AuthValidate(token string) (bool, error) {
 		return false, err
 	}
 
-	err = s.Reader().QueryRowx(
+	err = s.Reader().QueryRow(
+		context.Background(),
 		`select exists(select * from redix_users where id = $1 and secret = $2)`,
 		id,
 		secret,
@@ -134,25 +139,33 @@ func (s *Store) AuthValidate(token string) (bool, error) {
 	return exists, nil
 }
 
-func (s *Store) Select(ctx *context.Context, db string) error {
-	userID, _, err := parseToken(ctx.CurrentToken)
+func (s *Store) Select(token string, db int) (int, error) {
+	userID, _, err := parseToken(token)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
-	return s.Writer().QueryRowx(`
-		insert into redix_databases (user_id, name) 
-		values($1, $2) 
+	err = s.Writer().QueryRow(
+		context.Background(),
+		`
+		insert into redix_databases (user_id, name)
+		values($1, $2)
 		on conflict (user_id, name) do update set name = excluded.name returning id;
-	`, userID, db).Scan(&ctx.CurrentDatabase)
+	`, userID, db).Scan(&db)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return db, nil
 }
 
-func (s *Store) Writer() *sqlx.DB {
-	return s.writeConn.Next().(*sqlx.DB)
+func (s *Store) Writer() *pgxpool.Conn {
+	return s.writeConn.Next().(*pgxpool.Conn)
 }
 
-func (s *Store) Reader() *sqlx.DB {
-	return s.readConn.Next().(*sqlx.DB)
+func (s *Store) Reader() *pgxpool.Conn {
+	return s.readConn.Next().(*pgxpool.Conn)
 }
 
 func (s *Store) Close() (err error) {

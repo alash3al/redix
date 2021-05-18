@@ -2,12 +2,12 @@
 package redis
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/alash3al/redix/configparser"
 	"github.com/alash3al/redix/redis/commands"
-	"github.com/alash3al/redix/redis/context"
+	"github.com/alash3al/redix/redis/ctx"
 	"github.com/alash3al/redix/redis/store"
 	"github.com/alash3al/redix/redis/store/engines"
 	"github.com/tidwall/redcon"
@@ -41,73 +41,50 @@ func handler(engineConn store.Store) func(clientConn redcon.Conn, cmd redcon.Com
 			return
 		}
 
-		ctx := clientConn.Context().(*context.Context)
-		ctx.Command = bytes.ToLower(cmd.Args[0])
-		ctx.Args = cmd.Args[1:]
+		commandName := strings.ToLower(string(cmd.Args[0]))
+		args := []string{}
 
-		if engineConn.IsAuthRequired() && !ctx.IsAuthorized && string(ctx.Command) != "auth" {
+		for _, v := range cmd.Args[1:] {
+			args = append(args, string(v))
+		}
+
+		ctx := clientConn.Context().(*ctx.Ctx)
+		ctx.Conn = clientConn
+		ctx.Store = engineConn
+		ctx.Args = args
+		ctx.Command = commandName
+
+		if !ctx.IsAuthenticated && commandName != "auth" {
 			clientConn.WriteError("AUTH is required")
 			return
 		}
 
-		if engineConn.IsAuthRequired() && !ctx.IsAuthorized && string(ctx.Command) == "auth" {
-			token := ""
-
-			if len(ctx.Args) > 0 {
-				token = string(ctx.Args[0])
-			}
-
-			if exists, err := engineConn.AuthValidate(token); err != nil {
+		if ctx.CurrentDatabase == 0 && ctx.IsAuthenticated && commandName != "select" {
+			if _, err := (commands.Commands["select"])(ctx); err != nil {
 				clientConn.WriteError(err.Error())
 				return
-			} else if !exists {
-				clientConn.WriteError("AUTH mismatch")
-				return
 			}
+		}
 
-			ctx.CurrentToken = token
-			ctx.IsAuthorized = true
-
-			ctx.SetContext(ctx)
-			clientConn.WriteString("OK")
-
+		commandHandler, found := commands.Commands[commandName]
+		if !found {
+			clientConn.WriteError("command not found")
 			return
 		}
 
-		if err := engineConn.Select(ctx, "0"); err != nil {
-			clientConn.WriteError(err.Error())
-			return
-		}
-
-		ctx.SetContext(ctx)
-
-		command, exists := commands.Commands[string(ctx.Command)]
-		if !exists {
-			clientConn.WriteError("NOT IMPLEMENTED")
-			return
-		}
-
-		result, err := command(commands.Request{
-			Context: ctx,
-			Store:   engineConn,
-		})
+		result, err := commandHandler(ctx)
 		if err != nil {
 			clientConn.WriteError(err.Error())
 			return
 		}
 
-		ctx.SetContext(ctx)
+		clientConn.SetContext(ctx)
 
 		clientConn.WriteAny(result)
 	}
 }
 
 func accept(clientConn redcon.Conn) bool {
-	ctx := context.Context{
-		Conn: clientConn,
-	}
-
-	clientConn.SetContext(&ctx)
-
+	clientConn.SetContext(&ctx.Ctx{})
 	return true
 }

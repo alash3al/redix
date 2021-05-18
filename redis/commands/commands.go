@@ -2,23 +2,56 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 
-	"github.com/alash3al/redix/redis/context"
-	"github.com/alash3al/redix/redis/store"
+	"github.com/alash3al/redix/redis/ctx"
 )
 
-type Request struct {
-	*context.Context
-	store.Store
-}
-
-type HandlerFunc func(Request) (interface{}, error)
+type HandlerFunc func(*ctx.Ctx) (interface{}, error)
 
 var (
 	Commands = map[string]HandlerFunc{
-		"set": set,
+		"auth":   auth,
+		"select": selectDB,
 	}
 
 	ErrInvalidArgumentsNumber = fmt.Errorf("invalid arguments count specified")
 )
+
+func auth(c *ctx.Ctx) (interface{}, error) {
+	if len(c.Args) < 1 {
+		return nil, errors.New("missing authentication token")
+	}
+
+	ok, err := c.Store.AuthValidate(c.Args[0])
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return nil, errors.New("invalid authentication token")
+	}
+
+	c.CurrentToken = c.Args[0]
+	c.IsAuthenticated = true
+
+	return "OK", nil
+}
+
+func selectDB(c *ctx.Ctx) (interface{}, error) {
+	toBeSelected := 0
+	if len(c.Args) > 0 {
+		toBeSelected, _ = strconv.Atoi(c.Args[0])
+	}
+
+	selectedDB, err := c.Store.Select(c.CurrentToken, toBeSelected)
+	if err != nil {
+		return nil, err
+	}
+
+	c.CurrentDatabase = selectedDB
+
+	return "OK", nil
+}
