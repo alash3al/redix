@@ -6,7 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS redix_users (
     id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
 
-    password varchar NOT NULL
+    secret varchar NOT NULL
 );
 
 -- databases table
@@ -17,40 +17,20 @@ CREATE TABLE IF NOT EXISTS redix_databases (
     user_id uuid NOT NULL,
 
     -- 0, 1, 2, 3 ,4, ... 100 ... 1000 ... etc
-    alias INT DEFAULT 0,
-
-    UNIQUE INDEX (user_id, dbkey);
+    alias INT DEFAULT 0
 );
 
--- database table indexes
--- TODO
+CREATE UNIQUE INDEX IF NOT EXISTS uidx_redix_databases_uid_alias ON redix_databases(user_id, alias);
 
--- root table
--- this is the root table that holds the keys as well its meta info
--- read more about redis datatypes from here: https://redis.io/topics/data-types
-CREATE TABLE IF NOT EXISTS redix_keys_meta (
-    id bigserial NOT NULL,
+-- redix data holds all data inserted via redis server
+CREATE TABLE IF NOT EXISTS redix_data (
+    id bigserial NOT NULL PRIMARY KEY,
     db_id bigint NOT NULL,
 
-    key_type varchar(20) DEFAULT 'str',
     key_name varchar NOT NULL,
-    
-    expires_at timestamp DEFAULT NULL,
-
-    PRIMARY KEY (_id)
+    key_value jsonb default null,
+    is_deleted bool default false,
+    expires_at timestamp DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS redix_values_string (
-    key_id bigserial NOT NULL,
-    
-    value bytea not null,
-
-    PRIMARY KEY(key_id)
-);
-
-CREATE TABLE IF NOT EXISTS redix_values_number (
-    key_id bigserial NOT NULL,
-    value numeric DEFAULT 0.0,
-
-    PRIMARY KEY(key_id)
-);
+CREATE UNIQUE INDEX IF NOT EXISTS uidx_redix_data_dbid_keyname ON redix_data(db_id, key_name);

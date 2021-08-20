@@ -18,14 +18,6 @@ import (
 //go:embed schema.sql
 var schemaSQL string
 
-type KeyType string
-
-const (
-	KEYTYPE_STRING KeyType = "str"
-	KEYTYPE_INT    KeyType = "int"
-	KEYTYPE_FLOAT  KeyType = "float"
-)
-
 type Store struct {
 	config    *configparser.Config
 	readConn  *roundrobin.RR
@@ -55,7 +47,7 @@ func (s *Store) Connect(config *configparser.Config) (store.Store, error) {
 		s.writeConn.Add(conn)
 	}
 
-	if _, err := s.Writer().Exec(context.Background(), schemaSQL); err != nil {
+	if _, err := s.GetWriteConn().Exec(context.Background(), schemaSQL); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +59,7 @@ func (s *Store) AuthCreate() (string, error) {
 
 	var id string
 
-	err := s.Writer().QueryRow(
+	err := s.GetWriteConn().QueryRow(
 		context.Background(),
 		`INSERT INTO redix_users(secret) values($1) RETURNING id`,
 		secret,
@@ -91,7 +83,7 @@ func (s *Store) AuthReset(token string) (string, error) {
 		Secret string `db:"secret"`
 	}
 
-	err = s.Reader().QueryRow(
+	err = s.GetReadConn().QueryRow(
 		context.Background(),
 		`select id, secret from redix_users where id = $1 and secret = $2`,
 		inputID,
@@ -104,7 +96,7 @@ func (s *Store) AuthReset(token string) (string, error) {
 
 	user.Secret = xid.New().String()
 
-	_, err = s.Writer().Exec(
+	_, err = s.GetWriteConn().Exec(
 		context.Background(),
 		`update redix_users set secret = $1 where id = $2`,
 		user.Secret,
@@ -125,7 +117,7 @@ func (s *Store) AuthValidate(token string) (bool, error) {
 		return false, err
 	}
 
-	err = s.Reader().QueryRow(
+	err = s.GetReadConn().QueryRow(
 		context.Background(),
 		`select exists(select * from redix_users where id = $1 and secret = $2)`,
 		id,
@@ -145,13 +137,15 @@ func (s *Store) Select(token string, db int) (int, error) {
 		return -1, err
 	}
 
-	err = s.Writer().QueryRow(
-		context.Background(),
-		`
-		insert into redix_databases (user_id, name)
-		values($1, $2)
-		on conflict (user_id, name) do update set name = excluded.name returning id;
-	`, userID, db).Scan(&db)
+	err = s.GetWriteConn().
+		QueryRow(
+			context.Background(),
+			`insert into redix_databases (user_id, alias)
+			values($1, $2)
+			on conflict (user_id, alias) do update set alias = excluded.alias returning id;`,
+			userID,
+			db,
+		).Scan(&db)
 
 	if err != nil {
 		return -1, err
@@ -160,12 +154,16 @@ func (s *Store) Select(token string, db int) (int, error) {
 	return db, nil
 }
 
-func (s *Store) Writer() *pgxpool.Conn {
-	return s.writeConn.Next().(*pgxpool.Conn)
+func (s *Store) Exec(command string, args ...string) (interface{}, error) {
+	return nil, store.ErrCommandNotImplemented
 }
 
-func (s *Store) Reader() *pgxpool.Conn {
-	return s.readConn.Next().(*pgxpool.Conn)
+func (s *Store) GetWriteConn() *pgxpool.Pool {
+	return s.writeConn.Next().(*pgxpool.Pool)
+}
+
+func (s *Store) GetReadConn() *pgxpool.Pool {
+	return s.readConn.Next().(*pgxpool.Pool)
 }
 
 func (s *Store) Close() (err error) {

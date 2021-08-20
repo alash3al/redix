@@ -1,3 +1,5 @@
+// NWEzMmZlNTktMDQ3OS00YTczLWEyNjItN2JhZTkwMTFkMzY3OmMzc24xZXA2MmpwcTQzb3FmcmMw
+
 // any environment var here will be expanded first, e.x: `"${REDIX_DRIVER}"`
 // engine represents the storage driver to be used
 // engine = "postgres"
@@ -5,11 +7,11 @@ storage {
     driver = "postgres"
     
     connection {
-        default = "postgres://postgres@localhost/tstdb"
+        default = "postgres://postgres@localhost/redix"
 
         cluster {
-            read = ["postgres://postgres@localhost/tstdb"]
-            write = ["postgres://postgres@localhost/tstdb"]
+            read = ["postgres://postgres@localhost/redix"]
+            write = ["postgres://postgres@localhost/redix"]
         }
     }
 }

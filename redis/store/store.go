@@ -2,7 +2,13 @@
 package store
 
 import (
+	"errors"
+
 	"github.com/alash3al/redix/configparser"
+)
+
+var (
+	ErrCommandNotImplemented = errors.New("command not implemented")
 )
 
 type Store interface {
@@ -15,8 +21,5 @@ type Store interface {
 
 	Select(token string, db int) (int, error)
 
-	// Set(key, subkey []byte, value []byte) error
-	// Get(key, subkey []byte) ([]byte, error)
-	// SetGet(key, subkey []byte) ([]byte, error)
-	// Incr(key, subkey []byte, value float64) (float64, error)
+	Exec(command string, args ...string) (interface{}, error)
 }
