@@ -3,6 +3,7 @@ module github.com/alash3al/redix
 go 1.16
 
 require (
+	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.9.1
 	github.com/jackc/pgx/v4 v4.11.0
 	github.com/jmoiron/sqlx v1.3.3
