@@ -24,23 +24,19 @@ func main() {
 
 	fmt.Println(config)
 
-	e, _ := engine.New()
+	e, _ := engine.New(nil)
 
-	e.Put(&driver.RawValueEntry{
-		Entry: driver.Entry{
-			Key: "path1/key1",
-		},
-		Value: "value1",
+	e.Put(&driver.Entry{
+		Key:   "path1/key1",
+		Value: []byte("value1"),
 	})
 
-	e.Put(&driver.RawValueEntry{
-		Entry: driver.Entry{
-			Key: "path2/key1",
-		},
-		Value: "value1",
+	e.Put(&driver.Entry{
+		Key:   "path2/key1",
+		Value: []byte("value1"),
 	})
 
-	e.Walk(func(rve *driver.RawValueEntry) bool {
+	e.Walk(func(rve *driver.Entry) bool {
 		fmt.Printf("%v\t", rve)
 		return false
 	})

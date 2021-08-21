@@ -1,12 +1,12 @@
 package engine
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
+	"github.com/alash3al/redix/configparser"
 	"github.com/alash3al/redix/driver"
-	"github.com/armon/go-radix"
+	"github.com/alash3al/redix/driver/memory"
 )
 
 // ChangeOp represents the change currently happens to a key.
@@ -24,49 +24,49 @@ type OnChangeFunc func(key string, op ChangeOp)
 
 // Engine represents the core storage engine of the software.
 type Engine struct {
-	memtable *radix.Tree
+	memtable driver.Driver
 
 	onChangeFunc []OnChangeFunc
-
-	// TODO implement the persistent storage driver
-	// driver   driver.Driver
 
 	sync.RWMutex
 }
 
 // New initialize the engine
-func New() (*Engine, error) {
+func New(config *configparser.Config) (*Engine, error) {
+	mem, err := driver.Open(memory.Name, config)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Engine{
-		memtable:     radix.New(),
+		memtable:     mem,
 		onChangeFunc: make([]OnChangeFunc, 0),
 	}, nil
 }
 
 // Put insert/update the specified entry
-// P.S: this isn't thread-safe, the caller should utilize the underlying sync.RWMutex when needed.
-func (e *Engine) Put(entry *driver.RawValueEntry) (*driver.RawValueEntry, error) {
+// P.S: this doesn't handle locking, the caller should utilize the underlying sync.RWMutex when needed.
+func (e *Engine) Put(entry *driver.Entry) (*driver.Entry, error) {
 	currentTime := time.Now()
 
-	entry.UpdatedAt = &currentTime
-
-	oldEntryInterface, found := e.memtable.Get(string(entry.Key))
-	if !found {
-		entry.CreatedAt = &currentTime
-	} else {
-		oldEntry := oldEntryInterface.(*driver.RawValueEntry)
-
-		entry.CreatedAt = oldEntry.CreatedAt
+	oldEntry, err := e.memtable.Get(string(entry.Key))
+	if err != nil && err != driver.ErrKeyNotFound {
+		return nil, err
 	}
 
-	_, inserted := e.memtable.Insert(string(entry.Key), entry)
-	if !inserted {
-		return nil, fmt.Errorf("unable to insert the specifed entry")
+	op := OpUpdate
+
+	if oldEntry == nil {
+		oldEntry = entry
+		oldEntry.CreatedAt = &currentTime
+		op = OpCreate
 	}
 
-	op := OpCreate
+	oldEntry.UpdatedAt = &currentTime
+	oldEntry.Value = entry.Value
 
-	if found {
-		op = OpUpdate
+	if err := e.memtable.Put(oldEntry); err != nil {
+		return nil, err
 	}
 
 	// TODO use a goroutine pool?
@@ -78,67 +78,51 @@ func (e *Engine) Put(entry *driver.RawValueEntry) (*driver.RawValueEntry, error)
 }
 
 // Delete deletes the specified key
-func (e *Engine) Delete(key string) bool {
-	_, deleted := e.memtable.Delete(key)
-
-	if deleted {
-		// TODO use a goroutine pool?
-		go (func() {
-			e.publishChange(key, OpDeleteKey)
-		})()
+func (e *Engine) Delete(key string) error {
+	if err := e.memtable.Delete(key); err != nil {
+		return err
 	}
 
-	return deleted
+	// TODO use a goroutine pool?
+	go (func() {
+		e.publishChange(key, OpDeleteKey)
+	})()
+
+	return nil
 }
 
 // DeletePrefix delete the subtree under a prefix
-func (e *Engine) DeletePrefix(prefix string) bool {
-	deletesCount := e.memtable.DeletePrefix(prefix)
-	deleted := deletesCount > 0
-
-	if deleted {
-		// TODO use a goroutine pool?
-		go (func() {
-			e.publishChange(prefix, OpDeletePrefix)
-		})()
+func (e *Engine) DeletePrefix(prefix string) error {
+	if err := e.memtable.DeletePrefix(prefix); err != nil {
+		return err
 	}
 
-	return deleted
+	// TODO use a goroutine pool?
+	go (func() {
+		e.publishChange(prefix, OpDeletePrefix)
+	})()
+
+	return nil
 }
 
 // Get return the value of the specified key
-func (e *Engine) Get(key string) (*driver.RawValueEntry, bool) {
-	entryInterface, found := e.memtable.Get(key)
-	if !found {
-		return nil, false
+func (e *Engine) Get(key string) (*driver.Entry, error) {
+	entry, err := e.memtable.Get(key)
+	if err != nil {
+		return nil, err
 	}
 
-	entry := entryInterface.(*driver.RawValueEntry)
-
-	return entry, true
-}
-
-// Len returns the number of elements in the store
-func (e *Engine) Len() int {
-	return e.memtable.Len()
+	return entry, nil
 }
 
 // Walk is used to walk the tree
-func (e *Engine) Walk(fn func(*driver.RawValueEntry) bool) error {
-	e.memtable.Walk(func(key string, val interface{}) bool {
-		return fn(val.(*driver.RawValueEntry))
-	})
-
-	return nil
+func (e *Engine) Walk(fn func(*driver.Entry) bool) error {
+	return e.memtable.Walk(fn)
 }
 
 // WalkPrefix is used to walk the tree under a prefix
-func (e *Engine) WalkPrefix(prefix string, fn func(*driver.RawValueEntry) bool) error {
-	e.memtable.WalkPrefix(prefix, func(key string, val interface{}) bool {
-		return fn(val.(*driver.RawValueEntry))
-	})
-
-	return nil
+func (e *Engine) WalkPrefix(prefix string, fn func(*driver.Entry) bool) error {
+	return e.memtable.WalkPrefix(prefix, fn)
 }
 
 // Subscribe registers a watcher that will be notified when the tree is changed it returns the index of the new watcher
