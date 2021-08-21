@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bytes"
 	"sync"
 	"time"
 
@@ -60,6 +61,11 @@ func (e *Engine) Put(entry *driver.Entry) (*driver.Entry, error) {
 		oldEntry = entry
 		oldEntry.CreatedAt = &currentTime
 		op = OpCreate
+	}
+
+	// this to ignore any write if the new value is the same as the old value
+	if op == OpUpdate && bytes.EqualFold(oldEntry.Value, entry.Value) {
+		return entry, nil
 	}
 
 	oldEntry.UpdatedAt = &currentTime
