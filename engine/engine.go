@@ -6,7 +6,7 @@ import (
 
 	"github.com/alash3al/redix/configparser"
 	"github.com/alash3al/redix/driver"
-	"github.com/alash3al/redix/driver/memory"
+	"github.com/alash3al/redix/drivers/memory"
 )
 
 // ChangeOp represents the change currently happens to a key.
