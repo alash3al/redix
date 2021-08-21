@@ -2,11 +2,15 @@ package postgres
 
 import (
 	"context"
+	"embed"
 
 	"github.com/alash3al/redix/internals/configparser"
 	"github.com/alash3al/redix/internals/driver"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
+
+//go:embed schema.sql
+var schemaSQL string
 
 type Engine struct {
 	pgpool *pgxpool.Pool
