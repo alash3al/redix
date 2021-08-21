@@ -14,8 +14,8 @@ Thoughts
 - Don't accept key's value if it is not changed.
 - Abbility to extend/add custom redis commands at least for basic operations without core change, may be via (js, lua, ... etc).
 - Abbility to have multiple storage drivers.
-- Must implement an in-memory driver to store data in memory.
-- Must provide the abbility to choose the default driver and pipe everything to secondary drivers.
+- Must provide the abbility to choose the default driver
+- May implement pipes to pipe everything to secondary drivers.
 - Imagine each redix instance as a BIG HASH TABLE, there is no namespace/dbs, why? 
     to force you as a developer to separate the concerns of your apps.
 - 

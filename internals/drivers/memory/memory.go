@@ -57,18 +57,30 @@ func (e Engine) Get(key string) (*driver.Entry, error) {
 	return entry, nil
 }
 
-func (e Engine) Walk(fn func(*driver.Entry) bool) error {
-	e.memtable.Walk(func(key string, val interface{}) bool {
-		return fn(val.(*driver.Entry))
-	})
+func (e Engine) Scan(opts driver.ScanOpts, scanner func(*driver.Entry) bool) error {
+	fetchedCount := 0
 
-	return nil
-}
+	scannerWrapper := func(key string, val interface{}) bool {
+		if opts.ResultLimit > 0 && fetchedCount >= opts.ResultLimit {
+			return true
+		}
 
-func (e Engine) WalkPrefix(prefix string, fn func(*driver.Entry) bool) error {
-	e.memtable.WalkPrefix(prefix, func(key string, val interface{}) bool {
-		return fn(val.(*driver.Entry))
-	})
+		if opts.StartingAfterKey != "" && opts.StartingAfterKey == key {
+			return false
+		}
+
+		entry := val.(*driver.Entry)
+
+		fetchedCount++
+
+		return scanner(entry)
+	}
+
+	if opts.Prefix != "" {
+		e.memtable.WalkPrefix(opts.Prefix, scannerWrapper)
+	} else {
+		e.memtable.Walk(scannerWrapper)
+	}
 
 	return nil
 }

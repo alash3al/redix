@@ -21,8 +21,13 @@ type Driver interface {
 	Get(key string) (*Entry, error)
 	Delete(key string) error
 	DeletePrefix(prefix string) error
-	Walk(func(*Entry) bool) error
-	WalkPrefix(prefix string, walker func(*Entry) bool) error
+	Scan(opts ScanOpts, scanner func(*Entry) bool) error
+}
+
+type ScanOpts struct {
+	Prefix           string
+	StartingAfterKey string
+	ResultLimit      int
 }
 
 var (

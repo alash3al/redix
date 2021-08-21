@@ -36,10 +36,8 @@ func main() {
 		Value: []byte("value1"),
 	})
 
-	e.Walk(func(rve *driver.Entry) bool {
-		fmt.Printf("%v\t", rve)
+	e.Scan(driver.ScanOpts{ResultLimit: 1}, func(rve *driver.Entry) bool {
+		fmt.Printf("%v\t\n", rve)
 		return false
 	})
-
-	fmt.Println(e.Get("path1/key1"))
 }

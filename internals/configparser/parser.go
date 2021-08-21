@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	DefaultEngineDriver string `hcl:"default_engine_driver"`
 }
 
 func Parse(filename string) (*Config, error) {

@@ -25,7 +25,7 @@ type OnChangeFunc func(key string, op ChangeOp)
 
 // Engine represents the core storage engine of the software.
 type Engine struct {
-	memtable driver.Driver
+	driver driver.Driver
 
 	onChangeFunc []OnChangeFunc
 
@@ -40,7 +40,7 @@ func New(config *configparser.Config) (*Engine, error) {
 	}
 
 	return &Engine{
-		memtable:     mem,
+		driver:       mem,
 		onChangeFunc: make([]OnChangeFunc, 0),
 	}, nil
 }
@@ -50,7 +50,7 @@ func New(config *configparser.Config) (*Engine, error) {
 func (e *Engine) Put(entry *driver.Entry) (*driver.Entry, error) {
 	currentTime := time.Now()
 
-	oldEntry, err := e.memtable.Get(string(entry.Key))
+	oldEntry, err := e.driver.Get(string(entry.Key))
 	if err != nil && err != driver.ErrKeyNotFound {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (e *Engine) Put(entry *driver.Entry) (*driver.Entry, error) {
 	oldEntry.UpdatedAt = &currentTime
 	oldEntry.Value = entry.Value
 
-	if err := e.memtable.Put(oldEntry); err != nil {
+	if err := e.driver.Put(oldEntry); err != nil {
 		return nil, err
 	}
 
@@ -85,7 +85,7 @@ func (e *Engine) Put(entry *driver.Entry) (*driver.Entry, error) {
 
 // Delete deletes the specified key
 func (e *Engine) Delete(key string) error {
-	if err := e.memtable.Delete(key); err != nil {
+	if err := e.driver.Delete(key); err != nil {
 		return err
 	}
 
@@ -99,7 +99,7 @@ func (e *Engine) Delete(key string) error {
 
 // DeletePrefix delete the subtree under a prefix
 func (e *Engine) DeletePrefix(prefix string) error {
-	if err := e.memtable.DeletePrefix(prefix); err != nil {
+	if err := e.driver.DeletePrefix(prefix); err != nil {
 		return err
 	}
 
@@ -113,7 +113,7 @@ func (e *Engine) DeletePrefix(prefix string) error {
 
 // Get return the value of the specified key
 func (e *Engine) Get(key string) (*driver.Entry, error) {
-	entry, err := e.memtable.Get(key)
+	entry, err := e.driver.Get(key)
 	if err != nil {
 		return nil, err
 	}
@@ -121,14 +121,8 @@ func (e *Engine) Get(key string) (*driver.Entry, error) {
 	return entry, nil
 }
 
-// Walk is used to walk the tree
-func (e *Engine) Walk(fn func(*driver.Entry) bool) error {
-	return e.memtable.Walk(fn)
-}
-
-// WalkPrefix is used to walk the tree under a prefix
-func (e *Engine) WalkPrefix(prefix string, fn func(*driver.Entry) bool) error {
-	return e.memtable.WalkPrefix(prefix, fn)
+func (e *Engine) Scan(opts driver.ScanOpts, scanner func(*driver.Entry) bool) error {
+	return e.driver.Scan(opts, scanner)
 }
 
 // Subscribe registers a watcher that will be notified when the tree is changed it returns the index of the new watcher
