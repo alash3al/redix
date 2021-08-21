@@ -4,7 +4,7 @@ package store
 import (
 	"errors"
 
-	"github.com/alash3al/redix/configparser"
+	"github.com/alash3al/redix/internals/configparser"
 )
 
 var (

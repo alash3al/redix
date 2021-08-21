@@ -4,7 +4,7 @@ package postgres
 import (
 	"context"
 
-	"github.com/alash3al/redix/configparser"
+	"github.com/alash3al/redix/internals/configparser"
 	"github.com/alash3al/redix/redis/store"
 	"github.com/alash3al/redix/utils/roundrobin"
 	"github.com/jmoiron/sqlx"

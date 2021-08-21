@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/alash3al/redix/configparser"
+	"github.com/alash3al/redix/internals/configparser"
 	"github.com/alash3al/redix/redis/store"
 )
 

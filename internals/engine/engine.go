@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/alash3al/redix/configparser"
-	"github.com/alash3al/redix/driver"
-	"github.com/alash3al/redix/drivers/memory"
+	"github.com/alash3al/redix/internals/configparser"
+	"github.com/alash3al/redix/internals/driver"
+	"github.com/alash3al/redix/internals/drivers/memory"
 )
 
 // ChangeOp represents the change currently happens to a key.

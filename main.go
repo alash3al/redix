@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/alash3al/redix/configparser"
-	"github.com/alash3al/redix/driver"
-	"github.com/alash3al/redix/engine"
+	"github.com/alash3al/redix/internals/configparser"
+	"github.com/alash3al/redix/internals/driver"
+	"github.com/alash3al/redix/internals/engine"
 )
 
 var (

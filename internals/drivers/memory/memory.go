@@ -1,8 +1,8 @@
 package memory
 
 import (
-	"github.com/alash3al/redix/configparser"
-	"github.com/alash3al/redix/driver"
+	"github.com/alash3al/redix/internals/configparser"
+	"github.com/alash3al/redix/internals/driver"
 	"github.com/armon/go-radix"
 )
 
