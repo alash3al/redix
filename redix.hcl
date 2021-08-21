@@ -1,3 +1,5 @@
-default_engine_driver = "memory"
+driver {
+    uses = "postgres"
 
-// secondry_drivers = ["files", ""]
+    dsn = "postgres://postgres@localhost/redix_v3"
+}
