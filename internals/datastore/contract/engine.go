@@ -5,6 +5,6 @@ type Engine interface {
 	Opener
 	Putter
 	Getter
-	Deleter
-	Exporter
+	Iterator
+	Replicator
 }

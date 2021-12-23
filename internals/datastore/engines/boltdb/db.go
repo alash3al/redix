@@ -1,12 +1,17 @@
 package boltdb
 
 import (
+	"errors"
 	"fmt"
-	"io"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/alash3al/redix/internals/datastore/contract"
+	"github.com/gosimple/slug"
 	"go.etcd.io/bbolt"
 )
 
@@ -19,11 +24,22 @@ var (
 // DB represents the database defeination
 type DB struct {
 	*bbolt.DB
+
+	replicas     map[string]*bbolt.DB
+	replicasLock *sync.RWMutex
+
+	datadir string
 }
 
 // Open opens the specified database file
-func (db *DB) Open(dsn string) error {
-	bolt, err := bbolt.Open(dsn, 0666, &bbolt.Options{Timeout: 1 * time.Second})
+func (db *DB) Open(dirname string) error {
+	if err := os.MkdirAll(dirname, 0755); err != nil {
+		return err
+	}
+
+	masterDBFilename := filepath.Join(dirname, "master.rxdb")
+
+	bolt, err := bbolt.Open(masterDBFilename, 0666, &bbolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		return err
 	}
@@ -32,13 +48,39 @@ func (db *DB) Open(dsn string) error {
 		if _, err := tx.CreateBucketIfNotExists(dataBucketName); err != nil {
 			return err
 		}
-		_, err := tx.CreateBucketIfNotExists(expirationsBucketName)
+		if _, err := tx.CreateBucketIfNotExists(expirationsBucketName); err != nil {
+			return err
+		}
 		return err
 	}); err != nil {
 		return err
 	}
 
 	db.DB = bolt
+	db.datadir = dirname
+	db.replicasLock = new(sync.RWMutex)
+	db.replicas = make(map[string]*bbolt.DB)
+
+	repliacsFilesNames, err := filepath.Glob(filepath.Join(dirname, "/*.replica.rxdb"))
+	if err != nil {
+		return err
+	}
+
+	for _, filename := range repliacsFilesNames {
+		fileparts := strings.Split(filepath.Base(filename), ".replica.rxdb")
+		if len(fileparts) < 1 {
+			continue
+		}
+
+		replica, err := bbolt.Open(filename, 0666, &bbolt.Options{Timeout: 1 * time.Second})
+		if err != nil {
+			return err
+		}
+
+		db.replicasLock.Lock()
+		db.replicas[fileparts[0]] = replica
+		db.replicasLock.Unlock()
+	}
 
 	go (func() {
 		expiredKeys := [][]byte{}
@@ -60,7 +102,7 @@ func (db *DB) Open(dsn string) error {
 		// FIXME handle any error happends during batch update?
 		db.Batch(func(tx *bbolt.Tx) error {
 			for _, k := range expiredKeys {
-				tx.Bucket(dataBucketName).Delete(k)
+				tx.Bucket(dataBucketName).Put(k, nil)
 			}
 
 			return nil
@@ -113,27 +155,6 @@ func (db *DB) Get(input *contract.GetInput) (*contract.GetOutput, error) {
 	}, err
 }
 
-// Delete performs the specified Delete request
-func (db *DB) Delete(input *contract.DeleteInput) (*contract.DeleteOutput, error) {
-	err := db.Batch(func(tx *bbolt.Tx) error {
-		if err := tx.Bucket(dataBucketName).Delete(input.Key); err != nil {
-			return err
-		}
-
-		if err := tx.Bucket(expirationsBucketName).Delete(input.Key); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return new(contract.DeleteOutput), nil
-}
-
 // Put performs the specified put request
 func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 	if input.OnlyIfNotExists {
@@ -147,7 +168,8 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 		}
 	}
 
-	err := db.Batch(func(tx *bbolt.Tx) error {
+	// TODO move to db.rsync
+	err := db.rsync(func(tx *bbolt.Tx) error {
 		if err := tx.Bucket(dataBucketName).Put(
 			input.Key,
 			input.Value,
@@ -172,11 +194,96 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 	return new(contract.PutOutput), nil
 }
 
-// Export export the current database
-func (db *DB) Export(w io.Writer) error {
-	return db.View(func(tx *bbolt.Tx) error {
-		_, err := tx.WriteTo(w)
+// ForEach iterate over each key-value in the datastore
+func (db *DB) ForEach(fn contract.IteratorFunc) error {
+	stop := errors.New("STOP_ITERATION")
 
-		return err
+	err := db.View(func(tx *bbolt.Tx) error {
+		return tx.Bucket(dataBucketName).ForEach(func(k, v []byte) error {
+			if !fn(k, v) {
+				return stop
+			}
+
+			return nil
+		})
 	})
+
+	if err == stop {
+		return nil
+	}
+
+	return err
+}
+
+// AddReplica adds a new replica db
+func (db *DB) AddReplica(name string) error {
+	name = slug.Make(name)
+	exists := false
+
+	db.replicasLock.RLock()
+	if _, exists = db.replicas[name]; exists {
+		exists = true
+	}
+	db.replicasLock.RUnlock()
+
+	if exists {
+		return nil
+	}
+
+	replicaFilename := filepath.Join(db.datadir, name+".replica.rxdb")
+
+	fd, err := os.OpenFile(replicaFilename, os.O_CREATE|os.O_TRUNC|os.O_RDWR|os.O_SYNC, 0755)
+	if err != nil {
+		return err
+	}
+
+	defer (func() {
+		if fd != nil {
+			fd.Close()
+		}
+	})()
+
+	if err := db.View(func(tx *bbolt.Tx) error {
+		_, err := tx.WriteTo(fd)
+		return err
+	}); err != nil {
+		return err
+	}
+
+	if err := fd.Close(); err != nil {
+		return err
+	}
+
+	fd = nil
+
+	replica, err := bbolt.Open(replicaFilename, 0666, &bbolt.Options{Timeout: 5 * time.Second})
+	if err != nil {
+		return err
+	}
+
+	db.replicasLock.Lock()
+	db.replicas[name] = replica
+	defer db.replicasLock.Unlock()
+
+	return nil
+}
+
+func (db *DB) rsync(rsyncFn func(*bbolt.Tx) error) error {
+	replicas := []*bbolt.DB{db.DB}
+
+	db.replicasLock.RLock()
+
+	for _, replica := range replicas {
+		replicas = append(replicas, replica)
+	}
+
+	db.replicasLock.RUnlock()
+
+	for _, replica := range replicas {
+		if err := replica.Batch(rsyncFn); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
