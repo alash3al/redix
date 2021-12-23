@@ -2,8 +2,7 @@ package contract
 
 // GetInput represents a Get request
 type GetInput struct {
-	Key    []byte
-	Delete bool
+	Key []byte
 }
 
 // GetOutput represents a Get output

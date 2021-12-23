@@ -9,15 +9,17 @@ import (
 	"go.etcd.io/bbolt"
 )
 
-// DB represents the database defeination
-type DB struct {
-	*bbolt.DB
-}
-
+// Engine level vars
 var (
 	dataBucketName        = []byte("data")
 	expirationsBucketName = []byte("expirations")
 )
+
+// DB represents the database defeination
+type DB struct {
+	*bbolt.DB
+	statemachine contract.Engine
+}
 
 // Open opens the specified database file
 func (db *DB) Open(dsn string) error {
@@ -27,7 +29,10 @@ func (db *DB) Open(dsn string) error {
 	}
 
 	if err = bolt.Update(func(tx *bbolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists(dataBucketName)
+		if _, err := tx.CreateBucketIfNotExists(dataBucketName); err != nil {
+			return err
+		}
+		_, err := tx.CreateBucketIfNotExists(expirationsBucketName)
 		return err
 	}); err != nil {
 		return err
@@ -35,17 +40,51 @@ func (db *DB) Open(dsn string) error {
 
 	db.DB = bolt
 
+	go (func() {
+		expiredKeys := [][]byte{}
+
+		// FIXME handle any error happends during view?
+		db.View(func(tx *bbolt.Tx) error {
+			return tx.Bucket(expirationsBucketName).ForEach(func(k, v []byte) error {
+				expiresAtNano, _ := strconv.ParseInt(string(v), 10, 64)
+				now := time.Now().UnixNano()
+
+				if now >= expiresAtNano {
+					expiredKeys = append(expiredKeys, k)
+				}
+
+				return nil
+			})
+		})
+
+		// FIXME handle any error happends during batch update?
+		db.Batch(func(tx *bbolt.Tx) error {
+			for _, k := range expiredKeys {
+				tx.Bucket(dataBucketName).Delete(k)
+			}
+
+			return nil
+		})
+
+		time.Sleep(10 * time.Minute)
+	})()
+
 	return nil
 }
 
 // Get performs the specified Get request
 func (db *DB) Get(input *contract.GetInput) (*contract.GetOutput, error) {
 	var val []byte
-	var expiresAt []byte
+	var expiresAtRaw []byte
+	var expiresAtParsed time.Time
+	var expired bool
+	var expiresAfterSeconds float64
+
+	now := time.Now()
 
 	err := db.View(func(tx *bbolt.Tx) error {
 		val = tx.Bucket(dataBucketName).Get(input.Key)
-		expiresAt = tx.Bucket(expirationsBucketName).Get(input.Key)
+		expiresAtRaw = tx.Bucket(expirationsBucketName).Get(input.Key)
 
 		return nil
 	})
@@ -54,19 +93,23 @@ func (db *DB) Get(input *contract.GetInput) (*contract.GetOutput, error) {
 		return nil, err
 	}
 
-	expiresAtNano, _ := strconv.ParseInt(string(expiresAt), 10, 64)
-	now := time.Now().UnixNano()
-	expired := now == expiresAtNano || now < expiresAtNano
+	if expiresAtRaw != nil {
+		expiresAtNano, _ := strconv.ParseInt(string(expiresAtRaw), 10, 64)
+		expired = now.UnixNano() >= expiresAtNano
+		expiresAtParsed = time.Unix(0, expiresAtNano)
 
-	if input.Delete || expired {
-		if _, err := db.Delete(&contract.DeleteInput{Key: input.Key}); err != nil {
-			return nil, err
+		if !expired {
+			expiresAfterSeconds = expiresAtParsed.Sub(now).Seconds()
 		}
+	}
+
+	if expired {
+		return new(contract.GetOutput), nil
 	}
 
 	return &contract.GetOutput{
 		Value:               val,
-		ExpiresAfterSeconds: time.Since(time.Unix(0, expiresAtNano)).Seconds(),
+		ExpiresAfterSeconds: expiresAfterSeconds,
 	}, err
 }
 
@@ -77,10 +120,18 @@ func (db *DB) Delete(input *contract.DeleteInput) (*contract.DeleteOutput, error
 			return err
 		}
 
-		return tx.Bucket(expirationsBucketName).Delete(input.Key)
+		if err := tx.Bucket(expirationsBucketName).Delete(input.Key); err != nil {
+			return err
+		}
+
+		return nil
 	})
 
-	return new(contract.DeleteOutput), err
+	if err != nil {
+		return nil, err
+	}
+
+	return new(contract.DeleteOutput), nil
 }
 
 // Put performs the specified put request
@@ -91,7 +142,6 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 			return nil, err
 		}
 
-		// exists & not expired
 		if getOutput.Value != nil && getOutput.ExpiresAfterSeconds >= 0 {
 			return new(contract.PutOutput), nil
 		}
@@ -115,5 +165,9 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 		return nil
 	})
 
-	return new(contract.PutOutput), err
+	if err != nil {
+		return nil, err
+	}
+
+	return new(contract.PutOutput), nil
 }
