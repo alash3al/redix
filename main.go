@@ -21,12 +21,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(mngr.Put(0, &contract.PutInput{
+	fmt.Println(mngr.Put(&contract.PutInput{
 		Key:   []byte("key1"),
 		Value: []byte("value1"),
 	}))
 
-	fmt.Println(mngr.Put(0, &contract.PutInput{
+	fmt.Println(mngr.Put(&contract.PutInput{
 		Key:             []byte("key1"),
 		Value:           []byte("value1-overrider"),
 		OnlyIfNotExists: true,
@@ -35,7 +35,7 @@ func main() {
 
 	time.Sleep(1 * time.Second)
 
-	o, err := mngr.Get(0, &contract.GetInput{
+	o, err := mngr.Get(&contract.GetInput{
 		Key: []byte("key1"),
 	})
 

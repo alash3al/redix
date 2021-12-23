@@ -2,6 +2,7 @@ package boltdb
 
 import (
 	"fmt"
+	"io"
 	"strconv"
 	"time"
 
@@ -18,7 +19,6 @@ var (
 // DB represents the database defeination
 type DB struct {
 	*bbolt.DB
-	statemachine contract.Engine
 }
 
 // Open opens the specified database file
@@ -170,4 +170,13 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 	}
 
 	return new(contract.PutOutput), nil
+}
+
+// Export export the current database
+func (db *DB) Export(w io.Writer) error {
+	return db.View(func(tx *bbolt.Tx) error {
+		_, err := tx.WriteTo(w)
+
+		return err
+	})
 }
