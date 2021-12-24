@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/alash3al/redix/internals/datastore/contract"
-	"github.com/gosimple/slug"
 	"go.etcd.io/bbolt"
 )
 
@@ -27,6 +26,8 @@ type DB struct {
 
 	replicas     map[string]*bbolt.DB
 	replicasLock *sync.RWMutex
+
+	beforeCommit contract.BeforeCommitFunc
 
 	datadir string
 }
@@ -168,8 +169,19 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 		}
 	}
 
-	// TODO move to db.rsync
-	err := db.rsync(func(tx *bbolt.Tx) error {
+	err := db.Batch(func(tx *bbolt.Tx) error {
+		if db.beforeCommit != nil {
+			if err := db.beforeCommit(input); err != nil {
+				return err
+			}
+		}
+
+		if !input.KeepTTL {
+			if err := tx.Bucket(expirationsBucketName).Delete(input.Key); err != nil {
+				return err
+			}
+		}
+
 		if err := tx.Bucket(dataBucketName).Put(
 			input.Key,
 			input.Value,
@@ -215,75 +227,7 @@ func (db *DB) ForEach(fn contract.IteratorFunc) error {
 	return err
 }
 
-// AddReplica adds a new replica db
-func (db *DB) AddReplica(name string) error {
-	name = slug.Make(name)
-	exists := false
-
-	db.replicasLock.RLock()
-	if _, exists = db.replicas[name]; exists {
-		exists = true
-	}
-	db.replicasLock.RUnlock()
-
-	if exists {
-		return nil
-	}
-
-	replicaFilename := filepath.Join(db.datadir, name+".replica.rxdb")
-
-	fd, err := os.OpenFile(replicaFilename, os.O_CREATE|os.O_TRUNC|os.O_RDWR|os.O_SYNC, 0755)
-	if err != nil {
-		return err
-	}
-
-	defer (func() {
-		if fd != nil {
-			fd.Close()
-		}
-	})()
-
-	if err := db.View(func(tx *bbolt.Tx) error {
-		_, err := tx.WriteTo(fd)
-		return err
-	}); err != nil {
-		return err
-	}
-
-	if err := fd.Close(); err != nil {
-		return err
-	}
-
-	fd = nil
-
-	replica, err := bbolt.Open(replicaFilename, 0666, &bbolt.Options{Timeout: 5 * time.Second})
-	if err != nil {
-		return err
-	}
-
-	db.replicasLock.Lock()
-	db.replicas[name] = replica
-	defer db.replicasLock.Unlock()
-
-	return nil
-}
-
-func (db *DB) rsync(rsyncFn func(*bbolt.Tx) error) error {
-	replicas := []*bbolt.DB{db.DB}
-
-	db.replicasLock.RLock()
-
-	for _, replica := range replicas {
-		replicas = append(replicas, replica)
-	}
-
-	db.replicasLock.RUnlock()
-
-	for _, replica := range replicas {
-		if err := replica.Batch(rsyncFn); err != nil {
-			return err
-		}
-	}
-
-	return nil
+// BeforeCommit register a before commit callback
+func (db *DB) BeforeCommit(fn contract.BeforeCommitFunc) {
+	db.beforeCommit = fn
 }

@@ -8,6 +8,7 @@ type PutInput struct {
 	Value           []byte
 	OnlyIfNotExists bool
 	TTL             time.Duration
+	KeepTTL         bool
 }
 
 // PutOutput represents a PUT output

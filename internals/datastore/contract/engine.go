@@ -6,5 +6,5 @@ type Engine interface {
 	Putter
 	Getter
 	Iterator
-	Replicator
+	Hooker
 }
