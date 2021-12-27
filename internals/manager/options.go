@@ -15,11 +15,12 @@ const (
 
 // Options manager options
 type Options struct {
-	DataDir       string
-	DefaultEngine string
-	InstanceRole  InstanceRole
-	MasterDSN     string
-	ReplicasDSN   []string
+	DataDir           string
+	DefaultEngine     string
+	InstanceRole      InstanceRole
+	MasterRESPDSN     string
+	MasterHTTPBaseURL string
+	ReplicasDSN       []string
 }
 
 // DataDirPath returns full path relative to the datadir

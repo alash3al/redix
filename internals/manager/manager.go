@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -21,7 +23,7 @@ type Manager struct {
 	opts  *Options
 	state *leveldb.DB
 
-	masterClient *redis.Client
+	masterRESPClient *redis.Client
 }
 
 // New initializes a new manager
@@ -36,7 +38,7 @@ func New(opts *Options) (*Manager, error) {
 		return nil, fmt.Errorf("unknown instance role (%s) specified", opts.InstanceRole)
 	}
 
-	if opts.InstanceRole == InstanceRoleReplica && opts.MasterDSN == "" {
+	if opts.InstanceRole == InstanceRoleReplica && opts.MasterRESPDSN == "" {
 		return nil, fmt.Errorf("empty master specified, please specify a valid master dsn")
 	}
 
@@ -44,26 +46,26 @@ func New(opts *Options) (*Manager, error) {
 		return nil, err
 	}
 
-	var masterClient *redis.Client
+	var masterRESPClient *redis.Client
 
 	if opts.InstanceRole == InstanceRoleReplica {
-		url, err := redis.ParseURL(opts.MasterDSN)
+		url, err := redis.ParseURL(opts.MasterRESPDSN)
 		if err != nil {
-			return nil, fmt.Errorf("invalid master dsn (%s) specified: %s", opts.MasterDSN, err.Error())
+			return nil, fmt.Errorf("invalid master dsn (%s) specified: %s", opts.MasterRESPDSN, err.Error())
 		}
 
 		cli := redis.NewClient(url)
 
 		if cli.Ping(context.Background()).Err() != nil {
-			return nil, fmt.Errorf("unable to ping the master (%s)", opts.MasterDSN)
+			return nil, fmt.Errorf("unable to ping the master (%s)", opts.MasterRESPDSN)
 		}
 
-		masterClient = cli
+		masterRESPClient = cli
 	}
 
 	db, err := contract.Open(
 		opts.DefaultEngine,
-		opts.DataDirPath(opts.DefaultEngine, "redix.data"),
+		opts.DataDirPath(opts.DefaultEngine),
 	)
 
 	if err != nil {
@@ -76,10 +78,10 @@ func New(opts *Options) (*Manager, error) {
 	}
 
 	mngr := &Manager{
-		opts:         opts,
-		db:           db,
-		state:        statedb,
-		masterClient: masterClient,
+		opts:             opts,
+		db:               db,
+		state:            statedb,
+		masterRESPClient: masterRESPClient,
 	}
 
 	if opts.InstanceRole == InstanceRoleMaster {
@@ -90,6 +92,10 @@ func New(opts *Options) (*Manager, error) {
 
 		mngr.wal = waldb
 	}
+
+	mngr.db.Close()
+
+	mngr.importFromMaster()
 
 	go (func() {
 		mngr.replicationHandler()
@@ -130,12 +136,27 @@ func (m *Manager) ForEach(fn contract.IteratorFunc) error {
 	return m.db.ForEach(fn)
 }
 
+// Export dumps the database
+func (m *Manager) Export(fn contract.ExportFunc) error {
+	return m.db.Export(fn)
+}
+
 // Wal returns the wal handler
 func (m *Manager) Wal() *wal.Wal {
 	if m.opts.InstanceRole != InstanceRoleMaster {
 		panic("trying to get a wal instance in a none-master instance/node")
 	}
 	return m.wal
+}
+
+// CurrentOffset returns the current offset of the current instance
+func (m *Manager) CurrentOffset() (string, error) {
+	currentOffset, err := m.state.Get([]byte("current_offset"), nil)
+	if err != nil && err != leveldb.ErrNotFound {
+		return "", err
+	}
+
+	return string(currentOffset), nil
 }
 
 // Report report the specified error
@@ -149,6 +170,8 @@ func (m *Manager) Report(err error, shouldPanic bool) {
 
 func (m *Manager) replicationHandler() {
 	for {
+		time.Sleep(50 * time.Millisecond)
+
 		currentOffset, err := m.state.Get([]byte("current_offset"), nil)
 		if err != nil && err != leveldb.ErrNotFound {
 			m.Report(fmt.Errorf("unable to fetch the latest state from state db due to: %s", err.Error()), true)
@@ -179,7 +202,7 @@ func (m *Manager) replicationHandler() {
 			args = append(args, currentOffset)
 		}
 
-		row, err := m.masterClient.Do(context.Background(), args...).StringSlice()
+		row, err := m.masterRESPClient.Do(context.Background(), args...).StringSlice()
 		if err != nil {
 			m.Report(fmt.Errorf("unable to parse a replicated data due to: %s", err.Error()), true)
 		}
@@ -195,8 +218,45 @@ func (m *Manager) replicationHandler() {
 		if err := m.directWrite([]byte(row[0]), []byte(row[1])); err != nil {
 			m.Report(fmt.Errorf("unable to apply replicated data due to: %s", err.Error()), true)
 		}
+	}
+}
 
-		time.Sleep(1 * time.Millisecond)
+func (m *Manager) importFromMaster() {
+	currentOffset, err := m.state.Get([]byte("current_offset"), nil)
+	if err != nil && err != leveldb.ErrNotFound {
+		m.Report(fmt.Errorf("unable to fetch the latest state from state db due to: %s", err.Error()), true)
+	}
+
+	if currentOffset == nil && m.opts.InstanceRole != InstanceRoleMaster {
+		log.Println("=> asking for a dump from the master instance ...")
+
+		resp, err := http.Get(fmt.Sprintf("%s/dump", m.opts.MasterHTTPBaseURL))
+		if err != nil {
+			m.Report(fmt.Errorf("unable to fetch the dump from the master due to: %s", err.Error()), true)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			bdy, _ := ioutil.ReadAll(resp.Body)
+			m.Report(fmt.Errorf("unable to fetch the dump from the master due to: %s", string(bdy)), true)
+		}
+
+		currentOffset := resp.Header.Get("X-Current-Offset")
+		written, err := m.db.Import(resp.Body)
+		if err != nil {
+			m.Report(fmt.Errorf("unable to import from the master dump due to: %s", err.Error()), true)
+		}
+
+		if written != resp.ContentLength {
+			m.Report(fmt.Errorf("the dump content-length isn't the same as written dump, something went wrong there, could you retry again?"), true)
+		}
+
+		if err := m.state.Put([]byte("current_offset"), []byte(currentOffset), nil); err != nil {
+			resp.Body.Close()
+			m.Report(fmt.Errorf("unable to fetch the dump from the master due to: %s", err.Error()), true)
+		}
+
+		log.Println("=> finalized the dump ...")
 	}
 }
 

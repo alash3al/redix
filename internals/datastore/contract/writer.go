@@ -1,6 +1,7 @@
 package contract
 
 import (
+	"io"
 	"time"
 
 	"github.com/vmihailenco/msgpack/v5"
@@ -38,4 +39,5 @@ type WriteOutput struct{}
 // Writer represents a Put related actions
 type Writer interface {
 	Write(*WriteInput) (*WriteOutput, error)
+	Import(io.Reader) (int64, error)
 }

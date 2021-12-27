@@ -11,5 +11,6 @@ TODOs
 - [x] Local state machine on top of leveldb
 - [x] Expose wal scanning to main Redis interface
 - [x] Only write to wal, then let any instance consume from it even the master
-- [ ] Expose snapshot command let any replica to fetch a snapshot
-- [ ] Expose a state command to let the master detect how much of wal should be trimmed
+- [x] Expose snapshot api let any replica to fetch a snapshot
+    - [x] Let new replicas to resync all dump as well as the current master offset
+- [ ] Expose a state api to let the master detect how much of wal should be trimmed

@@ -3,6 +3,7 @@ package boltdb
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -31,9 +32,9 @@ func (db *DB) Open(dirname string) error {
 		return err
 	}
 
-	masterDBFilename := filepath.Join(dirname, "master.rxdb")
+	filename := filepath.Join(dirname, "data.rxdb")
 
-	bolt, err := bbolt.Open(masterDBFilename, 0666, &bbolt.Options{Timeout: 1 * time.Second})
+	bolt, err := bbolt.Open(filename, 0666, &bbolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		return err
 	}
@@ -189,4 +190,55 @@ func (db *DB) ForEach(fn contract.IteratorFunc) error {
 	}
 
 	return err
+}
+
+// Export exports the current database
+func (db *DB) Export(fn contract.ExportFunc) error {
+	return db.View(func(tx *bbolt.Tx) error {
+		_, err := tx.WriteTo(fn(tx.Size()))
+
+		return err
+	})
+}
+
+// Import imports the specified io.Reader into the current db (overrides it)
+func (db *DB) Import(r io.Reader) (int64, error) {
+	if err := db.Close(); err != nil {
+		return 0, err
+	}
+
+	filename := filepath.Join(db.datadir, "data.rxdb")
+
+	if err := os.RemoveAll(filename); err != nil {
+		return 0, err
+	}
+
+	fd, err := os.OpenFile(
+		filename,
+		os.O_TRUNC|os.O_RDWR|os.O_CREATE,
+		0755,
+	)
+	if err != nil {
+		return 0, err
+	}
+	defer fd.Close()
+
+	written, err := io.Copy(fd, r)
+	if err != nil {
+		return 0, err
+	}
+
+	bolt, err := bbolt.Open(filename, 0666, &bbolt.Options{Timeout: 1 * time.Second})
+	if err != nil {
+		return 0, err
+	}
+
+	db.DB = bolt
+
+	return written, err
+}
+
+// Close closes the database
+func (db *DB) Close() error {
+	return db.DB.Close()
 }

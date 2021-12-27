@@ -7,6 +7,7 @@ import (
 
 	"github.com/alash3al/redix/internals/config"
 	"github.com/alash3al/redix/internals/datastore/engines/boltdb"
+	"github.com/alash3al/redix/internals/http"
 	"github.com/alash3al/redix/internals/manager"
 	"github.com/alash3al/redix/internals/redis"
 )
@@ -30,20 +31,28 @@ func main() {
 	}
 
 	mngr, err := manager.New(&manager.Options{
-		DataDir:       cfg.DataDir,
-		DefaultEngine: boltdb.EngineName,
-		InstanceRole:  cfg.InstanceRole,
-		MasterDSN:     cfg.MasterDSN,
+		DataDir:           cfg.DataDir,
+		DefaultEngine:     boltdb.EngineName,
+		InstanceRole:      cfg.InstanceRole,
+		MasterRESPDSN:     cfg.MasterRESPDSN,
+		MasterHTTPBaseURL: cfg.MasterHTTPBaseURL,
 	})
 
 	if err != nil {
 		log.Fatal("unable to initialize the database manager due to: ", err.Error())
 	}
 
-	fmt.Println("=> started the redis server on addr", cfg.InstanceRespListenAddr)
+	go func() {
+		fmt.Println("=> started the redis server on addr", cfg.InstanceRESPListenAddr)
+		log.Fatal(
+			"unable to start the redis server due to: ",
+			redis.ListenAndServe(cfg.InstanceRESPListenAddr, mngr),
+		)
+	}()
 
+	fmt.Println("=> started the http server on addr", cfg.InstanceHTTPListenAddr)
 	log.Fatal(
-		"unable to start the redis server due to: ",
-		redis.ListenAndServe(cfg.InstanceRespListenAddr, mngr),
+		"unable to start the http server due to: ",
+		http.ListenAndServe(cfg.InstanceHTTPListenAddr, mngr),
 	)
 }

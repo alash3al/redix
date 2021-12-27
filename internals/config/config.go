@@ -12,9 +12,11 @@ import (
 // Config represents global configs container
 type Config struct {
 	InstanceRole           manager.InstanceRole `envconfig:"INSTANCE_ROLE" required:"true"`
-	InstanceRespListenAddr string               `envconfig:"INSTANCE_RESP_LISTEN_ADDR" required:"true"`
+	InstanceRESPListenAddr string               `envconfig:"INSTANCE_RESP_LISTEN_ADDR" required:"true"`
+	InstanceHTTPListenAddr string               `envconfig:"INSTANCE_HTTP_LISTEN_ADDR" required:"true"`
 	DataDir                string               `envconfig:"DATA_DIR" required:"true"`
-	MasterDSN              string               `envconfig:"MASTER_DSN"`
+	MasterRESPDSN          string               `envconfig:"MASTER_RESP_DSN"`
+	MasterHTTPBaseURL      string               `envconfig:"MASTER_HTTP_BASE_URL"`
 }
 
 // Unmarshal parses the specified filename and load it into memory
