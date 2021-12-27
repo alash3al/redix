@@ -1,27 +1,17 @@
 package redis
 
 import (
-	"encoding/json"
 	"strconv"
 	"strings"
 
-	"github.com/alash3al/redix/internals/binlog"
 	"github.com/alash3al/redix/internals/datastore/contract"
 	"github.com/alash3al/redix/internals/manager"
+	"github.com/alash3al/redix/internals/wal"
 	"github.com/tidwall/redcon"
 )
 
 // ListenAndServe start a redis server
-func ListenAndServe(addr string) error {
-	mngr, err := manager.New(&manager.Options{
-		DataDir:       "./redixdata",
-		DefaultEngine: "boltdb",
-	})
-
-	if err != nil {
-		return err
-	}
-
+func ListenAndServe(addr string, mngr *manager.Manager) error {
 	return redcon.ListenAndServe(addr,
 		func(conn redcon.Conn, cmd redcon.Command) {
 			switch strings.ToLower(string(cmd.Args[0])) {
@@ -32,61 +22,59 @@ func ListenAndServe(addr string) error {
 			case "quit":
 				conn.WriteString("OK")
 				conn.Close()
-			case "binlog":
+			case "wal":
 				if len(cmd.Args) < 1 {
 					conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
 					return
 				}
 
-				var offset []byte
-
-				if len(cmd.Args) > 1 {
-					offset = cmd.Args[1]
-				}
-
 				limit := 1
 
-				if len(cmd.Args) > 2 {
-					limit, _ = strconv.Atoi(string(cmd.Args[2]))
+				if len(cmd.Args) > 1 {
+					limit, _ = strconv.Atoi(string(cmd.Args[1]))
 				}
 
-				fetchedLogs := []*binlog.LogEntry{}
+				var offset []byte
 
-				if err := mngr.BinLog().ForEach(offset, false, func(l *binlog.LogEntry) bool {
-					if len(fetchedLogs) >= limit {
-						return false
-					}
+				if len(cmd.Args) > 2 {
+					offset = cmd.Args[2]
+				}
 
-					fetchedLogs = append(fetchedLogs, l)
+				fetchedLogs := [][][]byte{}
+
+				if err := mngr.Wal().Range(func(key, value []byte) bool {
+					fetchedLogs = append(fetchedLogs, [][]byte{key, value})
 
 					return true
+				}, &wal.RangeOpts{
+					Offset:             offset,
+					IncludeOffsetValue: false,
+					Limit:              int64(limit),
 				}); err != nil {
 					conn.WriteError("ERR " + err.Error())
 					return
 				}
 
-				conn.WriteArray(len(fetchedLogs))
+				conn.WriteArray(len(fetchedLogs) * 2)
 
-				for _, e := range fetchedLogs {
-					jbytes, err := json.Marshal(e)
-					if err != nil {
-						conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
-						return
-					}
-					conn.WriteBulk(jbytes)
+				for _, val := range fetchedLogs {
+					conn.WriteBulk(val[0])
+					conn.WriteBulk(val[1])
 				}
 			case "set":
 				if len(cmd.Args) != 3 {
 					conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
 					return
 				}
-				if _, err := mngr.Put(&contract.PutInput{
+
+				if err := mngr.Write(&contract.WriteInput{
 					Key:   cmd.Args[1],
 					Value: cmd.Args[2],
 				}); err != nil {
 					conn.WriteError("ERR " + err.Error())
 					return
 				}
+
 				conn.WriteString("OK")
 			case "get":
 				if len(cmd.Args) != 2 {
@@ -113,7 +101,7 @@ func ListenAndServe(addr string) error {
 					conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
 					return
 				}
-				if _, err := mngr.Put(&contract.PutInput{
+				if err := mngr.Write(&contract.WriteInput{
 					Key:   cmd.Args[1],
 					Value: nil,
 				}); err != nil {

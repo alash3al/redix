@@ -4,20 +4,26 @@ import (
 	"path/filepath"
 )
 
+// InstanceRole represents the role of the initiated manager instance
+type InstanceRole string
+
+// Available instance roles
+const (
+	InstanceRoleMaster  InstanceRole = "master"
+	InstanceRoleReplica InstanceRole = "replica"
+)
+
 // Options manager options
 type Options struct {
 	DataDir       string
 	DefaultEngine string
+	InstanceRole  InstanceRole
+	MasterDSN     string
+	ReplicasDSN   []string
 }
 
 // DataDirPath returns full path relative to the datadir
 func (opts *Options) DataDirPath(elem ...string) string {
 	elem = append([]string{opts.DataDir}, elem...)
 	return filepath.Join(elem...)
-}
-
-// DatabasesPath returns the full database path relative to the datadir and based on
-func (opts *Options) DatabasesPath(elem ...string) string {
-	elem = append([]string{"databases", opts.DefaultEngine}, elem...)
-	return opts.DataDirPath(elem...)
 }

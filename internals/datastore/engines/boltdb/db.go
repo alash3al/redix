@@ -6,8 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/alash3al/redix/internals/datastore/contract"
@@ -23,11 +21,6 @@ var (
 // DB represents the database defeination
 type DB struct {
 	*bbolt.DB
-
-	replicas     map[string]*bbolt.DB
-	replicasLock *sync.RWMutex
-
-	beforeCommit contract.BeforeCommitFunc
 
 	datadir string
 }
@@ -59,29 +52,6 @@ func (db *DB) Open(dirname string) error {
 
 	db.DB = bolt
 	db.datadir = dirname
-	db.replicasLock = new(sync.RWMutex)
-	db.replicas = make(map[string]*bbolt.DB)
-
-	repliacsFilesNames, err := filepath.Glob(filepath.Join(dirname, "/*.replica.rxdb"))
-	if err != nil {
-		return err
-	}
-
-	for _, filename := range repliacsFilesNames {
-		fileparts := strings.Split(filepath.Base(filename), ".replica.rxdb")
-		if len(fileparts) < 1 {
-			continue
-		}
-
-		replica, err := bbolt.Open(filename, 0666, &bbolt.Options{Timeout: 1 * time.Second})
-		if err != nil {
-			return err
-		}
-
-		db.replicasLock.Lock()
-		db.replicas[fileparts[0]] = replica
-		db.replicasLock.Unlock()
-	}
 
 	go (func() {
 		expiredKeys := [][]byte{}
@@ -156,8 +126,8 @@ func (db *DB) Get(input *contract.GetInput) (*contract.GetOutput, error) {
 	}, err
 }
 
-// Put performs the specified put request
-func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
+// Write performs the specified write request
+func (db *DB) Write(input *contract.WriteInput) (*contract.WriteOutput, error) {
 	if input.OnlyIfNotExists {
 		getOutput, err := db.Get(&contract.GetInput{Key: input.Key})
 		if err != nil {
@@ -165,17 +135,11 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 		}
 
 		if getOutput.Value != nil && getOutput.ExpiresAfterSeconds >= 0 {
-			return new(contract.PutOutput), nil
+			return new(contract.WriteOutput), nil
 		}
 	}
 
 	err := db.Batch(func(tx *bbolt.Tx) error {
-		if db.beforeCommit != nil {
-			if err := db.beforeCommit(input); err != nil {
-				return err
-			}
-		}
-
 		if !input.KeepTTL {
 			if err := tx.Bucket(expirationsBucketName).Delete(input.Key); err != nil {
 				return err
@@ -203,7 +167,7 @@ func (db *DB) Put(input *contract.PutInput) (*contract.PutOutput, error) {
 		return nil, err
 	}
 
-	return new(contract.PutOutput), nil
+	return new(contract.WriteOutput), nil
 }
 
 // ForEach iterate over each key-value in the datastore
@@ -225,9 +189,4 @@ func (db *DB) ForEach(fn contract.IteratorFunc) error {
 	}
 
 	return err
-}
-
-// BeforeCommit register a before commit callback
-func (db *DB) BeforeCommit(fn contract.BeforeCommitFunc) {
-	db.beforeCommit = fn
 }

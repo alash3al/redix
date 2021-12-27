@@ -11,7 +11,11 @@ type GetOutput struct {
 	ExpiresAfterSeconds float64
 }
 
-// Getter represents Get related actions
-type Getter interface {
+// IteratorFunc function used while iterator
+type IteratorFunc func([]byte, []byte) bool
+
+// Reader represents read related actions
+type Reader interface {
 	Get(*GetInput) (*GetOutput, error)
+	ForEach(IteratorFunc) error
 }
