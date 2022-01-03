@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/alash3al/redix/internals/datastore/contract"
@@ -22,6 +24,9 @@ type Manager struct {
 	wal   *wal.Wal
 	opts  *Options
 	state *leveldb.DB
+
+	// TODO: implements some sort of sync here
+	minClusterOffsetTimeNS int64
 
 	masterRESPClient *redis.Client
 }
@@ -93,15 +98,52 @@ func New(opts *Options) (*Manager, error) {
 		mngr.wal = waldb
 	}
 
-	mngr.db.Close()
-
-	mngr.importFromMaster()
-
 	go (func() {
 		mngr.replicationHandler()
 	})()
 
+	if opts.InstanceRole == InstanceRoleReplica {
+		go (func() {
+			for {
+				time.Sleep(1 * time.Minute)
+
+				offset, err := mngr.CurrentOffset()
+				if err != nil {
+					mngr.Report(fmt.Errorf("unable to fetch current instance wal offset due to: %s", err), true)
+				}
+
+				if err := mngr.masterRESPClient.Do(context.Background(), "SETCLUSTERWALOFFSET", offset).Err(); err != nil {
+					mngr.Report(fmt.Errorf("unable to propogate my offset to the master due to: %s", err), true)
+				}
+			}
+		})()
+	}
+
+	if opts.InstanceRole == InstanceRoleMaster {
+		// TODO: a goroutine to remove the data older than the minimum offset
+		// each x of time or each time the database size be >= y bytes?
+	}
+
 	return mngr, nil
+}
+
+// UpdateClusterMinimumOffset sync the minimum offset of the cluster to help in trimming the wal
+func (m *Manager) UpdateClusterMinimumOffset(offset string) error {
+	parts := strings.Split(offset, "-")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid offset specified")
+	}
+
+	offsetNS, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil {
+		return fmt.Errorf("offset parsing failed due to: %s", err)
+	}
+
+	if m.minClusterOffsetTimeNS != 0 && m.minClusterOffsetTimeNS > offsetNS {
+		m.minClusterOffsetTimeNS = offsetNS
+	}
+
+	return nil
 }
 
 // Write writes the specified input
@@ -197,6 +239,13 @@ func (m *Manager) replicationHandler() {
 		// ANYTHING HERE MEANS elseif we're not in a master node
 		// which means a replica node area.
 
+		// it is our first time to poll from master?
+		// then let's dump everything from there
+		if currentOffset == nil {
+			m.importFromMaster()
+			continue
+		}
+
 		args := []interface{}{"WAL", 1}
 		if len(currentOffset) > 0 {
 			args = append(args, currentOffset)
@@ -204,10 +253,11 @@ func (m *Manager) replicationHandler() {
 
 		row, err := m.masterRESPClient.Do(context.Background(), args...).StringSlice()
 		if err != nil {
-			m.Report(fmt.Errorf("unable to parse a replicated data due to: %s", err.Error()), true)
+			m.Report(fmt.Errorf("unable to fetch data to be replicated from the master due to: %s", err.Error()), true)
 		}
 
 		if row == nil || len(row) == 0 {
+			time.Sleep(1 * time.Second)
 			continue
 		}
 
@@ -270,11 +320,11 @@ func (m *Manager) directWrite(offset, payload []byte) error {
 	batch.Put([]byte("current_offset"), offset)
 
 	if err := m.state.Write(batch, nil); err != nil {
-		return err
+		return fmt.Errorf("state err: %s", err)
 	}
 
 	if _, err := m.db.Write(input); err != nil {
-		return err
+		return fmt.Errorf("db error: %s", err)
 	}
 
 	return nil

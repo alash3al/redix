@@ -22,6 +22,26 @@ func ListenAndServe(addr string, mngr *manager.Manager) error {
 			case "quit":
 				conn.WriteString("OK")
 				conn.Close()
+			case "setclusterwaloffset":
+				if len(cmd.Args) != 2 {
+					conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
+					return
+				}
+
+				if err := mngr.UpdateClusterMinimumOffset(string(cmd.Args[1])); err != nil {
+					conn.WriteError("ERR updating the cluster minimum offset due to: " + err.Error())
+					return
+				}
+
+				conn.WriteString("OK")
+			case "waloffset":
+				offset, err := mngr.CurrentOffset()
+				if err != nil {
+					conn.WriteError("ERR fetching the current data offset due to: " + err.Error())
+					return
+				}
+
+				conn.WriteString(offset)
 			case "wal":
 				if len(cmd.Args) < 1 {
 					conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
