@@ -13,4 +13,6 @@ TODOs
 - [x] Only write to wal, then let any instance consume from it even the master
 - [x] Expose snapshot api let any replica to fetch a snapshot
     - [x] Let new replicas to resync all dump as well as the current master offset
-- [ ] Expose a state api to let the master detect how much of wal should be trimmed
+- [x] Expose a state api to let the master detect how much of wal should be trimmed
+- [ ] Let the master trim the wal
+- [ ] Do any TODO in the code
