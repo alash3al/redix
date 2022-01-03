@@ -16,3 +16,5 @@ TODOs
 - [x] Expose a state api to let the master detect how much of wal should be trimmed
 - [ ] Let the master trim the wal
 - [ ] Do any TODO in the code
+- [ ] Implement redis databases (0, 1, 2, ... etc) virtually by prefixing any key by the currently used db index?
+- [ ] Implement more helpful commands?
