@@ -14,7 +14,6 @@ TODOs
 - [x] Expose snapshot api let any replica to fetch a snapshot
     - [x] Let new replicas to resync all dump as well as the current master offset
 - [x] Expose a state api to let the master detect how much of wal should be trimmed
-- [ ] Let the master trim the wal
-- [ ] Do any TODO in the code
+- [x] Let the master trim the wal
 - [ ] Implement redis databases (0, 1, 2, ... etc) virtually by prefixing any key by the currently used db index?
 - [ ] Implement more helpful commands?

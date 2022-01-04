@@ -36,6 +36,8 @@ func main() {
 		InstanceRole:      cfg.InstanceRole,
 		MasterRESPDSN:     cfg.MasterRESPDSN,
 		MasterHTTPBaseURL: cfg.MasterHTTPBaseURL,
+		MaxWalSize:        cfg.MaxWalSize,
+		RESPListenAddr:    cfg.InstanceRESPListenAddr,
 	})
 
 	if err != nil {

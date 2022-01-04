@@ -2,6 +2,8 @@ package wal
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync/atomic"
 	"time"
 
@@ -21,6 +23,7 @@ type RangeOpts struct {
 type Wal struct {
 	db      *leveldb.DB
 	counter uint64
+	path    string
 }
 
 // Open opens the specified path
@@ -37,6 +40,7 @@ func Open(path string) (*Wal, error) {
 	wal := &Wal{
 		db:      db,
 		counter: 0,
+		path:    path,
 	}
 
 	// our counter resetter
@@ -110,6 +114,42 @@ func (wal *Wal) Range(fn func([]byte, []byte) bool, opts *RangeOpts) error {
 
 		if !fn(dstKey, dstValue) {
 			break
+		}
+	}
+
+	return iter.Error()
+}
+
+// Size return the size of the wal in bytes
+func (wal *Wal) Size() (int64, error) {
+	var size int64
+	err := filepath.Walk(wal.path, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+	return size, err
+}
+
+// TrimBefore trim the wal before the specified offset
+func (wal *Wal) TrimBefore(offsetTimeNano int64, offsetID int64) error {
+	iter := wal.db.NewIterator(&util.Range{
+		Limit: []byte(fmt.Sprintf("%d-%d", offsetTimeNano, offsetID)),
+	}, nil)
+	defer iter.Release()
+
+	for iter.Next() {
+		srcKey := iter.Key()
+		dstKey := make([]byte, len(srcKey))
+
+		copy(dstKey, srcKey)
+
+		if err := wal.db.Delete(dstKey, nil); err != nil {
+			return err
 		}
 	}
 

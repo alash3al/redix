@@ -10,10 +10,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/alash3al/redix/internals/datastore/contract"
 	"github.com/alash3al/redix/internals/wal"
+	"github.com/docker/go-units"
 	"github.com/go-redis/redis/v8"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -25,10 +27,13 @@ type Manager struct {
 	opts  *Options
 	state *leveldb.DB
 
-	// TODO: implements some sort of sync here
-	minClusterOffsetTimeNS int64
+	minClusterOffsetTimeNS *int64
+	minClusterOffsetID     *int64
+	maxWalSize             int64
 
 	masterRESPClient *redis.Client
+
+	InternalReplicationHeartBeatChan chan struct{}
 }
 
 // New initializes a new manager
@@ -82,11 +87,26 @@ func New(opts *Options) (*Manager, error) {
 		return nil, err
 	}
 
+	clusterMinOffsetTimeNano := int64(0)
+	clusterMinOffsetID := int64(0)
+
 	mngr := &Manager{
-		opts:             opts,
-		db:               db,
-		state:            statedb,
-		masterRESPClient: masterRESPClient,
+		opts:                             opts,
+		db:                               db,
+		state:                            statedb,
+		masterRESPClient:                 masterRESPClient,
+		minClusterOffsetTimeNS:           &clusterMinOffsetTimeNano,
+		minClusterOffsetID:               &clusterMinOffsetID,
+		InternalReplicationHeartBeatChan: make(chan struct{}),
+	}
+
+	if mngr.opts.InstanceRole == InstanceRoleMaster {
+		maxSize, err := units.FromHumanSize(mngr.opts.MaxWalSize)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse the WAL_MAX_SIZE due to: %s", err)
+		}
+
+		mngr.maxWalSize = maxSize
 	}
 
 	if opts.InstanceRole == InstanceRoleMaster {
@@ -99,10 +119,23 @@ func New(opts *Options) (*Manager, error) {
 	}
 
 	go (func() {
-		mngr.replicationHandler()
+		for {
+			select {
+			case <-mngr.InternalReplicationHeartBeatChan:
+				mngr.replicate()
+			}
+		}
 	})()
 
 	if opts.InstanceRole == InstanceRoleReplica {
+		go (func() {
+			for {
+				time.Sleep(time.Millisecond * 100)
+
+				mngr.InternalReplicationHeartBeatChan <- struct{}{}
+			}
+		})()
+
 		go (func() {
 			for {
 				time.Sleep(1 * time.Minute)
@@ -119,10 +152,28 @@ func New(opts *Options) (*Manager, error) {
 		})()
 	}
 
-	if opts.InstanceRole == InstanceRoleMaster {
-		// TODO: a goroutine to remove the data older than the minimum offset
-		// each x of time or each time the database size be >= y bytes?
-	}
+	go (func() {
+		for {
+			time.Sleep(time.Minute * 1)
+
+			if opts.InstanceRole == InstanceRoleMaster {
+				size, err := mngr.wal.Size()
+				if err != nil {
+					mngr.Report(err, true)
+				}
+
+				if size >= mngr.maxWalSize {
+					log.Println("trimming the wal ...")
+
+					if err := mngr.wal.TrimBefore(atomic.LoadInt64(mngr.minClusterOffsetTimeNS), atomic.LoadInt64(mngr.minClusterOffsetID)); err != nil {
+						mngr.Report(err, true)
+					}
+
+					log.Println("trimmed the wal !")
+				}
+			}
+		}
+	})()
 
 	return mngr, nil
 }
@@ -139,8 +190,19 @@ func (m *Manager) UpdateClusterMinimumOffset(offset string) error {
 		return fmt.Errorf("offset parsing failed due to: %s", err)
 	}
 
-	if m.minClusterOffsetTimeNS != 0 && m.minClusterOffsetTimeNS > offsetNS {
-		m.minClusterOffsetTimeNS = offsetNS
+	offsetID, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil {
+		return fmt.Errorf("offset parsing failed due to: %s", err)
+	}
+
+	minClusterOffsetNano := atomic.LoadInt64(m.minClusterOffsetTimeNS)
+	minClussterOffsetID := atomic.LoadInt64(m.minClusterOffsetID)
+
+	if minClusterOffsetNano != 0 && minClusterOffsetNano > offsetNS {
+		atomic.StoreInt64(m.minClusterOffsetTimeNS, offsetNS)
+		if minClussterOffsetID > offsetID {
+			atomic.StoreInt64(m.minClusterOffsetID, offsetID)
+		}
 	}
 
 	return nil
@@ -165,7 +227,15 @@ func (m *Manager) Write(input *contract.WriteInput) error {
 		return err
 	}
 
-	return m.wal.Write(rawData)
+	if err := m.wal.Write(rawData); err != nil {
+		return err
+	}
+
+	go (func() {
+		m.InternalReplicationHeartBeatChan <- struct{}{}
+	})()
+
+	return nil
 }
 
 // Get fetches the specified input into the specified dbIndex
@@ -210,63 +280,47 @@ func (m *Manager) Report(err error, shouldPanic bool) {
 	log.Println(err)
 }
 
-func (m *Manager) replicationHandler() {
-	for {
-		time.Sleep(50 * time.Millisecond)
+func (m *Manager) replicate() {
+	currentOffset, err := m.state.Get([]byte("current_offset"), nil)
+	if err != nil && err != leveldb.ErrNotFound {
+		m.Report(fmt.Errorf("unable to fetch the latest state from state db due to: %s", err.Error()), true)
+	}
 
-		currentOffset, err := m.state.Get([]byte("current_offset"), nil)
-		if err != nil && err != leveldb.ErrNotFound {
-			m.Report(fmt.Errorf("unable to fetch the latest state from state db due to: %s", err.Error()), true)
-		}
-
-		if m.opts.InstanceRole == InstanceRoleMaster {
-			err := m.wal.Range(func(offset, payload []byte) bool {
-				if err := m.directWrite(offset, payload); err != nil {
-					m.Report(fmt.Errorf("unable to write to disk due to: %s", err.Error()), true)
-					return false
-				}
-
-				return true
-			}, &wal.RangeOpts{Offset: currentOffset, Limit: 1})
-
-			if err != nil {
-				m.Report(fmt.Errorf("unable to read from wal due to: %s", err.Error()), true)
+	if m.opts.InstanceRole == InstanceRoleMaster {
+		err := m.wal.Range(func(offset, payload []byte) bool {
+			if err := m.directWrite(offset, payload); err != nil {
+				m.Report(fmt.Errorf("unable to write to disk due to: %s", err.Error()), true)
+				return false
 			}
 
-			continue
+			return true
+		}, &wal.RangeOpts{Offset: currentOffset, Limit: 1})
+
+		if err != nil {
+			m.Report(fmt.Errorf("unable to read from wal due to: %s", err.Error()), true)
 		}
 
-		// ANYTHING HERE MEANS elseif we're not in a master node
-		// which means a replica node area.
-
-		// it is our first time to poll from master?
-		// then let's dump everything from there
+		return
+	} else if m.opts.InstanceRole == InstanceRoleReplica {
 		if currentOffset == nil {
 			m.importFromMaster()
-			continue
+			return
 		}
 
-		args := []interface{}{"WAL", 1}
+		args := []interface{}{"WAL", 0}
 		if len(currentOffset) > 0 {
 			args = append(args, currentOffset)
 		}
 
-		row, err := m.masterRESPClient.Do(context.Background(), args...).StringSlice()
+		rows, err := m.masterRESPClient.Do(context.Background(), args...).Slice()
 		if err != nil {
 			m.Report(fmt.Errorf("unable to fetch data to be replicated from the master due to: %s", err.Error()), true)
 		}
 
-		if row == nil || len(row) == 0 {
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		if len(row) < 2 {
-			m.Report(fmt.Errorf("unable to parse a replicated data due to an invalid input: %v", row), false)
-		}
-
-		if err := m.directWrite([]byte(row[0]), []byte(row[1])); err != nil {
-			m.Report(fmt.Errorf("unable to apply replicated data due to: %s", err.Error()), true)
+		for i := 0; i < len(rows)/2; i += 2 {
+			if err := m.directWrite([]byte(rows[i].(string)), []byte(rows[i+1].(string))); err != nil {
+				m.Report(fmt.Errorf("unable to apply replicated data due to: %s", err.Error()), true)
+			}
 		}
 	}
 }

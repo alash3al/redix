@@ -17,6 +17,7 @@ type Config struct {
 	DataDir                string               `envconfig:"DATA_DIR" required:"true"`
 	MasterRESPDSN          string               `envconfig:"MASTER_RESP_DSN"`
 	MasterHTTPBaseURL      string               `envconfig:"MASTER_HTTP_BASE_URL"`
+	MaxWalSize             string               `envconfig:"WAL_MAX_SIZE"`
 }
 
 // Unmarshal parses the specified filename and load it into memory

@@ -48,7 +48,7 @@ func ListenAndServe(addr string, mngr *manager.Manager) error {
 					return
 				}
 
-				limit := 1
+				limit := 0
 
 				if len(cmd.Args) > 1 {
 					limit, _ = strconv.Atoi(string(cmd.Args[1]))
@@ -81,6 +81,9 @@ func ListenAndServe(addr string, mngr *manager.Manager) error {
 					conn.WriteBulk(val[0])
 					conn.WriteBulk(val[1])
 				}
+			case "replicate":
+				mngr.InternalReplicationHeartBeatChan <- struct{}{}
+				conn.WriteString("OK")
 			case "set":
 				if len(cmd.Args) != 3 {
 					conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")

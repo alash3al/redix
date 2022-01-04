@@ -21,6 +21,8 @@ type Options struct {
 	MasterRESPDSN     string
 	MasterHTTPBaseURL string
 	ReplicasDSN       []string
+	MaxWalSize        string
+	RESPListenAddr    string
 }
 
 // DataDirPath returns full path relative to the datadir
