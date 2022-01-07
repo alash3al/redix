@@ -25,8 +25,8 @@ func (e *Engine) Open(dsn string) (err error) {
 		return err
 	}
 
-	e.conn.Exec(
-		context.TODO(),
+	if _, err := e.conn.Exec(
+		context.Background(),
 		`
 			CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -39,9 +39,29 @@ func (e *Engine) Open(dsn string) (err error) {
 
 			CREATE UNIQUE INDEX IF NOT EXISTS uniq_idx_redix_data_v5_key ON redix_data_v5 (_key);
 
-			CREATE INDEX trgm_idx_redix_data_v5_key ON redix_data_v5 USING GIN(_key gin_trgm_ops);
+			CREATE INDEX IF NOT EXISTS trgm_idx_redix_data_v5_key ON redix_data_v5 USING GIN(_key gin_trgm_ops);
+
+			CREATE INDEX IF NOT EXISTS idx_redix_data_v5_expires_at ON redix_data_v5 (_expires_at);
 		`,
-	)
+	); err != nil {
+		return err
+	}
+
+	go (func() {
+		for {
+			now := time.Now().UnixNano()
+
+			if _, err := e.conn.Exec(
+				context.Background(),
+				`DELETE FROM redix_data_v5 WHERE _expires_at != 0 and _expires_at <= $1`,
+				now,
+			); err != nil {
+				panic(err)
+			}
+
+			time.Sleep(time.Second * 1)
+		}
+	})()
 
 	return nil
 }
@@ -60,26 +80,30 @@ func (e *Engine) Write(input *contract.WriteInput) (*contract.WriteOutput, error
 		return nil, nil
 	}
 
-	var val interface{} = string(input.Value)
-
+	insertQuery := []string{"INSERT INTO redix_data_v5(_key, _value, _expires_at) VALUES($1, $2, $3)"}
+	appending := false
+	isNumber := false
 	ttl := int64(0)
+
+	var val interface{} = string(input.Value)
 
 	if input.TTL > 0 {
 		ttl = time.Now().Add(input.TTL).UnixNano()
 	}
 
-	insertQuery := []string{"INSERT INTO redix_data_v5(_key, _value, _expires_at) VALUES($1, $2, $3)"}
-	appending := false
+	if fval, err := strconv.ParseFloat(string(input.Value), 64); err == nil {
+		isNumber = true
+		val = fval
+	}
 
 	if input.OnlyIfNotExists {
 		insertQuery = append(insertQuery, "ON CONFLICT (_key) DO NOTHING")
 	} else if input.Increment {
-		appending = true
-		floatval, err := strconv.ParseFloat(string(input.Value), 64)
-		if err != nil {
-			return nil, err
+		if !isNumber {
+			return nil, fmt.Errorf("the specified value is not a number")
 		}
-		val = floatval
+
+		appending = true
 		insertQuery = append(insertQuery, "ON CONFLICT (_key) DO UPDATE SET _value = (EXCLUDED._value::text::float + redix_data_v5._value::text::float)::text::jsonb")
 	} else if input.Append {
 		appending = true
@@ -108,6 +132,9 @@ func (e *Engine) Write(input *contract.WriteInput) (*contract.WriteOutput, error
 		strings.Join(insertQuery, " "),
 		input.Key, string(jsonVal), ttl,
 	).Scan(&retVal, &retExpiresAt); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -144,9 +171,10 @@ func (e *Engine) Read(input *contract.ReadInput) (*contract.ReadOutput, error) {
 	}
 
 	readOutput := contract.ReadOutput{
-		Key:   input.Key,
-		Value: []byte(fmt.Sprintf("%v", retVal)),
-		TTL:   0,
+		Key:    input.Key,
+		Value:  []byte(fmt.Sprintf("%v", retVal)),
+		TTL:    0,
+		Exists: true,
 	}
 
 	if retExpiresAt != 0 {

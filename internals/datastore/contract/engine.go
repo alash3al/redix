@@ -38,9 +38,10 @@ type ReadInput struct {
 
 // ReadOutput represents a Get output
 type ReadOutput struct {
-	Key   []byte
-	Value []byte
-	TTL   time.Duration
+	Key    []byte
+	Value  []byte
+	Exists bool
+	TTL    time.Duration
 }
 
 type IteratorOpts struct {

@@ -1,23 +1,28 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/alash3al/redix/internals/datastore/contract"
 )
 
 func init() {
+	// PING
 	HandleFunc("ping", func(c *Context) {
 		c.Conn.WriteString("PONG")
 	})
 
+	// QUIT
 	HandleFunc("quit", func(c *Context) {
 		c.Conn.WriteString("OK")
 		c.Conn.Close()
 	})
 
+	// SELECT <DB index>
 	HandleFunc("select", func(c *Context) {
 		if c.Argc < 1 {
 			c.Conn.WriteError("Err invalid arguments supplied")
@@ -35,26 +40,7 @@ func init() {
 		c.Conn.WriteString("OK")
 	})
 
-	HandleFunc("incr", func(c *Context) {
-		if c.Argc < 1 {
-			c.Conn.WriteError("Err invalid arguments specified")
-			return
-		}
-
-		ret, err := c.Engine.Write(&contract.WriteInput{
-			Key:       c.AbsoluteKeyPath(c.Argv[0]),
-			Value:     []byte("1"),
-			Increment: true,
-		})
-
-		if err != nil {
-			c.Conn.WriteError("Err " + err.Error())
-			return
-		}
-
-		c.Conn.WriteBulk(ret.Value)
-	})
-
+	// GET <key>
 	HandleFunc("get", func(c *Context) {
 		if c.Argc < 1 {
 			c.Conn.WriteError("Err invalid arguments specified")
@@ -78,18 +64,39 @@ func init() {
 		c.Conn.WriteBulk(ret.Value)
 	})
 
+	// SET <key> <value> [EX seconds | KEEPTTL] [NX]
 	HandleFunc("set", func(c *Context) {
 		if c.Argc < 2 {
 			c.Conn.WriteError("Err invalid arguments specified")
 			return
 		}
 
-		_, err := c.Engine.Write(&contract.WriteInput{
+		writeOpts := contract.WriteInput{
 			Key:   c.AbsoluteKeyPath(c.Argv[0]),
 			Value: c.Argv[1],
-		})
+		}
 
-		if err != nil {
+		if c.Argc > 2 {
+			for i := 0; i < len(c.Argv); i++ {
+				chr := string(bytes.ToLower(c.Argv[i]))
+				switch chr {
+				case "ex":
+					n, err := strconv.ParseInt(string(c.Argv[i+1]), 10, 64)
+					if err != nil {
+						c.Conn.WriteError("Err " + err.Error())
+						return
+					}
+					writeOpts.TTL = time.Second * time.Duration(n)
+				case "keepttl":
+					writeOpts.KeepTTL = true
+				case "nx":
+					writeOpts.OnlyIfNotExists = true
+				}
+
+			}
+		}
+
+		if _, err := c.Engine.Write(&writeOpts); err != nil {
 			c.Conn.WriteError("Err " + err.Error())
 			return
 		}
@@ -97,25 +104,84 @@ func init() {
 		c.Conn.WriteString("OK")
 	})
 
+	// TTL <key>
+	HandleFunc("ttl", func(c *Context) {
+		if c.Argc < 1 {
+			c.Conn.WriteError("Err invalid arguments specified")
+			return
+		}
+
+		ret, err := c.Engine.Read(&contract.ReadInput{
+			Key: c.AbsoluteKeyPath(c.Argv[0]),
+		})
+
+		if err != nil {
+			c.Conn.WriteError("Err " + err.Error())
+			return
+		}
+
+		if !ret.Exists {
+			c.Conn.WriteBulkString("-2")
+			return
+		}
+
+		if ret.TTL == 0 {
+			c.Conn.WriteBulkString("-1")
+			return
+		}
+
+		c.Conn.WriteAny(ret.TTL.Milliseconds())
+	})
+
+	// INCR <key> [<delta>]
+	HandleFunc("incr", func(c *Context) {
+		if c.Argc < 1 {
+			c.Conn.WriteError("Err invalid arguments specified")
+			return
+		}
+
+		delta := []byte("1")
+		if c.Argc > 1 {
+			delta = c.Argv[1]
+		}
+
+		ret, err := c.Engine.Write(&contract.WriteInput{
+			Key:       c.AbsoluteKeyPath(c.Argv[0]),
+			Value:     delta,
+			Increment: true,
+		})
+
+		if err != nil {
+			c.Conn.WriteError("Err " + err.Error())
+			return
+		}
+
+		c.Conn.WriteBulk(ret.Value)
+	})
+
+	// DEL key [key ...]
 	HandleFunc("del", func(c *Context) {
 		if c.Argc < 1 {
 			c.Conn.WriteError("Err invalid arguments specified")
 			return
 		}
 
-		_, err := c.Engine.Write(&contract.WriteInput{
-			Key:   c.AbsoluteKeyPath(c.Argv[0]),
-			Value: nil,
-		})
+		for i := range c.Argv {
+			_, err := c.Engine.Write(&contract.WriteInput{
+				Key:   c.AbsoluteKeyPath(c.Argv[i]),
+				Value: nil,
+			})
 
-		if err != nil {
-			c.Conn.WriteError("Err " + err.Error())
-			return
+			if err != nil {
+				c.Conn.WriteError("Err " + err.Error())
+				return
+			}
 		}
 
 		c.Conn.WriteString("OK")
 	})
 
+	// HGETALL <prefix>
 	HandleFunc("hgetall", func(c *Context) {
 		prefix := []byte("")
 
@@ -141,6 +207,7 @@ func init() {
 		c.Conn.WriteAny(result)
 	})
 
+	// FLUSHALL
 	HandleFunc("flushall", func(c *Context) {
 		_, err := c.Engine.Write(&contract.WriteInput{
 			Key:   nil,
@@ -155,6 +222,7 @@ func init() {
 		c.Conn.WriteString("OK")
 	})
 
+	// FLUSHDB
 	HandleFunc("flushdb", func(c *Context) {
 		_, err := c.Engine.Write(&contract.WriteInput{
 			Key:   c.AbsoluteKeyPath(),
