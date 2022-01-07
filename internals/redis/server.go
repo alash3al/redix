@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"fmt"
 	"log"
 	"sync/atomic"
 
@@ -20,6 +21,7 @@ func ListenAndServe(cfg *config.Config, engine contract.Engine) error {
 		c.Conn.WriteAny(atomic.LoadInt64(&connCounter))
 	})
 
+	fmt.Println("=> started listening on", cfg.Server.Redis.ListenAddr, "...")
 	return redcon.ListenAndServe(cfg.Server.Redis.ListenAddr,
 		func(conn redcon.Conn, cmd redcon.Command) {
 			ctx := commands.Context{
