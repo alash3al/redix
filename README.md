@@ -5,17 +5,17 @@ Redix v5
 Core Commands
 =============
 
-- PING
-- QUIT
-- FLUSHALL
-- FLUSHDB
-- SELECT <DB index>
-- SET <key> <value> [EX seconds | KEEPTTL] [NX]
-- TTL <key>
-- GET <key>
-- INCR <key> [<delta>]
-- DEL key [key ...]
-- HGETALL <prefix>
+- `PING`
+- `QUIT`
+- `FLUSHALL`
+- `FLUSHDB`
+- `SELECT <DB index>`
+- `SET <key> <value> [EX seconds | KEEPTTL] [NX]`
+- `TTL <key>`
+- `GET <key>`
+- `INCR <key> [<delta>]`
+- `DEL key [key ...]`
+- `HGETALL <prefix>`
     > our magic command that treats with the whole database as if it were a single nested large hash-table
 
 
