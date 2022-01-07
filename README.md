@@ -16,8 +16,20 @@ Core Commands
 - `INCR <key> [<delta>]`
 - `DEL key [key ...]`
 - `HGETALL <prefix>`
-    > our magic command that treats with the whole database as if it were a single nested large hash-table
-
-
-
+    > Fetches the whole data under the specified prefix as a hashmap result
+    ```bash
+        127.0.0.1:6380> set /users/u1 USER_1
+        OK
+        127.0.0.1:6380> set /users/u2 USER_2
+        OK
+        127.0.0.1:6380> set /users/u3 USER_3
+        OK
+        127.0.0.1:6380> hgetall /users/
+        1) "u1"
+        2) "USER_1"
+        3) "u2"
+        4) "USER_2"
+        5) "u3"
+        6) "USER_3"
+    ```
 

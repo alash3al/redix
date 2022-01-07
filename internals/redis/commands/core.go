@@ -194,7 +194,7 @@ func init() {
 		err := c.Engine.Iterate(&contract.IteratorOpts{
 			Prefix: c.AbsoluteKeyPath(prefix),
 			Callback: func(ro *contract.ReadOutput) error {
-				endKey := strings.TrimPrefix(string(ro.Key), string(c.AbsoluteKeyPath()))
+				endKey := strings.TrimPrefix(string(ro.Key), string(c.AbsoluteKeyPath(prefix)))
 				result[endKey] = string(ro.Value)
 				return nil
 			},

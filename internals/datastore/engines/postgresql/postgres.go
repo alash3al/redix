@@ -198,7 +198,7 @@ func (e *Engine) Iterate(opts *contract.IteratorOpts) error {
 		return fmt.Errorf("you must specify the callback")
 	}
 
-	iter, err := e.conn.Query(context.Background(), "SELECT _key, _value, _expires_at FROM redix_data_v5 WHERE _key LIKE $1", append(opts.Prefix, '%'))
+	iter, err := e.conn.Query(context.Background(), "SELECT _key, _value, _expires_at FROM redix_data_v5 WHERE _key LIKE $1 ORDER BY _id ASC", append(opts.Prefix, '%'))
 	if err != nil {
 		return err
 	}

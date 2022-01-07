@@ -1,6 +1,6 @@
 server {
     redis {
-        listen = ":4000"
+        listen = ":6380"
         max_connections = 100
     }
 }
