@@ -1,6 +1,24 @@
 Redix v5
 ========
-> `redis` is very simple, sometimes we abuse it, so decided to build a pure `key-value` storage system that introduces the core utilities for building any data structure you want, that why it has no specific commands for hashmaps, lists, sets, ... etc, it is all about keys & value nothing else!
+> `redix` is a very simple `key => value` storage engine that speaks redis and even more simpler and flexible.
+
+Why did I build this?
+======================
+> `redis` is very simple, sometimes we abuse it, so I decided to build a pure `key-value` storage system that introduces the core utilities for building any data structure you want, that why redix has no specific commands for hashmaps, lists, sets, ... etc, it is all about keys & value nothing else!
+
+Redix isn't
+=============
+- Full redix drop-in replacement
+- Very fast data writes
+- Caching Datastore, but you can use it as caching engine if you want
+
+Redix is
+==========
+- Simple `key => value` storage that speaks redis protocol.
+- A database, you can store any size of data till your postgres db be down, or till your disk free size is about to be zero.
+- Ready to be abused.
+- Nested Large Hash-table.
+- 
 
 Core Commands
 =============
