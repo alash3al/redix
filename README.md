@@ -8,7 +8,7 @@ Why did I build this?
 
 Redix isn't
 =============
-- Full redix drop-in replacement
+- Full `redis` drop-in replacement
 - Very fast data writes
 - Caching Datastore, but you can use it as caching engine if you want
 
@@ -22,7 +22,6 @@ Redix is
 
 Core Commands
 =============
-
 - `PING`
 - `QUIT`
 - `FLUSHALL`
