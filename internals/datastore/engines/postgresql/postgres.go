@@ -181,8 +181,22 @@ func (e *Engine) Read(input *contract.ReadInput) (*contract.ReadOutput, error) {
 		readOutput.TTL = time.Unix(0, retExpiresAt).Sub(time.Now())
 	}
 
+	deleter := func() {
+		// TODO report any expected error?
+		e.conn.Exec(context.Background(), "DELETE FROM redix_data_v5 WHERE _key = $1", input.Key)
+	}
+
 	if readOutput.TTL < 0 {
+		go (func() {
+			deleter()
+		})()
 		return &contract.ReadOutput{}, nil
+	}
+
+	if input.Delete {
+		go (func() {
+			deleter()
+		})()
 	}
 
 	return &readOutput, nil

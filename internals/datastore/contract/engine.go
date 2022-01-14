@@ -34,7 +34,8 @@ type WriteOutput struct {
 
 // ReadInput represents a Get request
 type ReadInput struct {
-	Key []byte
+	Key    []byte
+	Delete bool
 }
 
 // ReadOutput represents a Get output

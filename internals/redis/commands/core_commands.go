@@ -41,15 +41,25 @@ func init() {
 		c.Conn.WriteString("OK")
 	})
 
-	// GET <key>
+	// GET <key> [DELETE]
 	HandleFunc("get", func(c *Context) {
 		if c.Argc < 1 {
 			c.Conn.WriteError("Err invalid arguments specified")
 			return
 		}
 
+		delete := false
+
+		for i := 1; i < c.Argc; i++ {
+			switch strings.ToLower(string(c.Argv[i])) {
+			case "delete":
+				delete = true
+			}
+		}
+
 		ret, err := c.Engine.Read(&contract.ReadInput{
-			Key: c.AbsoluteKeyPath(c.Argv[0]),
+			Key:    c.AbsoluteKeyPath(c.Argv[0]),
+			Delete: delete,
 		})
 
 		if err != nil {
@@ -63,6 +73,20 @@ func init() {
 		}
 
 		c.Conn.WriteBulk(ret.Value)
+	})
+
+	// GETDEL <key> =
+	// same as: GET <key> DELETE
+	HandleFunc("getdel", func(c *Context) {
+		if c.Argc != 1 {
+			c.Conn.WriteError("Err invalid number of arguments specified")
+			return
+		}
+
+		c.Argc++
+		c.Argv = append(c.Argv, []byte("DELETE"))
+
+		Call("get", c)
 	})
 
 	// SET <key> <value> [EX seconds | KEEPTTL] [NX]
@@ -181,6 +205,11 @@ func init() {
 		}
 
 		c.Conn.WriteBulk(ret.Value)
+	})
+
+	// INCRBY <key> <delta>
+	HandleFunc("incrby", func(c *Context) {
+		Call("incr", c)
 	})
 
 	// DEL key [key ...]
