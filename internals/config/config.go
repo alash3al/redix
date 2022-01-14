@@ -11,8 +11,9 @@ import (
 type Config struct {
 	Server struct {
 		Redis struct {
-			ListenAddr string `hcl:"listen"`
-			MaxConns   int64  `hcl:"max_connections"`
+			ListenAddr  string `hcl:"listen"`
+			AsyncWrites bool   `hcl:"async"`
+			MaxConns    int64  `hcl:"max_connections"`
 		} `hcl:"redis,block"`
 	} `hcl:"server,block"`
 

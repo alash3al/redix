@@ -10,6 +10,7 @@ type Engine interface {
 	Open(string) error
 	Close() error
 	Write(*WriteInput) (*WriteOutput, error)
+	// BatchWrite([]*WriteInput) error
 	Read(*ReadInput) (*ReadOutput, error)
 	Iterate(*IteratorOpts) error
 }
@@ -44,6 +45,7 @@ type ReadOutput struct {
 	TTL    time.Duration
 }
 
+// IteratorOpts represents the itrator options
 type IteratorOpts struct {
 	Prefix   []byte
 	Callback func(*ReadOutput) error

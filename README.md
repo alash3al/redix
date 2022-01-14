@@ -15,10 +15,10 @@ Redix isn't
 Redix is
 ==========
 - Simple `key => value` storage that speaks redis protocol.
-- A database, you can store any size of data till your postgres db be down, or till your disk free size is about to be zero.
+- A database which means you can store any size of data till your storage free size is about to be zero.
 - Ready to be abused.
 - Nested Large Hash-table.
-- 
+- `Async` (all writes happen in the background), or `Sync` it won't respond to the client before writing to the internal datastore
 
 Core Commands
 =============

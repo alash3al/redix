@@ -3,6 +3,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -96,9 +97,17 @@ func init() {
 			}
 		}
 
-		if _, err := c.Engine.Write(&writeOpts); err != nil {
-			c.Conn.WriteError("Err " + err.Error())
-			return
+		if c.Cfg.Server.Redis.AsyncWrites {
+			go (func() {
+				if _, err := c.Engine.Write(&writeOpts); err != nil {
+					log.Println("[FATAL]", err.Error())
+				}
+			})()
+		} else {
+			if _, err := c.Engine.Write(&writeOpts); err != nil {
+				c.Conn.WriteError("Err " + err.Error())
+				return
+			}
 		}
 
 		c.Conn.WriteString("OK")
@@ -145,6 +154,21 @@ func init() {
 			delta = c.Argv[1]
 		}
 
+		if c.Cfg.Server.Redis.AsyncWrites {
+			go (func() {
+				if _, err := c.Engine.Write(&contract.WriteInput{
+					Key:       c.AbsoluteKeyPath(c.Argv[0]),
+					Value:     delta,
+					Increment: true,
+				}); err != nil {
+					log.Println("[FATAL]", err.Error())
+				}
+			})()
+
+			c.Conn.WriteNull()
+			return
+		}
+
 		ret, err := c.Engine.Write(&contract.WriteInput{
 			Key:       c.AbsoluteKeyPath(c.Argv[0]),
 			Value:     delta,
@@ -163,6 +187,25 @@ func init() {
 	HandleFunc("del", func(c *Context) {
 		if c.Argc < 1 {
 			c.Conn.WriteError("Err invalid arguments specified")
+			return
+		}
+
+		if c.Cfg.Server.Redis.AsyncWrites {
+			go (func() {
+				for i := range c.Argv {
+					_, err := c.Engine.Write(&contract.WriteInput{
+						Key:   c.AbsoluteKeyPath(c.Argv[i]),
+						Value: nil,
+					})
+
+					if err != nil {
+						log.Println("[FATAL]", err.Error())
+						return
+					}
+				}
+			})()
+
+			c.Conn.WriteString("OK")
 			return
 		}
 
