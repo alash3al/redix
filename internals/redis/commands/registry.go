@@ -30,11 +30,6 @@ func HandleFunc(name string, fn Handler) {
 
 // Call executes the specified command name if exists
 func Call(name string, ctx *Context) {
-	if strings.HasPrefix(name, "#") {
-		ctx.Conn.WriteBulkString("OK")
-		return
-	}
-
 	commandsMapLock.RLock()
 
 	name = strings.ToLower(name)

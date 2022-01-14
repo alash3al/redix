@@ -47,5 +47,3 @@ Core Commands
         6) "USER_3"
         ## in the hgetall response, redix removed the prefix you specified `/users/`
     ```
-**NOTE**
-- Any command starts with `#` will be just as if it were a comment, and `redix` will response with "OK"
