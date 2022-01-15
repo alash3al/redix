@@ -68,6 +68,7 @@ server {
         // let redix tries to be async as possible as it can while writing data
         // this means that the writes will be in background which means redix won't be able to tell
         // you whether the write succeeded or not! just use this if you will use it as if it were a log-file/streaming-service
+        // this config will result in a very fast writes response as redix won't block until it make sure that the writes are 100% commited!
         async = false
     }
 }

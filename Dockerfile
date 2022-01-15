@@ -2,7 +2,7 @@ FROM golang:1.17.3-alpine As builder
 
 WORKDIR /redix/
 
-RUN apk update && apk add musl-dev git gcc upx
+RUN apk update && apk add git upx
 
 COPY go.mod go.sum ./
 
@@ -14,10 +14,10 @@ RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o /usr/bin/redix
 
 RUN upx -9 /usr/bin/redix
 
-FROM alpine
+FROM scratch
 
 WORKDIR /redix/
 
 COPY --from=builder /usr/bin/redix /usr/bin/redix
 
-CMD ["/usr/bin/redix"]
+CMD ["/usr/bin/redix", "/etc/redix/redix.hcl"]
