@@ -89,3 +89,13 @@ Usage
 - Assuming that the redix-server is listening on localhost on port `6380`
 - Connect to it using any redis client i.e `$ redis-cli -p 6380`
 - Nothing else!
+
+TODOs
+=====
+- [ ] Batch Write API via `hmset`?.
+- [ ] Embeded Engine Like `boltdb`.
+
+
+Contributions
+=============
+> You're welcome!
