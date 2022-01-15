@@ -83,9 +83,9 @@ engine "postgresql" {
 
 Usage
 =====
-- Assuming you downloaded the official binaries from [here]() or the docker package from [here]()
+- Assuming you downloaded the official docker image via `docker pull ghcr.io/alash3al/redix`
 - Assuming that you have a configurations file called `./redix.hcl`
-- Just execute `./redix_v5 ./redix.hcl` or `docker run -v $(pwd)/redix.hcl:/redix/redix.hcl` ghcr.io/alash3al/redix
+- Just execute `docker run -v $(pwd)/redix.hcl:/etc/redix/redix.hcl -p6380:6380 ghcr.io/alash3al/redix`
 - Assuming that the redix-server is listening on localhost on port `6380`
 - Connect to it using any redis client i.e `$ redis-cli -p 6380`
 - Nothing else!
