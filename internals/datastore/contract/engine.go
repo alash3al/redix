@@ -10,7 +10,6 @@ type Engine interface {
 	Open(string) error
 	Close() error
 	Write(*WriteInput) (*WriteOutput, error)
-	// BatchWrite([]*WriteInput) error
 	Read(*ReadInput) (*ReadOutput, error)
 	Iterate(*IteratorOpts) error
 }

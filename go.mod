@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/hashicorp/hcl/v2 v2.11.1
+	github.com/jackc/pgx/v4 v4.14.1
 	github.com/tidwall/redcon v1.4.3
 )
 
@@ -18,7 +19,6 @@ require (
 	github.com/jackc/pgproto3/v2 v2.2.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.9.1 // indirect
-	github.com/jackc/pgx/v4 v4.14.1 // indirect
 	github.com/jackc/puddle v1.2.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/tidwall/btree v0.7.1 // indirect
