@@ -1,3 +1,5 @@
+//go:build linux || darwin
+
 package filesystem
 
 import "github.com/alash3al/redix/internals/datastore/contract"

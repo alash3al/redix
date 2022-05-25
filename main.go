@@ -1,3 +1,5 @@
+//go:build linux || darwin
+
 package main
 
 import (
@@ -7,7 +9,6 @@ import (
 
 	"github.com/alash3al/redix/internals/config"
 	"github.com/alash3al/redix/internals/datastore/contract"
-	_ "github.com/alash3al/redix/internals/datastore/engines/filesystem"
 	_ "github.com/alash3al/redix/internals/datastore/engines/postgresql"
 	"github.com/alash3al/redix/internals/redis"
 )
