@@ -11,7 +11,7 @@ Features
 - A really simple `key => value` store that speaks `redis` protocol but with our rules!.
 - A real system that you can abuse! it isn't intedented for cache only but a "database system".
 - `Async` (all writes happen in the background), or `Sync` it won't respond to the client before writing to the internal datastore.
-- Pluggable storage engines, currently it supports `postgresql`, and there may be more engines be introduced in the upcomning releases.
+- Pluggable storage engines, currently it supports (`postgresql`, `filesystem`), and there may be more engines be introduced in the upcomning releases.
 - It could be used using `redis` clients easily, i.e: "the famouus redis-cli"
 
 
@@ -23,9 +23,9 @@ Core Commands
 - `FLUSHDB`
 - `SELECT <DB index>`
 - `SET <key> <value> [EX seconds | KEEPTTL] [NX]`
-- `TTL <key>`
+- `TTL <key>` **(not supported while using `filesystem` engine)**
 - `GET <key> [DELETE]`, it has an alias for backward compatibility reasons called `GETDEL <key>`
-- `INCR <key> [<delta>]`, it has an alias for backward compatibility reasons called `INCRBY`
+- `INCR <key> [<delta>]`, it has an alias for backward compatibility reasons called `INCRBY` **(not supported while using `filesystem` engine)**
 - `DEL key [key ...]`
 - `HGETALL <prefix>`
     > Fetches the whole data under the specified prefix as a hashmap result

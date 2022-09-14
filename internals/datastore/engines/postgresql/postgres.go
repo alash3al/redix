@@ -72,6 +72,14 @@ func (e *Engine) Write(input *contract.WriteInput) (*contract.WriteOutput, error
 		return nil, fmt.Errorf("empty input specified")
 	}
 
+	if input.Key == nil {
+		if _, err := e.conn.Exec(context.Background(), "DELETE FROM redix_data_v5"); err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
+
 	if input.Value == nil {
 		if _, err := e.conn.Exec(context.Background(), "DELETE FROM redix_data_v5 WHERE _key LIKE $1", append(input.Key, '%')); err != nil {
 			return nil, err

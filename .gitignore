@@ -1,3 +1,4 @@
 bin
 redixdata*
 .DS_STORE
+data/
