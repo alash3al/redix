@@ -33,7 +33,7 @@ func main() {
 
 	db, err := contract.Open(cfg.Engine.Driver, cfg.Engine.DSN)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("failed to open database connection due to: ", err.Error())
 	}
 
 	redis.ListenAndServe(cfg, db)
