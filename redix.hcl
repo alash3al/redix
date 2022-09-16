@@ -6,10 +6,10 @@ server {
     }
 }
 
-// engine "postgresql" {
-//     dsn = "postgresql://postgres@localhost/redix"
-// }
-
-engine "filesystem" {
-    dsn = "./data/"
+engine "postgresql" {
+     dsn = "postgresql://postgres@localhost/redix"
 }
+
+#engine "filesystem" {
+#    dsn = "./data/"
+#}

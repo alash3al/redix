@@ -12,6 +12,8 @@ type Engine interface {
 	Write(*WriteInput) (*WriteOutput, error)
 	Read(*ReadInput) (*ReadOutput, error)
 	Iterate(*IteratorOpts) error
+	Publish([]byte, []byte) error
+	Subscribe([]byte, func([]byte) error) error
 }
 
 // WriteInput represents a PUT request

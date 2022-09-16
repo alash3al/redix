@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -267,4 +268,42 @@ func (e *Engine) Iterate(opts *contract.IteratorOpts) error {
 func (e *Engine) Close() error {
 	e.conn.Close()
 	return nil
+}
+
+// Publish submits the payload to the specified channel
+func (e *Engine) Publish(channel []byte, payload []byte) error {
+	newChannel := fmt.Sprintf("%x", md5.Sum(channel))
+	if _, err := e.conn.Exec(context.Background(), "SELECT pg_notify($1, $2)", newChannel, payload); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Subscribe listens for the incoming payloads on the specified channel
+func (e *Engine) Subscribe(channel []byte, cb func([]byte) error) error {
+	if cb == nil {
+		return fmt.Errorf("you must specify a callback (cb)")
+	}
+
+	conn, err := e.conn.Acquire(context.Background())
+	if err != nil {
+		return err
+	}
+
+	newChannel := fmt.Sprintf("\"%x\"", md5.Sum(channel))
+	if _, err := conn.Exec(context.Background(), "LISTEN "+newChannel); err != nil {
+		return fmt.Errorf("database::listen::err %s", err.Error())
+	}
+
+	for {
+		notification, err := conn.Conn().WaitForNotification(context.Background())
+		if err != nil {
+			return fmt.Errorf("database::notification::err %s", err.Error())
+		}
+
+		if err := cb([]byte(notification.Payload)); err != nil {
+			return fmt.Errorf("unable to process notification due to: %s", err.Error())
+		}
+	}
 }

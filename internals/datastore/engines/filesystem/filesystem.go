@@ -185,3 +185,13 @@ func (e *Engine) Iterate(opts *contract.IteratorOpts) error {
 func (e *Engine) Close() error {
 	return nil
 }
+
+// Publish not supported in filesystem mode
+func (e *Engine) Publish(channel []byte, payload []byte) error {
+	return fmt.Errorf("the %s driver doesn't support publish/subscribe", Name)
+}
+
+// Subscribe not supported in filesystem mode
+func (e *Engine) Subscribe(channel []byte, cb func([]byte) error) error {
+	return fmt.Errorf("the %s driver doesn't support publish/subscribe", Name)
+}

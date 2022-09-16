@@ -48,6 +48,8 @@ Core Commands
         6) "USER_3"
         ## in the hgetall response, redix removed the prefix you specified `/users/`
     ```
+- `PUBLISH <channel|topic|anyword> <message here>`
+- `SUBSCRIBE <channel|topic|anyword>`
 
 Configurations
 ==============
