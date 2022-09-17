@@ -48,8 +48,8 @@ Core Commands
         6) "USER_3"
         ## in the hgetall response, redix removed the prefix you specified `/users/`
     ```
-- `PUBLISH <channel|topic|anyword> <message here>`
-- `SUBSCRIBE <channel|topic|anyword>`
+- `PUBLISH <channel|topic|anyword> <message here>`  **(not supported while using `filesystem` engine)**
+- `SUBSCRIBE <channel|topic|anyword>`  **(not supported while using `filesystem` engine)**
 
 Configurations
 ==============
@@ -60,7 +60,7 @@ Configurations
 // for now we have "redis" only
 server {
     redis {
-        // the listining address in the format "[hostname]:portnumber"
+        // the listening address in the format "[hostname]:portnumber"
         listen = ":6380"
 
         // max connections to the same server
@@ -95,8 +95,7 @@ Usage
 TODOs
 =====
 - [ ] Batch Write API via `hmset`?.
-- [ ] Embeded Engine Like `boltdb`.
-
+- [ ] Embedded Engine Like `boltdb`.
 
 Contributions
 =============
