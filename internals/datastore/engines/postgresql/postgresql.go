@@ -272,8 +272,8 @@ func (e *Engine) Close() error {
 
 // Publish submits the payload to the specified channel
 func (e *Engine) Publish(channel []byte, payload []byte) error {
-	newChannel := fmt.Sprintf("%x", md5.Sum(channel))
-	if _, err := e.conn.Exec(context.Background(), "SELECT pg_notify($1, $2)", newChannel, payload); err != nil {
+	channelEncoded := fmt.Sprintf("%x", md5.Sum(channel))
+	if _, err := e.conn.Exec(context.Background(), "SELECT pg_notify($1, $2)", channelEncoded, payload); err != nil {
 		return err
 	}
 
@@ -291,8 +291,8 @@ func (e *Engine) Subscribe(channel []byte, cb func([]byte) error) error {
 		return err
 	}
 
-	newChannel := fmt.Sprintf("\"%x\"", md5.Sum(channel))
-	if _, err := conn.Exec(context.Background(), "LISTEN "+newChannel); err != nil {
+	channelEncoded := fmt.Sprintf("\"%x\"", md5.Sum(channel))
+	if _, err := conn.Exec(context.Background(), "LISTEN "+channelEncoded); err != nil {
 		return fmt.Errorf("database::listen::err %s", err.Error())
 	}
 
