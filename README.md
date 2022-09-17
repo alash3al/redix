@@ -12,7 +12,7 @@ Features
 - A real system that you can abuse! it isn't intedented for cache only but a "database system".
 - `Async` (all writes happen in the background), or `Sync` it won't respond to the client before writing to the internal datastore.
 - Pluggable storage engines, currently it supports (`postgresql`, `filesystem`), and there may be more engines be introduced in the upcomning releases.
-- It could be used using `redis` clients easily, i.e: "the famouus redis-cli"
+- It could be used via `redis` clients easily, i.e: "the famous redis-cli"
 
 
 Core Commands
