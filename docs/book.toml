@@ -4,6 +4,7 @@ language = "en"
 multilingual = false
 src = "src"
 title = "Redix Docs"
+description= "redix is a key-value datastore with pluggable storage engines and redis protocol as interface"
 
 [output.html]
 default-theme = "navy"
