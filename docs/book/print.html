@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="sidebar-visible no-js navy">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -37,7 +37,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "navy";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -63,7 +63,7 @@
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
             html.classList.remove('no-js')
-            html.classList.remove('light')
+            html.classList.remove('navy')
             html.classList.add(theme);
             html.classList.add('js');
         </script>
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Chapter 1</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">2.</strong> Installation</a></li><li class="chapter-item expanded "><a href="configurations.html"><strong aria-hidden="true">3.</strong> Configurations</a></li><li class="chapter-item expanded "><a href="redis-commands.html"><strong aria-hidden="true">4.</strong> Redis Commands</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -100,10 +100,10 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy (default)</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
                         <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
@@ -143,9 +143,146 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="intro"><a class="header" href="#intro">Intro</a></h1>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <blockquote>
+<p><strong>redix</strong> is a hashtable service with multiple storage engines as backend.</p>
+<p><strong>redix</strong> uses RESP protocol (Redis serialization protocol), you can learn more about it 
+<a href="https://redis.io/docs/reference/protocol-spec/">from here</a>, you can learn more about redis 
+<a href="https://redis.io/">from here</a>.</p>
+<p><strong>redix</strong> won't implement all redis features, but the core generic features 
+(the basic flat key-value model) that enables anyone to implement redis like features.</p>
+<p><strong>redix</strong> server tries to use all available cores, so it can provide the maximum machine 
+utilization as possible as it can to give you the best performance.</p>
 </blockquote>
+<h1 id="why-redix"><a class="header" href="#why-redix">Why Redix?</a></h1>
+<blockquote>
+<p><a href="https://redis.io/">redis</a>, is an in-memory data store, it is perfect
+as well, forces you to map everything to <code>key - value</code> which sometimes simplifies
+the thinking regarding the job you're doing, by the time, redis is abused by us
+due to that simplicity then we started to face new issues especially the
+memory and the single-threaded model.</p>
+<p>How could we store data on disk (read/write from/to disk)?
+How could we utilize the existing storage solutions but with simple redis interface?
+for sure there are many questions out there, most of them aren't in redis scope.</p>
+<p>That is why I created redix, which exposes redis-like interface but
+the datasource is different which could be anything (for now it is postgresql and filesystem).</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<h4 id="1--binary-installation"><a class="header" href="#1--binary-installation">1)- Binary installation</a></h4>
+<ol>
+<li>Goto the <a href="https://github.com/alash3al/redix/releases">releases page</a>.</li>
+<li>Select the release the matches your OS (Linux or Mac).</li>
+<li>Extract the binary file from the downloaded archive.</li>
+<li>Rename the extracted binary file as <code>redix</code> and copy/move it to your <code>/usr/local/bin</code> or any folder included in your <code>$PATH</code> env-var.</li>
+</ol>
+<h4 id="2--docker"><a class="header" href="#2--docker">2)- Docker</a></h4>
+<ol>
+<li><code>docker pull ghcr.io/alash3al/redix:latest</code></li>
+</ol>
+<h1 id="running"><a class="header" href="#running">Running</a></h1>
+<blockquote>
+<p>assuming you followed the corresponding installation instructions above,
+and created a configurations file called <code>redix.hcl</code> in the current working directory
+containing the configurations content found <a href="https://github.com/alash3al/redix/blob/master/redix.hcl">here</a>
+and edited to match your preferences, for more info about configurations <a href="./configurations.html">click here</a>.</p>
+</blockquote>
+<h4 id="1--binary"><a class="header" href="#1--binary">1)- Binary</a></h4>
+<blockquote>
+<p>assuming that you have a postgresql server running on the local machine contains a database called <code>redix</code>.</p>
+</blockquote>
+<pre><code class="language-bash">$ redix ./redix.hcl
+</code></pre>
+<h4 id="2--docker-1"><a class="header" href="#2--docker-1">2)- Docker</a></h4>
+<blockquote>
+<p>assuming that you have a postgresql container named <code>redixdb</code> having
+a database called <code>redix</code>, and the engine part configurations in <code>redix.hcl</code> as follows:</p>
+</blockquote>
+<pre><code class="language-hcl">engine &quot;postgresql&quot; {
+     dsn = &quot;postgresql://postgres@redixdb/redix&quot;
+}
+</code></pre>
+<pre><code class="language-bash">docker run -v $(pwd)/redix.hcl:/etc/redix/redix.hcl --link redixdb -p 6380:6380 ghcr.io/alash3al/redix
+</code></pre>
+<h1 id="connecting"><a class="header" href="#connecting">Connecting</a></h1>
+<blockquote>
+<p>you can connect to redix using any redis client/library, here we will use the <code>redis-cli</code> command:</p>
+</blockquote>
+<pre><code class="language-bash">redis-cli -p 6380
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="configurations"><a class="header" href="#configurations">Configurations</a></h1>
+<blockquote>
+<p>redix is using a configuration language called <a href="https://github.com/hashicorp/hcl">hcl</a>,
+here is a configurations example named as (redix.hcl):</p>
+</blockquote>
+<pre><code class="language-c">// server block contains the configurations related to redix server
+server {
+  // redix is modular, &quot;we can have multiple interfaces not only redis interface&quot;
+  // currently the supported interface is redis interface.
+  redis {
+    // which [address]:portNumber to let the server listen on
+    listen = &quot;:6380&quot;
+
+    // maximum number of connections allowed to the server instance in the same time
+    max_connections = 100
+
+    // whether to let the writes be async (done in background) or not?
+    async = false
+  }
+}
+
+// redix is modular, &quot;we can have multiple storage engines to store the data&quot;
+// currently the supported engines are &quot;postgresql&quot; and &quot;filesystem&quot;.
+// in case you want to connect to &quot;postgresql&quot;:
+engine &quot;postgresql&quot; {
+  // data-source-name regarding postgresql server configurations
+  dsn = &quot;postgresql://postgres@localhost/redix&quot;
+}
+
+// in case you want &quot;filesystem&quot; to be your backend:
+//engine &quot;filesystem&quot; {
+//  // data-source-name: the directory to store the data files in
+//  dsn = &quot;./data/&quot;
+//}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="redis-commands"><a class="header" href="#redis-commands">Redis Commands</a></h1>
+<blockquote>
+<p>we don't support all redis commands, we create our own redis by 
+implementing abstract commands only.</p>
+</blockquote>
+<ul>
+<li><code>PING</code></li>
+<li><code>QUIT</code></li>
+<li><code>FLUSHALL</code></li>
+<li><code>FLUSHDB</code></li>
+<li><code>SELECT &lt;DB index&gt;</code></li>
+<li><code>SET &lt;key&gt; &lt;value&gt; [EX seconds | KEEPTTL] [NX]</code></li>
+<li><code>TTL &lt;key&gt;</code> <strong>(not supported while using <code>filesystem</code> engine)</strong></li>
+<li><code>GET &lt;key&gt; [DELETE]</code>, it has an alias for backward compatibility reasons called <code>GETDEL &lt;key&gt;</code></li>
+<li><code>INCR &lt;key&gt; [&lt;delta&gt;]</code>, it has an alias for backward compatibility reasons called <code>INCRBY</code> <strong>(not supported while using <code>filesystem</code> engine)</strong></li>
+<li><code>DEL key [key ...]</code></li>
+<li><code>HGETALL &lt;prefix&gt;</code>, Fetches the whole data under the specified prefix as a hashmap
+<pre><code class="language-bash">$ 127.0.0.1:6380&gt; set /users/u1 USER_1
+OK
+
+$ 127.0.0.1:6380&gt; set /users/u2 USER_2
+OK
+
+$ 127.0.0.1:6380&gt; set /users/u3 USER_3
+OK
+
+$ 127.0.0.1:6380&gt; hgetall /users/
+1) &quot;u1&quot;
+2) &quot;USER_1&quot;
+3) &quot;u2&quot;
+4) &quot;USER_2&quot;
+5) &quot;u3&quot;
+6) &quot;USER_3&quot;
+## in the hgetall response, redix removed the prefix you specified `/users/`
+</code></pre>
+</li>
+<li><code>PUBLISH &lt;channel|topic|anyword&gt; &lt;message here&gt;</code>  <strong>(not supported while using <code>filesystem</code> engine)</strong></li>
+<li><code>SUBSCRIBE &lt;channel|topic|anyword&gt;</code>  <strong>(not supported while using <code>filesystem</code> engine)</strong></li>
+</ul>
 
                     </main>
 
